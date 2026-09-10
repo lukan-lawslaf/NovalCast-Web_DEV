@@ -1,0 +1,570 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Audiobook &amp; E-Book Application</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;family=Cinzel:wght@600;700&amp;display=swap" rel="stylesheet">
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            appDark: '#0D1117',
+            appCard: '#151921',
+            appCardBorder: 'rgba(217, 180, 126, 0.22)',
+            goldAccent: '#F3D182',
+            goldMuted: '#BBA06B',
+            textGray: '#8E96A4',
+            lightMuted: '#ADB5BD'
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serifTitle: ['"Cinzel"', 'serif']
+          }
+        }
+      }
+    };
+  </script>
+<!-- BEGIN: Custom Visual Effects & Bokeh Styles -->
+<style data-purpose="ambient-effects">
+    body {
+      background-color: #080A0E;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Subtle custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0D1117;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #252D3D;
+      border-radius: 9999px;
+    }
+
+    /* Ambient background glowing orbs inside Ikigai card */
+    .bokeh-dot {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
+      pointer-events: none;
+    }
+
+    /* Realistic 3D book spine shadow */
+    .book-shadow {
+      box-shadow: -4px 6px 16px rgba(0, 0, 0, 0.6), 0 10px 24px -5px rgba(0, 0, 0, 0.8);
+    }
+    .book-spine {
+      position: relative;
+    }
+    .book-spine::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 5px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.4) 100%);
+      border-top-left-radius: inherit;
+      border-bottom-left-radius: inherit;
+      z-index: 2;
+    }
+
+    /* Golden text glow */
+    .gold-glow {
+      text-shadow: 0 0 16px rgba(243, 209, 130, 0.4);
+    }
+  </style>
+<!-- END: Custom Visual Effects & Bokeh Styles -->
+</head>
+<body class="min-h-screen flex items-center justify-center p-0 md:p-3 bg-[#05070A] text-slate-200">
+<!-- BEGIN: Laptop Device Bezel Wrapper -->
+<main class="w-full max-w-[1340px] bg-[#0E1218] rounded-[24px] border border-[#202736] shadow-2xl overflow-hidden relative flex flex-col min-h-[820px]" data-purpose="device-viewport">
+<!-- Top Display Notch (MacBook style realistic camera notch) -->
+<div class="w-40 h-4 bg-[#050709] mx-auto rounded-b-xl flex items-center justify-center gap-2 absolute top-0 left-1/2 -translate-x-1/2 z-50 border-b border-x border-[#1A222E]/80">
+<span class="w-1.5 h-1.5 rounded-full bg-[#111A24] border border-[#1e293b]"></span>
+<span class="w-2 h-2 rounded-full bg-[#090D14] ring-1 ring-[#1f293d]/50 flex items-center justify-center">
+<span class="w-0.5 h-0.5 rounded-full bg-[#1E40AF]/40"></span>
+</span>
+</div>
+<!-- Inner Desktop Shell -->
+<div class="flex flex-1 w-full relative">
+<!-- BEGIN: Left Icon Navigation Sidebar -->
+<aside class="w-16 md:w-[72px] flex flex-col items-center py-7 gap-8 border-r border-[#1B2230]/70 shrink-0 z-40 bg-[#0E1218]" data-purpose="left-dock-navigation">
+<!-- Logo / Space keeper -->
+<div class="h-6"></div>
+<!-- Navigation Buttons -->
+<nav class="flex flex-col items-center gap-7 mt-12 text-[#7E889B]"><!-- 1. Top Icon: Sparkles in circular badge -->
+<button aria-label="Sparkle" class="w-9 h-9 rounded-full bg-[#181D26] flex items-center justify-center text-[#F5D77F] hover:scale-105 transition-transform" title="Sparkle">
+  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+    <!-- Primary large sparkle star -->
+    <path d="M9.5 2.5C9.8 6.2 11.8 8.2 15.5 8.5C11.8 8.8 9.8 10.8 9.5 14.5C9.2 10.8 7.2 8.8 3.5 8.5C7.2 8.2 9.2 6.2 9.5 2.5Z"></path>
+    <!-- Top right small sparkle -->
+    <path d="M17.5 3C17.7 4.7 18.8 5.8 20.5 6C18.8 6.2 17.7 7.3 17.5 9C17.3 7.3 16.2 6.2 14.5 6C16.2 5.8 17.3 4.7 17.5 3Z"></path>
+    <!-- Bottom right tiny sparkle -->
+    <path d="M17 13.5C17.15 14.7 17.9 15.45 19.1 15.6C17.9 15.75 17.15 16.5 17 17.7C16.85 16.5 16.1 15.75 14.9 15.6C16.1 15.45 16.85 14.7 17 13.5Z"></path>
+  </svg>
+</button>
+
+<!-- 2. Flame in Dashed Blue/Periwinkle Circle -->
+<button aria-label="Trending Fire" class="w-9 h-9 rounded-full flex items-center justify-center relative hover:scale-105 transition-transform group" title="Trending">
+  <svg class="absolute inset-0 w-full h-full text-[#38659E] stroke-current" fill="none" viewBox="0 0 36 36">
+    <circle cx="18" cy="18" r="15" stroke-dasharray="3.5 3.5" stroke-width="1.5"></circle>
+  </svg>
+  <svg class="w-4 h-4 text-[#E6DCBF]" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" viewBox="0 0 24 24">
+    <path d="M8.5 14.5A3.5 3.5 0 0 0 12 18a3.5 3.5 0 0 0 3.5-3.5c0-1.8-1.5-3.2-2.3-4.5C12.5 8.7 12.3 7 12 6c-1 2-3.5 4.5-3.5 8.5Z"></path>
+    <path d="M12 12c-1 1-1 2-1 2.5a1 1 0 0 0 2 0c0-.8-.5-1.5-1-2.5Z"></path>
+  </svg>
+</button>
+
+<!-- 3. Search Magnifier in Glowing Circle -->
+<button aria-label="Search" class="w-9 h-9 rounded-full bg-[#181D26] shadow-[0_0_18px_rgba(243,209,130,0.22)] flex items-center justify-center text-[#F5D77F] hover:scale-105 transition-transform" title="Search">
+  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewBox="0 0 24 24">
+    <circle cx="10.5" cy="10.5" r="5.5"></circle>
+    <line x1="14.5" x2="19.5" y1="14.5" y2="19.5"></line>
+  </svg>
+</button>
+
+<!-- 4. Reading / Open Book with Head Dot in Dashed Circle -->
+<button aria-label="Read Book" class="w-9 h-9 rounded-full flex items-center justify-center relative hover:scale-105 transition-transform group" title="Reading">
+  <svg class="absolute inset-0 w-full h-full text-[#38659E] stroke-current" fill="none" viewBox="0 0 36 36">
+    <circle cx="18" cy="18" r="15" stroke-dasharray="3.5 3.5" stroke-width="1.5"></circle>
+  </svg>
+  <svg class="w-4 h-4 text-[#E6DCBF]" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" viewBox="0 0 24 24">
+    <!-- Reader head dot -->
+    <circle cx="12" cy="7.5" r="1.8" fill="none" stroke="currentColor" stroke-width="1.75"></circle>
+    <!-- Open book pages -->
+    <path d="M12 13.5v5.5"></path>
+    <path d="M12 13.5c-2-1.2-4.5-1.2-6.5-.2v5.7c2-1 4.5-1 6.5.2 2-1.2 4.5-1.2 6.5-.2V13.3c-2-1-4.5-1-6.5.2Z"></path>
+  </svg>
+</button>
+
+<!-- 5. Heart Outline -->
+<button aria-label="Favorites" class="w-9 h-9 flex items-center justify-center text-[#E6DCBF] hover:text-[#F5D77F] hover:scale-105 transition-all" title="Favorites">
+  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
+    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
+  </svg>
+</button>
+
+<!-- 6. Geometric Trio Glyph (Triangle over Square and Circle) -->
+<button aria-label="Categories" class="w-9 h-9 flex items-center justify-center text-[#E6DCBF] hover:text-[#F5D77F] hover:scale-105 transition-all" title="Shapes">
+  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
+    <!-- Top centered triangle -->
+    <polygon points="12 3 7.5 11 16.5 11"></polygon>
+    <!-- Bottom left square -->
+    <rect height="6.5" rx="0.8" width="6.5" x="4.5" y="14"></rect>
+    <!-- Bottom right circle -->
+    <circle cx="16" cy="17.2" r="3.3"></circle>
+  </svg>
+</button></nav>
+</aside>
+<!-- END: Left Icon Navigation Sidebar -->
+<!-- BEGIN: Main Dashboard Content Area -->
+<div class="flex-1 flex flex-col px-6 md:px-10 py-5 overflow-hidden">
+<!-- BEGIN: Top Navigation Bar Header -->
+<header class="w-full flex items-center justify-between pb-6 pt-1" data-purpose="top-navigation-header">
+<!-- Left spacer for alignment -->
+<div class="w-20 hidden md:block"></div>
+<!-- Centered Toggle Tabs: E-book vs AudioBook -->
+<div class="flex items-center gap-7 text-[15px] font-medium tracking-wide">
+<button class="text-[#7F8897] hover:text-[#BAC2CD] transition-colors font-medium">
+              E-book
+            </button>
+<button class="text-goldAccent font-semibold relative flex items-center gap-1">
+<span class="">AudioBook</span>
+<span class="text-[11px] font-bold transform -translate-y-1">✦</span>
+<!-- Subtle active underline indicator -->
+<span class="absolute -bottom-1.5 left-0 right-3 h-[2px] bg-goldAccent/80 rounded-full"></span>
+</button>
+</div>
+<!-- Right User Controls: Notification & Profile Avatar -->
+<div class="flex items-center gap-3.5">
+<!-- Notification Bell -->
+<button aria-label="Notifications" class="w-9 h-9 rounded-full bg-[#161B24] border border-[#232B39] flex items-center justify-center text-[#B0BAC8] hover:text-white hover:border-[#354054] transition-all">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+<path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+</svg>
+</button>
+<!-- User Avatar Profile -->
+<div class="w-9 h-9 rounded-full overflow-hidden ring-2 ring-[#323E52]/60 cursor-pointer hover:ring-goldAccent/70 transition-all">
+<img alt="Profile Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmnoNtzC3OysY0pKNeCBKoQDpzOVgZqH2D_6GbsqT7u7qsedLQPHlvnjl35Ip0jJoJ-XKxzRFQ-aFGc4CmfXJJvawx8m-x0izomuGLesuvFz1wHfcsOXDw7mGQ7QMM2-dzx6uPAPUM6Fn6nGvK17Zay17cQH1KixOm0CKv0mDptCI4hPIifGP4zGjnjfr-_qpDa8wXM6vLQL0mqzqZMbeyptJ803ZeI0-I4ZcbMvdO04UZIXLltNE9">
+</div>
+</div>
+</header>
+<!-- END: Top Navigation Bar Header -->
+<!-- BEGIN: Hero Spotlight Featured Cards Section -->
+<section class="mt-2 relative w-full" data-purpose="hero-carousel">
+<div class="flex gap-6 items-stretch overflow-x-hidden">
+<!-- Primary Featured Card: IKIGAI -->
+<div class="relative flex-[1_0_660px] max-w-[690px] bg-[#141822] rounded-[22px] border border-appCardBorder p-6 md:p-7 overflow-hidden shadow-2xl flex justify-between gap-6" data-purpose="primary-hero-card" style="border: 1px solid rgba(243, 209, 130, 0.32); box-shadow: rgba(243, 209, 130, 0.16) 0px 0px 25px -4px, rgba(0, 0, 0, 0.7) 0px 20px 30px -10px;">
+<!-- Bokeh Background Lights -->
+<div class="bokeh-dot w-48 h-48 -top-12 right-24 bg-white/[0.04]"></div>
+<div class="bokeh-dot w-36 h-36 bottom-2 left-1/3 bg-white/[0.02]"></div>
+<div class="bokeh-dot w-28 h-28 top-8 left-12 bg-white/[0.03]"></div>
+<!-- Card Left Content Details -->
+<div class="relative z-10 flex flex-col justify-between flex-1 pr-2">
+<div>
+<!-- Title & Rating -->
+<div class="flex items-center gap-3">
+<h2 class="text-2xl md:text-[26px] font-bold tracking-wider text-[#F8F1E2] uppercase font-sans">
+                      IKIGAI
+                    </h2>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#202735] border border-[#2B3547] text-[11px] font-semibold text-[#E5E9F0]">
+<svg class="w-3 h-3 text-goldAccent fill-goldAccent" viewBox="0 0 24 24">
+<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+</svg>
+                      4.8
+                    </span>
+</div>
+<!-- Author Byline -->
+<p class="text-[12.5px] text-[#A6AFBD] mt-1 font-normal">
+                    Written by : <span class="text-[#CCD3DE]">Héctor García &amp; Francesc Miralles</span>
+</p>
+<!-- Metadata Badges / Stats -->
+<div class="flex items-center gap-4 text-[11.5px] text-[#939DB0] mt-3.5">
+<!-- Views -->
+<span class="flex items-center gap-1.5">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+<circle cx="12" cy="12" r="3"></circle>
+</svg>
+                      1,23,444
+                    </span>
+<!-- Duration -->
+<span class="flex items-center gap-1.5">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<circle cx="12" cy="12" r="10"></circle>
+<polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+                      3 hrs 30 mins
+                    </span>
+<!-- Chapters -->
+<span class="flex items-center gap-1.5">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<rect height="20" rx="2" width="16" x="4" y="2"></rect>
+<line x1="8" y1="6" y2="6"></line>
+<line x1="8" y1="10" y2="10"></line>
+</svg>
+                      17 chapters
+                    </span>
+</div>
+<!-- Description -->
+<div class="mt-4">
+<span class="text-[12px] font-semibold text-[#8B95A6] block mb-1">Description</span>
+<p class="text-[12px] leading-relaxed text-[#959EAE] line-clamp-3">
+                      Ikigai is book which talks about finding your purpose and then following it with all heart to live a happy and satisfying life. The authors take us in this search along with them and make us understand how people of Japan have been living a long and a happy life..
+                    </p>
+</div>
+</div>
+<!-- Action Button Controls -->
+<div class="flex items-center gap-3 mt-6 pt-1">
+<!-- Listen Now -->
+<button class="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-full bg-goldAccent text-[#161B22] text-[12.5px] font-bold shadow-md hover:bg-[#ffe196] transition-all transform active:scale-95">
+<svg class="w-3.5 h-3.5 fill-[#161B22]" viewBox="0 0 24 24">
+<path d="M9 18V5l12-2v13"></path>
+<circle cx="6" cy="18" r="3"></circle>
+<circle cx="18" cy="16" r="3"></circle>
+</svg>
+<span class="">Listen Now</span>
+</button>
+<!-- Read Now -->
+<button class="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-full bg-transparent border border-[#3E4759] hover:border-[#67758F] text-[#ECEFF4] text-[12.5px] font-medium transition-all transform active:scale-95">
+<svg class="w-3.5 h-3.5 text-[#BCC4D2]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+</svg>
+<span class="">Read Now</span>
+</button>
+<!-- Decorative Sparkle Icon -->
+<div class="text-[#7A8394] ml-1">
+<svg class="w-4 h-4 rotate-45" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+<rect height="14" rx="2" width="14" x="5" y="5"></rect>
+</svg>
+</div>
+</div>
+</div>
+<!-- Card Right: Book Cover with Trending Badge -->
+<div class="relative shrink-0 flex items-center justify-center pr-2">
+<!-- Trending Ribbon Tag -->
+<div class="absolute -top-3 -right-2 z-20 bg-gradient-to-r from-[#F0CA75] to-[#F8D88E] text-[#141822] text-[10.5px] font-bold uppercase tracking-wider py-1 px-4 rounded-md shadow-md">
+                  Trending
+                </div>
+<!-- Book 3D Container -->
+<div class="w-[145px] h-[205px] rounded-lg overflow-hidden book-shadow book-spine relative border border-[#496078]/30">
+<div class="w-full h-full bg-[#A0CAD7] flex flex-col items-center justify-between p-3.5 text-center relative overflow-hidden">
+<!-- Subtle Japanese Cherry Blossom branch illustration graphic -->
+<div class="text-[7px] tracking-[0.2em] uppercase text-[#355263] font-medium">The International Bestseller</div>
+<div class="my-auto">
+<!-- Blossom Graphic -->
+<div class="w-20 h-14 mx-auto mb-2 opacity-85">
+<svg class="w-full h-full" fill="none" viewBox="0 0 100 80">
+<path d="M10 65 Q 40 45 65 30 T 95 15" fill="none" stroke="#463A32" stroke-width="2.5"></path>
+<circle cx="45" cy="40" fill="#E8B0B8" r="3.5"></circle>
+<circle cx="58" cy="32" fill="#F4CCD2" r="4.5"></circle>
+<circle cx="70" cy="25" fill="#E8B0B8" r="3"></circle>
+<circle cx="82" cy="18" fill="#F4CCD2" r="4"></circle>
+<circle cx="35" cy="50" fill="#E5A6AF" r="3"></circle>
+</svg>
+</div>
+<h3 class="font-serifTitle text-[22px] tracking-[0.18em] font-bold text-[#1E2E3A] leading-tight">IKIGAI</h3>
+<p class="text-[8px] tracking-wide text-[#344D5E] font-medium mt-1">The Japanese Secret<br>to a Long and Happy Life</p>
+</div>
+<div class="text-[6.5px] tracking-tight text-[#486375] font-semibold">
+                      HÉCTOR GARCÍA AND FRANCESC MIRALLES
+                    </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Secondary Featured Card Peek: THE BRIDGE HOME -->
+<div class="relative flex-[1_0_460px] bg-[#141822] rounded-[22px] border border-appCardBorder/50 p-6 md:p-7 overflow-hidden shadow-xl flex flex-col justify-between opacity-85" data-purpose="secondary-hero-card" style="border: 1px solid rgba(243, 209, 130, 0.22); box-shadow: rgba(243, 209, 130, 0.1) 0px 0px 20px -4px, rgba(0, 0, 0, 0.6) 0px 15px 25px -10px;">
+<div>
+<!-- Title -->
+<h2 class="text-2xl md:text-[25px] font-bold tracking-wider text-[#F8F1E2] uppercase font-sans">
+                  THE BRIDGE HOME
+                </h2>
+<!-- Author Byline -->
+<p class="text-[12.5px] text-[#A6AFBD] mt-1">
+                  Written by : <span class="text-[#CCD3DE]">Padma Venkatraman</span>
+</p>
+<!-- Metadata Badges / Stats -->
+<div class="flex items-center gap-4 text-[11.5px] text-[#939DB0] mt-3.5">
+<span class="flex items-center gap-1.5">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+<circle cx="12" cy="12" r="3"></circle>
+</svg>
+                    1,11,994
+                  </span>
+<span class="flex items-center gap-1.5">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<circle cx="12" cy="12" r="10"></circle>
+<polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+                    2 hrs 50 mins
+                  </span>
+<span class="flex items-center gap-1.5">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<rect height="20" rx="2" width="16" x="4" y="2"></rect>
+<line x1="8" y1="6" y2="6"></line>
+</svg>
+                    21 chapters
+                  </span>
+</div>
+<!-- Description -->
+<div class="mt-4">
+<span class="text-[12px] font-semibold text-[#8B95A6] block mb-1">Description</span>
+<p class="text-[12px] leading-relaxed text-[#959EAE] line-clamp-3">
+                    Rukku is Viji's older sister who she has developed unconditional affection for; her sister unconditionally and does everything inseparable. The girls relocate to a new city with bridge, two boys, Muthu and Arul,
+                  </p>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-3 mt-6 pt-1">
+<button class="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-full bg-goldAccent text-[#161B22] text-[12.5px] font-bold shadow-md hover:bg-[#ffe196]">
+<svg class="w-3.5 h-3.5 fill-[#161B22]" viewBox="0 0 24 24">
+<path d="M9 18V5l12-2v13"></path>
+<circle cx="6" cy="18" r="3"></circle>
+<circle cx="18" cy="16" r="3"></circle>
+</svg>
+<span class="">Listen Now</span>
+</button>
+<button class="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-full bg-transparent border border-[#3E4759] text-[#ECEFF4] text-[12.5px] font-medium">
+<svg class="w-3.5 h-3.5 text-[#BCC4D2]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+</svg>
+<span class="">Read Now</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Hero Spotlight Featured Cards Section -->
+<!-- BEGIN: Popular Books Grid Section -->
+<section class="mt-8 mb-6" data-purpose="popular-books-section">
+<!-- Section Title Row -->
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-[17px] font-bold tracking-wide text-[#F3DCA0]">
+              Popular Books
+            </h3>
+<a class="text-[11.5px] text-[#7A8597] hover:text-goldAccent transition-colors" href="#view-all">
+              view all
+            </a>
+</div>
+<!-- Books 5-Column Carousel Row -->
+<div class="grid grid-cols-5 gap-5">
+<!-- Card 1: Mist & Whispers -->
+<div class="flex flex-col group cursor-pointer" data-purpose="book-card-item">
+<div class="relative w-full aspect-[1/1.42] rounded-xl overflow-hidden book-shadow book-spine bg-[#1B212E] border border-white/5 transition-transform duration-200 group-hover:-translate-y-1">
+<!-- Star Rating Badge -->
+<div class="absolute top-2 left-2 z-20 flex items-center gap-1 bg-[#1A212E]/90 backdrop-blur-md px-1.5 py-0.5 rounded-full border border-white/10 text-[10px] font-semibold text-white">
+<span class="text-goldAccent text-[9px]">★</span> 4.1
+                </div>
+<!-- Cover Image -->
+<img alt="Mist &amp; Whispers Book Cover" class="w-full h-full object-cover brightness-95 group-hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrEQwC0otB4D26cTlWFID0FNWq9DfiJ00ZwI0OoZFxZw9icwT2X83MjBp6z27vrsEpZPrhUOwCQzDIMCZAeaeMxOoEO63RKMFwRF6G105bA9e5dbABctrRzKeJN_clxF0eOXb_XelVjPdsrAksLEe8aZjDyW9A1EVWZutAHenlGUdhq9nSqNUof87VBR2Lu5ZHnvXp4npAR4y8G-cMiMBDZNRSDPu8hX5F9uKOIMgWyPzOkIXNpneI">
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30"></div>
+<div class="absolute bottom-2 left-2 right-2 text-center text-[10px] font-serif tracking-widest text-[#FFECC7] uppercase">
+                  Mist &amp; Whispers
+                </div>
+</div>
+<!-- Meta Subtext -->
+<div class="mt-2.5 flex flex-col">
+<span class="text-[12px] font-medium text-[#D6DCE7] truncate">Mist &amp; Whispers</span>
+<div class="flex items-center justify-between text-[11px] text-[#768092] mt-0.5">
+<span class="flex items-center gap-1">
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+<circle cx="12" cy="12" r="3"></circle>
+</svg>
+                    23,444
+                  </span>
+<span class="text-[10px] rotate-45">✧</span>
+</div>
+</div>
+</div>
+<!-- Card 2: Eighty Days -->
+<div class="flex flex-col group cursor-pointer" data-purpose="book-card-item">
+<div class="relative w-full aspect-[1/1.42] rounded-xl overflow-hidden book-shadow book-spine bg-[#1B212E] border border-white/5 transition-transform duration-200 group-hover:-translate-y-1">
+<div class="absolute top-2 left-2 z-20 flex items-center gap-1 bg-[#1A212E]/90 backdrop-blur-md px-1.5 py-0.5 rounded-full border border-white/10 text-[10px] font-semibold text-white">
+<span class="text-goldAccent text-[9px]">★</span> 3.7
+                </div>
+<img alt="Eighty Days Book Cover" class="w-full h-full object-cover brightness-90 group-hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXidzmx3CXnsD-C7SZPcdc-rdjXrYIuaDZ7CnCWyadTbQ8HIuvwOdW4dIpVXIr03aREWQCusNTQkJKuMuw7Oy_JkdcvbMnyBXmfnFXwp1GTqoCnurF1Nr8DJ0ZFyJzqwQdWzx-pkyUK2jsAkRs2Av3MLjCOnBpG4DSfLbeZnPY_YcuvctYRejT3dTepkoLt3wro5Vtd1ZLGJiejAbRc8jJYnWqVGnvQwHUBgAhfEMqu0LlXCdBKKrc">
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30"></div>
+<div class="absolute bottom-2 left-2 right-2 text-center text-[10px] font-serif tracking-widest text-[#DFE7F2] uppercase">
+                  Eighty Days
+                </div>
+</div>
+<div class="mt-2.5 flex flex-col">
+<span class="text-[12px] font-medium text-[#D6DCE7] truncate">Eighty Days</span>
+<div class="flex items-center justify-between text-[11px] text-[#768092] mt-0.5">
+<span class="flex items-center gap-1">
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+<circle cx="12" cy="12" r="3"></circle>
+</svg>
+                    13,094
+                  </span>
+<span class="text-[10px] rotate-45">✧</span>
+</div>
+</div>
+</div>
+<!-- Card 3: The White Raven -->
+<div class="flex flex-col group cursor-pointer" data-purpose="book-card-item">
+<div class="relative w-full aspect-[1/1.42] rounded-xl overflow-hidden book-shadow book-spine bg-[#1B212E] border border-white/5 transition-transform duration-200 group-hover:-translate-y-1">
+<div class="absolute top-2 left-2 z-20 flex items-center gap-1 bg-[#1A212E]/90 backdrop-blur-md px-1.5 py-0.5 rounded-full border border-white/10 text-[10px] font-semibold text-white">
+<span class="text-goldAccent text-[9px]">★</span> 4.3
+                </div>
+<img alt="The White Raven Book Cover" class="w-full h-full object-cover brightness-85 group-hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC07UxGyD9UslgWD44y88DTog0u9LrZ7iMaMGQRZ1HNIGkcZKq8M8-Pgyz4n5WRZK8shBtVtgd1QehQpYciuzGJ9KkSZ3cNOYaYtn18sloNTWkayojjUyiCCFGUKgx18YnRUVbxJoIL4hhlH2kCNfTdGovinAAkwUm4eNcghm4lGELOzYF8MQrtetkQrKOyyMX3wiu0HiTkx_Cw3-qiXwXf_LglBsa2GMw2dM7K-TGD4lPEoWDiEWL7">
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30"></div>
+<div class="absolute bottom-2 left-2 right-2 text-center text-[10px] font-serif tracking-widest text-[#FFFFFF] uppercase">
+                  The White Raven
+                </div>
+</div>
+<div class="mt-2.5 flex flex-col">
+<span class="text-[12px] font-medium text-[#D6DCE7] truncate">The White Raven</span>
+<div class="flex items-center justify-between text-[11px] text-[#768092] mt-0.5">
+<span class="flex items-center gap-1">
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+<circle cx="12" cy="12" r="3"></circle>
+</svg>
+                    27,804
+                  </span>
+<span class="text-[10px] rotate-45">✧</span>
+</div>
+</div>
+</div>
+<!-- Card 4: Swords Of The Son -->
+<div class="flex flex-col group cursor-pointer" data-purpose="book-card-item">
+<div class="relative w-full aspect-[1/1.42] rounded-xl overflow-hidden book-shadow book-spine bg-[#1B212E] border border-white/5 transition-transform duration-200 group-hover:-translate-y-1">
+<div class="absolute top-2 left-2 z-20 flex items-center gap-1 bg-[#1A212E]/90 backdrop-blur-md px-1.5 py-0.5 rounded-full border border-white/10 text-[10px] font-semibold text-white">
+<span class="text-goldAccent text-[9px]">★</span> 4.1
+                </div>
+<img alt="Swords Of The Son Book Cover" class="w-full h-full object-cover brightness-85 group-hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJhtHMt0mS20Kwds1bI-ooWPNBgOHpiFAwp3XBcUNGvnFUF5kJvd673RTs--oGLTxFbBmFBbWwzRVUg1TGEwkmIRtepcWulMMPYSs4_pu-CQfBdusDBGyUtJ7A7BEa4ph8fIfMrf_lUBMkQZCeOjG7KEWxVfljE9gJniwhQjCW4sLFx-sfN6lDaqNtHAPLo-3NNsZ1K_U63W9EKtxhxCsCKbPGCi_UqxBZkwV0kRi2kph5hHOmBdqm">
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30"></div>
+<div class="absolute bottom-2 left-2 right-2 text-center text-[10px] font-serif tracking-widest text-[#BEE3F8] uppercase">
+                  Swords Of The Son
+                </div>
+</div>
+<div class="mt-2.5 flex flex-col">
+<span class="text-[12px] font-medium text-[#D6DCE7] truncate">Swords Of The Son</span>
+<div class="flex items-center justify-between text-[11px] text-[#768092] mt-0.5">
+<span class="flex items-center gap-1">
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+<circle cx="12" cy="12" r="3"></circle>
+</svg>
+                    37,904
+                  </span>
+<span class="text-[10px] rotate-45">✧</span>
+</div>
+</div>
+</div>
+<!-- Card 5: Adorning The Dark -->
+<div class="flex flex-col group cursor-pointer" data-purpose="book-card-item">
+<div class="relative w-full aspect-[1/1.42] rounded-xl overflow-hidden book-shadow book-spine bg-[#1B212E] border border-white/5 transition-transform duration-200 group-hover:-translate-y-1">
+<div class="absolute top-2 left-2 z-20 flex items-center gap-1 bg-[#1A212E]/90 backdrop-blur-md px-1.5 py-0.5 rounded-full border border-white/10 text-[10px] font-semibold text-white">
+<span class="text-goldAccent text-[9px]">★</span> 3.6
+                </div>
+<img alt="Adorning The Dark Book Cover" class="w-full h-full object-cover brightness-75 group-hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvnYo-jLPAwAO-fNuRMzz5ruYy0sY8U3cD1fs7TXL64m6pNkg7IilKTYFNx-a6ChF6GrUPieLPi5yjuhGtcF0jxhVE4T-Puh_y9aWc2-8_dFi9bOl5zAE9B_DIazwUm--CI2az2-P25DrdlfZ0g3R0VedE7RyJlMQ3JPqc9LXmyYF2q0FRhtsQ8qPnvJ05ReIsMQqI_3SUfW9fgxk-bEd2MoKvGUdxvqQLtT6YEkBOrxPZUEj8IDne">
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30"></div>
+<div class="absolute bottom-2 left-2 right-2 text-center text-[10px] font-serif tracking-widest text-[#E2E8F0] uppercase">
+                  Adorning The Dark
+                </div>
+</div>
+<div class="mt-2.5 flex flex-col">
+<span class="text-[12px] font-medium text-[#D6DCE7] truncate">Adorning The Dark</span>
+<div class="flex items-center justify-between text-[11px] text-[#768092] mt-0.5">
+<span class="flex items-center gap-1">
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+<circle cx="12" cy="12" r="3"></circle>
+</svg>
+                    17,999
+                  </span>
+<span class="text-[10px] rotate-45">✧</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Popular Books Grid Section -->
+<!-- BEGIN: Ghibli Studio Special Header Peek -->
+<div class="mt-2 pb-2">
+<h3 class="text-[17px] font-bold tracking-wide text-[#F3DCA0] opacity-95">
+            Ghibli Studio Special
+          </h3>
+</div>
+<!-- END: Ghibli Studio Special Header Peek -->
+</div>
+<!-- END: Main Dashboard Content Area -->
+<!-- BEGIN: Floating Mascot AI Assistant -->
+<aside class="absolute bottom-6 right-8 z-50" data-purpose="floating-bot-assistant">
+<button aria-label="AI Assistant Bot" class="w-[52px] h-[52px] rounded-full bg-[#181D26] border-2 border-[#F3D182]/85 shadow-[0_0_20px_rgba(243,209,130,0.25)] flex items-center justify-center text-goldAccent hover:scale-110 active:scale-95 transition-all">
+<!-- Cute Minimalist Robot Mask / Head Icon -->
+<svg class="w-6 h-6 fill-current text-goldAccent" viewBox="0 0 24 24">
+<path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h2a5 5 0 0 1 5 5v1h1a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-1v1a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5v-1H3a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h1v-1a5 5 0 0 1 5-5h2V5.73A2 2 0 0 1 10 4a2 2 0 0 1 2-2zm-3 10a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"></path>
+</svg>
+</button>
+</aside>
+<!-- END: Floating Mascot AI Assistant -->
+</div>
+<!-- END: Inner Desktop Shell -->
+</main>
+<!-- END: Laptop Device Bezel Wrapper -->
+
+
+
+
+</body></html>
