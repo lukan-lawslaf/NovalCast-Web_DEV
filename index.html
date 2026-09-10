@@ -1,0 +1,433 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>NovelCast — Editorial Book Collection</title>
+<!-- Tailwind CSS CDN with forms & container queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Editorial luxury serif (Bodoni Moda / Playfair Display) & Clean Sans (Plus Jakarta Sans) -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..700&amp;family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;family=Cinzel:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Playfair Display"', '"Bodoni Moda"', 'Didot', 'serif'],
+            cinzel: ['"Cinzel"', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* Continuous 3D Perspective Book Parade */
+    .parade-stage {
+      perspective: 1400px;
+      perspective-origin: 50% 45%;
+      transform-style: preserve-3d;
+    }
+
+    /* Individual Book Container (Isometric 3D box) */
+    .book-3d-wrapper {
+      position: relative;
+      width: 175px;
+      height: 280px;
+      transform-style: preserve-3d;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.25, 1), filter 0.35s ease;
+      /* Rotate books strongly to face left, revealing the cover and full right page edge */
+      transform: rotateY(-54deg) rotateX(4deg);
+      filter: drop-shadow(-14px 22px 24px rgba(0, 0, 0, 0.95));
+    }
+
+    @media (min-width: 768px) {
+      .book-3d-wrapper {
+        width: 195px;
+        height: 310px;
+      }
+    }
+
+    @media (min-width: 1280px) {
+      .book-3d-wrapper {
+        width: 215px;
+        height: 335px;
+      }
+    }
+
+    /* Hover elevation */
+    .book-3d-wrapper:hover {
+      transform: rotateY(-54deg) rotateX(4deg) translateY(-22px) translateZ(35px);
+      filter: drop-shadow(-20px 32px 35px rgba(0, 0, 0, 0.98)) drop-shadow(0px 0px 30px rgba(255, 235, 180, 0.15));
+    }
+
+    /* Featured Center Book: Sunshine and Second Chances (Elevated & Brought Forward) */
+    .book-featured {
+      transform: rotateY(-54deg) rotateX(4deg) translateY(-28px) translateZ(48px) !important;
+      filter: drop-shadow(-24px 36px 40px rgba(0, 0, 0, 1)) drop-shadow(0 0 25px rgba(255, 200, 80, 0.22)) !important;
+      z-index: 40;
+    }
+
+    /* Right Paper Thickness Block (Pages) */
+    .book-edge-right {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 38px;
+      height: 100%;
+      transform-origin: right center;
+      transform: rotateY(90deg);
+      background: linear-gradient(to right, #ded7c6 0%, #f7f3e8 25%, #ece4d2 60%, #e2d9c5 100%);
+      background-image: repeating-linear-gradient(
+        to bottom,
+        #f4efe2,
+        #f4efe2 1.5px,
+        #e3dbcb 1.5px,
+        #e3dbcb 3px
+      );
+      box-shadow: inset 5px 0 10px rgba(0, 0, 0, 0.35), inset -2px 0 5px rgba(0, 0, 0, 0.2);
+      border-left: 1px solid rgba(0, 0, 0, 0.4);
+      border-radius: 0 1px 1px 0;
+    }
+
+    /* Top Page Edge */
+    .book-edge-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 38px;
+      transform-origin: top center;
+      transform: rotateX(-90deg);
+      background: linear-gradient(to bottom, #d5ccb8, #ede7d6);
+      box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Subtle Cover Crease/Spine Shadow on Left Edge */
+    .cover-crease {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 8px;
+      background: linear-gradient(to right, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.15) 50%, transparent 100%);
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    /* Sheen across cover */
+    .cover-sheen {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(115deg, rgba(255, 255, 255, 0.12) 0%, transparent 45%, rgba(0, 0, 0, 0.25) 100%);
+      pointer-events: none;
+      z-index: 11;
+    }
+
+    /* Ambient Spotlight Background */
+    .bg-spotlight {
+      background: radial-gradient(circle at 50% 42%, #14171d 0%, #080a0e 45%, #000000 85%);
+    }
+  </style>
+</head>
+<body class="bg-black text-white min-h-screen font-sans antialiased overflow-x-hidden selection:bg-neutral-200 selection:text-black">
+<!-- Main Hero Screen Container (Exact viewport fit) -->
+<div class="relative w-full h-screen min-h-[640px] max-h-[1080px] flex flex-col justify-between bg-spotlight overflow-hidden select-none">
+<!-- Top Navigation Bar -->
+<header class="relative z-50 w-full px-6 md:px-12 py-5 flex items-center justify-between" data-purpose="site-navigation">
+<!-- Left: Logo & Spine Icon -->
+<a class="flex items-center gap-2.5 group focus:outline-none" href="#">
+<!-- Bookmark / Spine minimal icon -->
+<div class="w-5 h-6 border-[1.5px] border-white/90 rounded-[2px] p-[2px] flex items-stretch gap-[2px]">
+<div class="w-1.5 h-full bg-white rounded-[1px]"></div>
+<div class="flex-1 h-full border-l border-white/40"></div>
+</div>
+<span class="font-serif text-xl tracking-tight font-medium text-white group-hover:text-neutral-200 transition-colors">
+          NovelCast
+        </span>
+</a>
+<!-- Center: Links -->
+<nav class="hidden md:flex items-center gap-8 text-[13px] tracking-wide text-neutral-400 font-normal">
+<a class="hover:text-white transition-colors duration-200" href="#catalogs">Catalogs</a>
+<a class="hover:text-white transition-colors duration-200" href="#editions">Editions</a>
+<a class="hover:text-white transition-colors duration-200" href="#hub">Hub</a>
+<a class="hover:text-white transition-colors duration-200" href="#info">Info</a>
+</nav>
+<!-- Right: Action Controls -->
+<div class="flex items-center gap-5 text-[13px]">
+<a class="text-neutral-300 hover:text-white font-medium transition-colors hidden sm:inline-block" href="#join">
+          Join us
+        </a>
+<button class="bg-white text-black font-semibold px-4 py-1.5 rounded-full text-xs hover:bg-neutral-200 active:scale-95 transition-all shadow-md shadow-white/10" type="button">
+          Build Your List
+        </button>
+</div>
+</header>
+<!-- Center Stage: Big Headline Behind Books & 3D Receding Parade -->
+<div class="relative flex-1 flex flex-col justify-center items-center w-full px-0 overflow-visible">
+<!-- Massive Brand Serif Headline Behind Books -->
+<div class="absolute top-[16%] md:top-[14%] w-full text-center pointer-events-none z-0">
+<h1 class="font-serif text-[19vw] md:text-[18vw] leading-none tracking-normal font-normal text-white/95 drop-shadow-[0_25px_30px_rgba(0,0,0,0.8)] select-none">
+          NovelCast
+        </h1>
+</div>
+<!-- 3D Isometric Receding Shelf / Horizontal Book Carousel -->
+<div class="parade-stage w-full flex items-end justify-center relative z-20 pt-16 md:pt-24 pb-8 overflow-visible" data-purpose="bookshelf-carousel">
+<!-- Books Track (Tightly packed with negative margins matching reference oblique angle) -->
+<div class="flex items-end -space-x-12 md:-space-x-16 lg:-space-x-20 pl-16 pr-8 sm:px-0">
+<!-- Book 1: Soft Pastel Pink / Coral Vintage -->
+<div class="book-3d-wrapper opacity-50 hover:opacity-100">
+<div class="book-edge-right"></div>
+<div class="book-edge-top"></div>
+<div class="relative w-full h-full rounded-r-[2px] bg-gradient-to-br from-[#df939a] via-[#ce7a85] to-[#9b4a55] text-[#3d1217] p-4 flex flex-col justify-between shadow-2xl overflow-hidden">
+<div class="cover-crease"></div>
+<div class="cover-sheen"></div>
+<span class="text-[8px] uppercase tracking-widest font-semibold opacity-70">Paris Poetry</span>
+<div class="my-auto">
+<p class="font-serif italic text-base leading-tight">Petits<br>Poèmes</p>
+</div>
+<span class="text-[8px] tracking-wider opacity-60">Vol. III</span>
+</div>
+</div>
+<!-- Book 2: Dark Architectural / Golden Window Lights -->
+<div class="book-3d-wrapper opacity-75 hover:opacity-100">
+<div class="book-edge-right"></div>
+<div class="book-edge-top"></div>
+<div class="relative w-full h-full rounded-r-[2px] bg-[#0c1322] border-l-[3px] border-amber-500/40 p-3.5 flex flex-col justify-between shadow-2xl overflow-hidden">
+<div class="cover-crease"></div>
+<div class="cover-sheen"></div>
+<!-- Botanical/Golden Framed Artwork -->
+<div class="h-full w-full border border-amber-500/30 p-2.5 flex flex-col justify-between relative bg-gradient-to-b from-[#111a2e] to-[#080d17]">
+<div class="flex justify-between items-center text-[7px] text-amber-300/80 font-mono tracking-widest">
+<span>EST. 1892</span>
+<span>NO. 4</span>
+</div>
+<div class="text-center my-auto">
+<div class="w-7 h-7 mx-auto mb-2 border border-amber-400/50 rounded-full flex items-center justify-center text-[10px] text-amber-300">🏛️</div>
+<h4 class="font-serif text-xs uppercase tracking-widest text-amber-100 font-semibold leading-tight">The Grand<br>Arcade</h4>
+</div>
+<span class="text-[7px] text-amber-400/60 uppercase tracking-wider text-center">Oxford Press</span>
+</div>
+</div>
+</div>
+<!-- Book 3: "The Light Story" / Midnight Blue Vintage Gold Frame -->
+<div class="book-3d-wrapper opacity-90 hover:opacity-100">
+<div class="book-edge-right"></div>
+<div class="book-edge-top"></div>
+<div class="relative w-full h-full rounded-r-[2px] bg-[#0f172a] border-l-[3px] border-blue-900 p-4 flex flex-col justify-between shadow-2xl overflow-hidden">
+<div class="cover-crease"></div>
+<div class="cover-sheen"></div>
+<div class="flex justify-between items-center text-[8px] uppercase tracking-widest text-blue-300/70">
+<span>First Edition</span>
+<span>Vol. II</span>
+</div>
+<div class="my-auto space-y-1">
+<span class="text-[9px] uppercase tracking-widest text-blue-200 block font-light">The</span>
+<h3 class="font-serif text-lg tracking-wider text-white font-bold leading-tight">LIGHT<br>STORY</h3>
+<div class="w-8 h-[1px] bg-blue-400/40 my-2"></div>
+<p class="text-[9px] text-blue-300/70 font-serif italic">Maxwell</p>
+</div>
+<span class="text-[8px] text-neutral-500">London, 1924</span>
+</div>
+</div>
+<!-- Book 4: James Allen - As a Man Thinketh (Ivory Classical) -->
+<div class="book-3d-wrapper">
+<div class="book-edge-right"></div>
+<div class="book-edge-top"></div>
+<div class="relative w-full h-full rounded-r-[2px] bg-[#f5f1e8] text-neutral-900 border-l-[3px] border-neutral-400 p-4 flex flex-col justify-between shadow-2xl overflow-hidden">
+<div class="cover-crease"></div>
+<div class="cover-sheen"></div>
+<div class="border-b border-neutral-300 pb-1 text-center">
+<span class="text-[7px] uppercase tracking-widest font-semibold text-neutral-500 block">
+                  The New York Times Bestseller
+                </span>
+</div>
+<div class="my-auto text-left py-2">
+<h3 class="font-serif text-2xl uppercase tracking-wider font-bold text-neutral-950 leading-none mb-1">
+                  JAMES<br>ALLEN
+                </h3>
+<div class="w-6 h-[1.5px] bg-neutral-900 my-2"></div>
+<p class="font-serif italic text-xs text-neutral-700">As a Man<br>Thinketh</p>
+</div>
+<span class="text-[8px] uppercase tracking-widest font-semibold text-neutral-500">Classic Edition</span>
+</div>
+</div>
+<!-- Book 5 [FEATURED CENTER BOOK]: "Sunshine and Second Chances" by Mila Summers -->
+<div class="book-3d-wrapper book-featured" data-purpose="featured-active-book">
+<!-- Ivory Physical Page Rim & Right Thickness Edge -->
+<div class="book-edge-right !w-[42px]"></div>
+<div class="book-edge-top !h-[42px]"></div>
+<!-- Book Front Cover -->
+<div class="relative w-full h-full rounded-r-[2px] bg-gradient-to-b from-[#FFFDF2] via-[#FDF5D8] to-[#FCEABB] text-[#802D15] p-4 flex flex-col justify-between border-l-[4px] border-[#D4AF37] shadow-2xl overflow-hidden">
+<div class="cover-crease"></div>
+<div class="cover-sheen"></div>
+<!-- Subtle pastoral micro pattern background -->
+<div class="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#d97706_1px,transparent_1px)] [background-size:10px_10px]"></div>
+<!-- Top Bestseller Ribbon -->
+<div class="relative z-10 text-center border-b border-[#ebd79b] pb-1">
+<span class="text-[7px] tracking-widest uppercase font-bold text-[#A85A2A] block">
+                  The Sunday Times Bestseller
+                </span>
+</div>
+<!-- Central Book Title Typography -->
+<div class="relative z-10 my-auto text-center space-y-0.5">
+<h2 class="font-serif italic text-2xl md:text-3xl text-[#cf4a21] font-semibold leading-tight drop-shadow-sm">
+                  Sunshine
+                </h2>
+<p class="text-[9px] tracking-[0.25em] font-serif uppercase text-[#8d5e34] font-bold">
+                  &amp; SECOND
+                </p>
+<h3 class="font-serif text-2xl md:text-3xl text-[#dc5523] font-medium leading-none drop-shadow-sm">
+                  Chances
+                </h3>
+</div>
+<!-- Illustration & Author Motif (Bicycle, Sunflowers, Mila Summers) -->
+<div class="relative z-10 pt-1 flex flex-col items-center">
+<!-- Illustrated Sunflower & Bicycle Symbol -->
+<div class="flex items-center justify-center gap-1.5 mb-1.5">
+<span class="text-base drop-shadow">🌻</span>
+<span class="text-xs opacity-80 drop-shadow">🚲</span>
+<span class="text-base drop-shadow">🌻</span>
+</div>
+<span class="font-sans text-[10px] uppercase tracking-wider font-bold text-[#56341f]">
+                  Mila Summers
+                </span>
+</div>
+</div>
+<!-- Interaction Floating Badge "1.00" & System Cursor Pointer (Matching Reference Exact Placement) -->
+<div class="absolute top-[46%] left-6 -translate-y-1/2 z-50 flex items-center gap-1.5 pointer-events-none">
+<!-- Dark translucent amber/gold pill -->
+<div class="bg-[#1f1b13]/85 backdrop-blur-md border border-[#f5d77f]/40 text-[#fde492] font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-lg">
+                1.00
+              </div>
+<!-- System Cursor Pointer Arrow -->
+<svg class="w-5 h-5 text-black fill-black filter drop-shadow-[0_2px_4px_rgba(255,255,255,0.6)]" viewBox="0 0 24 24">
+<path d="M4 2l11 11-4.5 1 3.5 7-2.5 1-3.5-7-4 3.5z" stroke="white" stroke-linejoin="round" stroke-width="1.2"></path>
+</svg>
+</div>
+</div>
+<!-- Book 6: "SHADOWS" Atmospheric Dark / Black Classical Serif -->
+<div class="book-3d-wrapper opacity-95 hover:opacity-100">
+<div class="book-edge-right"></div>
+<div class="book-edge-top"></div>
+<div class="relative w-full h-full rounded-r-[2px] bg-gradient-to-b from-[#181920] via-[#0d0e12] to-black border-l-[3px] border-neutral-700 p-4 flex flex-col justify-between text-neutral-200 shadow-2xl overflow-hidden">
+<div class="cover-crease"></div>
+<div class="cover-sheen"></div>
+<span class="text-[8px] uppercase tracking-widest text-neutral-400">A Candle in the Attic</span>
+<div class="my-auto space-y-1">
+<h3 class="font-serif text-lg tracking-[0.2em] text-white uppercase font-light leading-none">SHADOWS</h3>
+<p class="font-serif italic text-xs text-neutral-400">of time</p>
+<div class="w-5 h-[1px] bg-neutral-600 mt-2"></div>
+</div>
+<span class="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">Rowe</span>
+</div>
+</div>
+<!-- Book 7: "VENTURE LINE" / Bold International Orange -->
+<div class="book-3d-wrapper opacity-95 hover:opacity-100">
+<div class="book-edge-right"></div>
+<div class="book-edge-top"></div>
+<div class="relative w-full h-full rounded-r-[2px] bg-[#E64A19] text-white border-l-[3px] border-orange-800 p-4 flex flex-col justify-between shadow-2xl overflow-hidden">
+<div class="cover-crease"></div>
+<div class="cover-sheen"></div>
+<span class="text-[8px] uppercase font-bold tracking-widest text-orange-200">The Series</span>
+<div class="my-auto">
+<h3 class="font-sans font-black text-2xl uppercase leading-none tracking-tight">
+                  VEN<br>TURE
+                </h3>
+</div>
+<div class="border-t border-orange-300/40 pt-1">
+<span class="text-[8px] uppercase tracking-widest text-orange-100 font-bold">Art &amp; Culture</span>
+</div>
+</div>
+</div>
+<!-- Book 8: Celestial Deep Navy / Gold Crescent Moon -->
+<div class="book-3d-wrapper opacity-90 hover:opacity-100">
+<div class="book-edge-right"></div>
+<div class="book-edge-top"></div>
+<div class="relative w-full h-full rounded-r-[2px] bg-[#0c1524] border-l-[3px] border-amber-600/80 p-3.5 flex flex-col justify-between shadow-2xl overflow-hidden">
+<div class="cover-crease"></div>
+<div class="cover-sheen"></div>
+<div class="h-full w-full border border-amber-500/40 p-2.5 flex flex-col justify-between">
+<div class="flex justify-center pt-1">
+<span class="text-amber-300 text-xs">🌙</span>
+</div>
+<div class="text-center my-auto">
+<p class="font-serif text-[9px] text-amber-200 tracking-widest uppercase">The</p>
+<h4 class="font-serif text-sm tracking-widest text-amber-300 font-semibold uppercase">ISLAND</h4>
+</div>
+<span class="text-[8px] text-amber-400/70 text-center font-sans tracking-widest uppercase">AU D</span>
+</div>
+</div>
+</div>
+<!-- Book 9: Ivory / Cream James Allen New Edition -->
+<div class="book-3d-wrapper opacity-85 hover:opacity-100">
+<div class="book-edge-right"></div>
+<div class="book-edge-top"></div>
+<div class="relative w-full h-full rounded-r-[2px] bg-[#eeeae0] text-black border-l-[3px] border-neutral-400 p-4 flex flex-col justify-between shadow-2xl overflow-hidden">
+<div class="cover-crease"></div>
+<div class="cover-sheen"></div>
+<span class="text-[8px] uppercase tracking-widest text-neutral-500 font-medium">New Edition</span>
+<div class="my-auto py-2">
+<h3 class="font-serif text-lg tracking-normal uppercase font-bold text-neutral-900 leading-snug">
+                  JAMES<br>ALLEN
+                </h3>
+</div>
+<span class="text-[8px] uppercase tracking-wider text-neutral-600">Philosophic</span>
+</div>
+</div>
+<!-- Book 10: Deep Dark Midnight Teal "The Deep" / "The Silent Key" -->
+<div class="book-3d-wrapper opacity-65 hover:opacity-100">
+<div class="book-edge-right"></div>
+<div class="book-edge-top"></div>
+<div class="relative w-full h-full rounded-r-[2px] bg-[#070b14] border-l-[3px] border-teal-900 p-4 flex flex-col justify-between text-neutral-300 shadow-2xl overflow-hidden">
+<div class="cover-crease"></div>
+<div class="cover-sheen"></div>
+<span class="text-[8px] uppercase tracking-wider text-teal-400/80">The Silent Key</span>
+<div class="my-auto">
+<h4 class="font-serif text-base tracking-wider text-white font-semibold">THE DEEP</h4>
+</div>
+<span class="text-[8px] text-neutral-500">M. B. Cooper</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Floating Pill Filters -->
+<footer class="relative z-40 w-full pb-8 pt-2 px-4 flex flex-col items-center justify-center" data-purpose="genre-selector">
+<nav aria-label="Genre Filters" class="inline-flex items-center p-1 rounded-full bg-neutral-950/90 backdrop-blur-md border border-neutral-800/90 shadow-2xl space-x-1 sm:space-x-1.5">
+<!-- Active Genre Button: Romance -->
+<button class="px-5 py-1.5 text-xs font-medium rounded-full bg-neutral-800 text-white border border-neutral-700 shadow-inner transition-all hover:bg-neutral-700 focus:outline-none" type="button">
+          Romance
+        </button>
+<!-- Inactive Genre Pills -->
+<button class="px-4 py-1.5 text-xs font-normal rounded-full text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors focus:outline-none" type="button">
+          Short Story
+        </button>
+<button class="px-4 py-1.5 text-xs font-normal rounded-full text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors focus:outline-none" type="button">
+          Memoir
+        </button>
+<button class="px-4 py-1.5 text-xs font-normal rounded-full text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors focus:outline-none" type="button">
+          Classic
+        </button>
+<button class="px-4 py-1.5 text-xs font-normal rounded-full text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors focus:outline-none" type="button">
+          Fantasy
+        </button>
+</nav>
+</footer>
+</div>
+<!-- Interactive dynamic book highlighting on mouse move / hover -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const books = document.querySelectorAll('.book-3d-wrapper');
+      
+      books.forEach((book) => {
+        book.addEventListener('mouseenter', () => {
+          books.forEach(b => b.classList.remove('book-featured'));
+          book.classList.add('book-featured');
+        });
+      });
+    });
+  </script>
+</body></html>
