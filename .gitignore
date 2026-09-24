@@ -19,12 +19,15 @@ build/
 # Heavy Reference AST dumps
 Referance/Figma/figma-file.json
 
-# IDE and Editor files
-.agents/mcp_config.json
-.vscode/
-.idea/
+# Local Agent & IDE folders and configs
+.antigravity/
+.agents/
+AGENTS.md
+GEMINI.md
 .claude/
 **/.claude/
+.vscode/
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
