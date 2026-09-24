@@ -63,12 +63,14 @@ NovalCast-Web_DEV/
 
 ## 🗺️ Roadmap
 
-- [ ] Semantic routing / friendly page names
-- [ ] Real audio playback for audiobooks
-- [ ] Reader state persistence (notes, highlights, progress)
-- [ ] Search & filtering across the catalog
-- [ ] User accounts and cloud-synced library
-- [ ] Dark / light theme toggle
+- [x] Semantic routing / friendly page names
+- [x] Search & filtering across the catalog
+- [x] User accounts and cloud-synced library (Supabase Auth & user manuscript uploads)
+- [x] Reader dual modes (Classic Book double-page & Continuous Scroll PDF layout)
+- [x] Reading progress tracking (% complete, reading pace & time left)
+- [x] Interactive 3D hardcover book parade & ambient visual effects
+- [ ] Real-time audio playback & TTS voice streaming (Fish Audio integration)
+- [ ] Reader state persistence for user notes & highlights
 - [ ] Responsive polish for mobile readers
 
 ## 👥 Team
