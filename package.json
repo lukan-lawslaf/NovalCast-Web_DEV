@@ -1,0 +1,40 @@
+{
+  "name": "novelcast",
+  "version": "1.0.0",
+  "description": "NovelCast — Editorial Digital Reading Platform & Audio Novel Experience",
+  "main": "index.html",
+  "type": "commonjs",
+  "scripts": {
+    "prestart": "node scripts/generate-env.js",
+    "predev": "node scripts/generate-env.js",
+    "generate:env": "node scripts/generate-env.js",
+    "start": "npx serve frontend -l 3000",
+    "dev": "npx serve frontend -l 3000",
+    "dev:all": "npx serve . -l 3000",
+    "build:css": "node scripts/build-css.js",
+    "inspect": "node scripts/inspect.js",
+    "screenshots": "node scripts/screenshots.js",
+    "test": "node tests/test-reader-book-pdf.js",
+    "test:auth": "node tests/test-email-confirmation-login.js",
+    "test:all": "node tests/test-reader-book-pdf.js && node tests/test-email-confirmation-login.js && node tests/test-env-and-logo.js"
+  },
+  "keywords": [
+    "reading",
+    "ebooks",
+    "audiobooks",
+    "editorial",
+    "tailwind",
+    "novelcast"
+  ],
+  "author": "NovelCast Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@tailwindcss/container-queries": "^0.1.1",
+    "@tailwindcss/forms": "^0.5.10",
+    "autoprefixer": "^10.4.20",
+    "jsdom": "^26.0.0",
+    "playwright": "^1.50.1",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.17"
+  }
+}

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>NovelCast — Curated Audiobooks & Readers</title>
+  
+  <!-- Preconnect & Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Cinzel:wght@600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=EB+Garamond:ital,wght@0,400..700;1,400..700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Complete Design System Tailwind Configuration (Stitch + Figma + Landing) -->
+  <script data-purpose="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            appDark: '#0D1117',
+            appCard: '#151921',
+            appCardBorder: 'rgba(217, 180, 126, 0.22)',
+            goldAccent: '#F3D182',
+            goldMuted: '#BBA06B',
+            textGray: '#8E96A4',
+            lightMuted: '#ADB5BD',
+            obsidian: {
+              950: '#06080b',
+              900: '#0b0e13',
+              800: '#12161f',
+              700: '#181e29',
+              600: '#232b3b',
+            },
+            gold: {
+              100: '#fcf8ee',
+              200: '#f8ecc5',
+              300: '#f2d479',
+              400: '#e5bf5b',
+              500: '#d7ab3d',
+              600: '#b48a27',
+              700: '#856317',
+            },
+            ivory: {
+              50: '#fdfcf9',
+              100: '#f7f5ef',
+              200: '#ece7db',
+              300: '#d2ccbf',
+              400: '#9b968a',
+              500: '#6d727f',
+            },
+            // Google Stitch Design System Tokens
+            "primary-container": "#f5d77f",
+            "surface-tint": "#e1c46e",
+            "on-tertiary-fixed": "#241a00",
+            "secondary": "#c0c6da",
+            "on-tertiary": "#3c2f00",
+            "primary-fixed-dim": "#e1c46e",
+            "background": "#10141a",
+            "outline-variant": "#4c4638",
+            "surface-bright": "#353940",
+            "surface-container-high": "#262a31",
+            "on-primary-container": "#725c0f",
+            "on-surface-variant": "#cfc6b3",
+            "primary": "#fff5e1",
+            "surface-container": "#1c2026",
+            "surface-container-low": "#181c22",
+            "error": "#ffb4ab",
+            "inverse-primary": "#725c0f",
+            "on-error-container": "#ffdad6",
+            "surface-variant": "#31353c",
+            "surface-dim": "#10141a",
+            "inverse-on-surface": "#2d3137",
+            "tertiary-fixed": "#ffe088",
+            "tertiary": "#fff5e1",
+            "on-primary-fixed-variant": "#574500",
+            "secondary-fixed-dim": "#c0c6da",
+            "on-error": "#690005",
+            "surface-container-highest": "#31353c",
+            "on-primary-fixed": "#231b00",
+            "on-secondary": "#2a3040",
+            "on-secondary-fixed": "#151b2a",
+            "outline": "#98907f",
+            "on-secondary-fixed-variant": "#414657",
+            "tertiary-fixed-dim": "#e9c349",
+            "error-container": "#93000a",
+            "on-tertiary-container": "#745c00",
+            "surface": "#10141a",
+            "primary-fixed": "#ffe087",
+            "on-tertiary-fixed-variant": "#574500",
+            "secondary-fixed": "#dde2f7",
+            "tertiary-container": "#fdd55a",
+            "on-surface": "#dfe2eb",
+            "on-secondary-container": "#afb5c8",
+            "inverse-surface": "#dfe2eb",
+            "surface-container-lowest": "#0a0e14",
+            "on-background": "#dfe2eb",
+            "on-primary": "#3c2f00",
+            "secondary-container": "#414657"
+          },
+          borderRadius: {
+            DEFAULT: "1rem",
+            lg: "2rem",
+            xl: "3rem",
+            full: "9999px"
+          },
+          spacing: {
+            "space-3xl": "4rem",
+            "space-sm": "0.75rem",
+            "header-height": "4.5rem",
+            "space-xl": "2rem",
+            "space-2xl": "3rem",
+            "card-hero-min-height": "20rem",
+            "space-2xs": "0.25rem",
+            "sidebar-width": "5rem",
+            "space-lg": "1.5rem",
+            "space-xs": "0.5rem",
+            "space-md": "1rem"
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['"Playfair Display"', '"Bodoni Moda"', 'Didot', 'serif'],
+            editorial: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+            serifTitle: ['"Cinzel"', 'serif'],
+            cinzel: ['"Cinzel"', 'serif'],
+            "body-sm": ["Plus Jakarta Sans"],
+            "label-badge": ["Plus Jakarta Sans"],
+            "label-numeric": ["Space Grotesk"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "label-caps": ["Space Grotesk"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "headline-xl": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"]
+          },
+          fontSize: {
+            "body-sm": ["12px", { lineHeight: "18px", fontWeight: "400" }],
+            "label-badge": ["11px", { lineHeight: "14px", letterSpacing: "0.02em", fontWeight: "700" }],
+            "label-numeric": ["12px", { lineHeight: "16px", letterSpacing: "0.04em", fontWeight: "500" }],
+            "headline-sm": ["15px", { lineHeight: "22px", letterSpacing: "0.01em", fontWeight: "600" }],
+            "display-lg": ["36px", { lineHeight: "44px", letterSpacing: "0.02em", fontWeight: "800" }],
+            "label-caps": ["11px", { lineHeight: "14px", letterSpacing: "0.08em", fontWeight: "600" }],
+            "body-lg": ["15px", { lineHeight: "24px", fontWeight: "400" }],
+            "headline-lg": ["22px", { lineHeight: "30px", letterSpacing: "0.02em", fontWeight: "700" }],
+            "headline-md": ["18px", { lineHeight: "26px", letterSpacing: "0.01em", fontWeight: "600" }],
+            "headline-xl": ["28px", { lineHeight: "36px", letterSpacing: "0.03em", fontWeight: "700" }],
+            "body-md": ["13px", { lineHeight: "20px", fontWeight: "400" }]
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+  <!-- Stylesheets -->
+  <link href="css/site.css" rel="stylesheet"/>
+  <link href="css/home.css" rel="stylesheet"/>
+  <link href="css/reader.css" rel="stylesheet"/>
+  <link href="css/landing.css" rel="stylesheet"/>
+  <link href="css/pixel-card.css" rel="stylesheet"/>
+  <link href="css/app.css" rel="stylesheet"/>
+
+  <style data-purpose="ambient-effects">
+    /* Global Reset to eliminate browser default blue underlined links */
+    a, a:visited, a:hover, a:active {
+      text-decoration: none !important;
+      color: inherit;
+    }
+    
+    body {
+      background-color: #080A0E;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient background glowing orbs inside Ikigai card */
+    .bokeh-dot {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
+      pointer-events: none;
+    }
+
+    /* Realistic 3D book spine shadow */
+    .book-shadow {
+      box-shadow: -4px 6px 16px rgba(0, 0, 0, 0.6), 0 10px 24px -5px rgba(0, 0, 0, 0.8);
+    }
+    .book-spine {
+      position: relative;
+    }
+    .book-spine::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 5px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.4) 100%);
+      border-top-left-radius: inherit;
+      border-bottom-left-radius: inherit;
+      z-index: 2;
+    }
+
+    /* Golden text glow */
+    .gold-glow {
+      text-shadow: 0 0 16px rgba(243, 209, 130, 0.4);
+    }
+
+    /* Custom utility styles for smooth SPA app shell */
+    .nav-active {
+      color: #F5D77F !important;
+      background: #181D26 !important;
+      box-shadow: 0 0 18px rgba(243, 209, 130, 0.22);
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="min-h-screen bg-[#05070A] text-slate-200 antialiased selection:bg-goldAccent/30 selection:text-white">
+  
+  <div class="flex w-full relative min-h-screen">
+    
+    <!-- Unified Sidebar Navigation -->
+    <aside id="app-sidebar" class="w-16 md:w-[72px] flex flex-col items-center py-7 gap-8 border-r border-[#1B2230]/70 shrink-0 z-40 bg-[#0E1218] sticky top-0 h-screen transition-all">
+      <!-- App Brand Mark -->
+      <a href="#/landing" class="w-8 h-8 flex items-center justify-center hover:opacity-80 transition-opacity" title="NovelCast">
+        <img src="logo.svg" alt="NovelCast Logo" class="w-full h-full object-contain" />
+      </a>
+
+      <!-- Main Navigation Icons -->
+      <nav class="flex flex-col items-center gap-6 mt-6 text-[#7E889B]" id="main-nav">
+        <!-- Home -->
+        <a aria-label="Home" class="w-10 h-10 rounded-full flex items-center justify-center hover:text-white hover:bg-[#181D26] hover:scale-105 transition-all" href="#/home" data-nav-route="home" title="Home Discovery">
+          <svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24">
+            <path d="M9.5 2.5C9.8 6.2 11.8 8.2 15.5 8.5C11.8 8.8 9.8 10.8 9.5 14.5C9.2 10.8 7.2 8.8 3.5 8.5C7.2 8.2 9.2 6.2 9.5 2.5Z"></path>
+            <path d="M17.5 3C17.7 4.7 18.8 5.8 20.5 6C18.8 6.2 17.7 7.3 17.5 9C17.3 7.3 16.2 6.2 14.5 6C16.2 5.8 17.3 4.7 17.5 3Z"></path>
+            <path d="M17 13.5C17.15 14.7 17.9 15.45 19.1 15.6C17.9 15.75 17.15 16.5 17 17.7C16.85 16.5 16.1 15.75 14.9 15.6C16.1 15.45 16.85 14.7 17 13.5Z"></path>
+          </svg>
+        </a>
+
+        <!-- Search / Explore -->
+        <a aria-label="Search" class="w-10 h-10 rounded-full flex items-center justify-center hover:text-white hover:bg-[#181D26] hover:scale-105 transition-all" href="#/search" data-nav-route="search" title="Search & Explore">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24">
+            <circle cx="10.5" cy="10.5" r="5.5"></circle>
+            <line x1="14.5" x2="19.5" y1="14.5" y2="19.5"></line>
+          </svg>
+        </a>
+
+        <!-- Book Reader -->
+        <a aria-label="Reader" class="w-10 h-10 rounded-full flex items-center justify-center hover:text-white hover:bg-[#181D26] hover:scale-105 transition-all" href="#/reader" data-nav-route="reader" title="Book Reader">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24">
+            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
+            <path d="M6 6h10"></path>
+            <path d="M6 10h10"></path>
+          </svg>
+        </a>
+
+        <!-- Library & Favorites -->
+        <a aria-label="Library" class="w-10 h-10 rounded-full flex items-center justify-center hover:text-white hover:bg-[#181D26] hover:scale-105 transition-all" href="#/library" data-nav-route="library" title="My Library">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24">
+            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
+          </svg>
+        </a>
+
+        <!-- 3D Perspective Showcase -->
+        <a aria-label="Showcase" class="w-10 h-10 rounded-full flex items-center justify-center hover:text-white hover:bg-[#181D26] hover:scale-105 transition-all" href="#/landing" data-nav-route="landing" title="3D Hero Showcase">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24">
+            <polygon points="12 3 7.5 11 16.5 11"></polygon>
+            <rect height="6.5" rx="0.8" width="6.5" x="4.5" y="14"></rect>
+            <circle cx="16" cy="17.2" r="3.3"></circle>
+          </svg>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- App Content Wrapper -->
+    <div id="app-content-wrapper" class="flex-1 flex flex-col px-4 sm:px-6 md:px-10 py-5 min-w-0 overflow-x-hidden transition-all">
+      
+      <!-- Shared Header -->
+      <header id="app-header" class="w-full flex items-center justify-between pb-6 pt-1 border-b border-[#1A2230]/50 mb-6 transition-all">
+        <a href="#/home" class="flex items-center gap-3 group focus:outline-none cursor-pointer">
+          <img src="logo.svg" alt="NovelCast Logo" class="h-8 w-auto object-contain" />
+          <span class="font-serif text-xl tracking-tight font-medium text-white group-hover:text-neutral-200 transition-colors">
+            NovelCast
+          </span>
+        </a>
+
+        <!-- Header Actions -->
+        <div class="flex items-center gap-3.5">
+          <button aria-label="Notifications" class="w-9 h-9 rounded-full bg-[#161B24] border border-[#232B39] flex items-center justify-center text-[#B0BAC8] hover:text-white hover:border-[#354054] transition-all" onclick="window.NovelCast.toast('No new notifications')">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+            </svg>
+          </button>
+          <button id="header-user-btn" aria-label="User Profile" class="relative w-9 h-9 rounded-full bg-[#161B24] border border-[#232B39] flex items-center justify-center text-[#B0BAC8] hover:text-goldAccent hover:border-goldAccent/50 transition-all cursor-pointer focus:outline-none" onclick="window.NovelCastAuth && window.NovelCastAuth.isAuthenticated() ? window.NovelCastRouter.navigate('library') : window.NovelCastRouter.navigate('login')" title="Account / My Library">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" stroke-dasharray="40" stroke-dashoffset="0" opacity="1"></path><circle cx="12" cy="7" r="4" opacity="1"></circle></g></svg>
+            <span id="user-auth-indicator" class="hidden absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-goldAccent ring-2 ring-[#0E1218] shadow-[0_0_6px_#f5d77f]"></span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Dynamic View Container (SPA Mount Target) -->
+      <main id="app-view" class="flex-1 w-full relative min-h-0">
+        <!-- Content dynamically injected by router -->
+      </main>
+
+    </div>
+  </div>
+
+  <!-- Persistent Global Audio Player Bar -->
+  <div id="global-audio-player" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-2xl bg-[#141924]/95 backdrop-blur-xl border border-goldAccent/30 rounded-full px-5 py-3 shadow-[0_12px_40px_rgba(0,0,0,0.8)] flex items-center justify-between gap-4 transition-all duration-300 translate-y-24 opacity-0 pointer-events-none">
+    <div class="flex items-center gap-3 min-w-0">
+      <div class="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-white/10 shadow" id="player-thumb"></div>
+      <div class="truncate">
+        <h4 class="text-xs font-bold text-white truncate" id="player-title">Track Title</h4>
+        <p class="text-[10px] text-[#8C98AC] truncate" id="player-narrator">Narrator</p>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-3">
+      <button class="w-8 h-8 rounded-full bg-goldAccent text-[#121620] flex items-center justify-center hover:scale-105 transition-transform" id="player-play-btn">
+        <span class="material-symbols-outlined text-[18px]" id="player-play-icon">pause</span>
+      </button>
+      <button class="text-[#7E8B9C] hover:text-white transition-colors" id="player-close-btn" title="Close">
+        <span class="material-symbols-outlined text-[18px]">close</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Supabase Client SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Environment Configuration (Generated from .env) -->
+  <script src="js/env.js"></script>
+
+  <!-- Core Scripts in Order -->
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/components/pixelCard.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/pages.js"></script>
+  
+  <!-- View Controllers -->
+  <script src="js/views/homeView.js"></script>
+  <script src="js/views/searchView.js"></script>
+  <script src="js/views/libraryView.js"></script>
+  <script src="js/views/bookDetailsView.js"></script>
+  <script src="js/views/readerView.js"></script>
+  <script src="js/views/landingView.js"></script>
+  <script src="js/views/loginView.js"></script>
+
+  <!-- App Core & SPA Router -->
+  <script src="js/app.js"></script>
+  <script src="js/router.js"></script>
+
+  <!-- Boot SPA -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Global persistent player logic
+      window.NovelCastApp = Object.assign(window.NovelCastApp || {}, {
+        toggleAudio: function (trackId) {
+          const player = document.getElementById('global-audio-player');
+          const titleEl = document.getElementById('player-title');
+          const narratorEl = document.getElementById('player-narrator');
+          const thumbEl = document.getElementById('player-thumb');
+          const iconEl = document.getElementById('player-play-icon');
+
+          if (!player) return;
+
+          const bookId = trackId.replace('book-', '');
+          const book = window.NovelCast.getBook(bookId) || window.NovelCast.books[0];
+
+          titleEl.textContent = book.title;
+          narratorEl.textContent = book.narrator || book.author;
+          thumbEl.innerHTML = window.NovelCastView.cover(book);
+
+          player.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+          player.classList.add('translate-y-0', 'opacity-100');
+          iconEl.textContent = 'pause';
+          window.NovelCast.toast(`Playing: ${book.title}`);
+        },
+        bindInteractiveElements: function (scope) {
+          if (window.NovelCastUI) {
+            window.NovelCastUI.installBookLinks(scope);
+            window.NovelCastUI.installFavoriteToggle(scope);
+            window.NovelCastUI.installLibraryToggle(scope);
+          }
+          (scope || document).querySelectorAll('[data-audio-stub]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              e.preventDefault();
+              window.NovelCastApp.toggleAudio(btn.dataset.audioStub);
+            });
+          });
+        }
+      });
+
+      // Player close button
+      const closeBtn = document.getElementById('player-close-btn');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+          const player = document.getElementById('global-audio-player');
+          player.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+          player.classList.remove('translate-y-0', 'opacity-100');
+        });
+      }
+
+      // Initialize Supabase Auth & Sync Indicator
+      if (window.NovelCastAuth) {
+        window.NovelCastAuth.init().then(user => {
+          const indicator = document.getElementById('user-auth-indicator');
+          if (indicator) indicator.classList.toggle('hidden', !user);
+        });
+        window.NovelCastAuth.onAuthStateChange(user => {
+          const indicator = document.getElementById('user-auth-indicator');
+          if (indicator) indicator.classList.toggle('hidden', !user);
+        });
+      }
+
+      // Initialize SPA Router
+      window.NovelCastRouter.init();
+    });
+  </script>
+</body>
+</html>

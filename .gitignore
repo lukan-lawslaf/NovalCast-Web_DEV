@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment and Secrets
+.env
+.env.local
+.env.*.local
+frontend/js/env.js
+frontend/env.json
+
+# Build artifacts, visual testing outputs & archive
+outputs/
+archive/
+dist/
+**/dist/
+build/
+
+# Heavy Reference AST dumps
+Referance/Figma/figma-file.json
+
+# IDE and Editor files
+.agents/mcp_config.json
+.vscode/
+.idea/
+.claude/
+**/.claude/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS Generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Legacy / AI temp tool directories
+.workbuddy-ai/

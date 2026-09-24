@@ -1,0 +1,99 @@
+.parade-stage {
+  perspective: 1400px;
+  perspective-origin: 50% 45%;
+  transform-style: preserve-3d;
+}
+
+.book-3d-wrapper {
+  position: relative;
+  width: 210px;
+  height: 255px;
+  transform-style: preserve-3d;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.25, 1), filter 0.35s ease;
+  transform: rotateY(-54deg) rotateX(4deg);
+  filter: drop-shadow(-14px 22px 24px rgba(0, 0, 0, 0.95));
+}
+
+@media (min-width: 768px) {
+  .book-3d-wrapper {
+    width: 235px;
+    height: 275px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .book-3d-wrapper {
+    width: 255px;
+    height: 290px;
+  }
+}
+
+.book-3d-wrapper:hover {
+  transform: rotateY(-54deg) rotateX(4deg) translateY(-20px) translateZ(35px);
+  filter: drop-shadow(-20px 32px 35px rgba(0, 0, 0, 0.98)) drop-shadow(0px 0px 30px rgba(255, 235, 180, 0.15));
+}
+
+.book-featured {
+  /* Kept at exact same bottom level as other books with forward z-depth */
+  transform: rotateY(-54deg) rotateX(4deg) translateZ(24px);
+  filter: drop-shadow(-22px 34px 38px rgba(0, 0, 0, 1)) drop-shadow(0 0 25px rgba(255, 200, 80, 0.22));
+  z-index: 40;
+}
+
+.book-edge-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 38px;
+  height: 100%;
+  transform-origin: right center;
+  transform: rotateY(90deg);
+  background: linear-gradient(to right, #ded7c6 0%, #f7f3e8 25%, #ece4d2 60%, #e2d9c5 100%);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    #f4efe2,
+    #f4efe2 1.5px,
+    #e3dbcb 1.5px,
+    #e3dbcb 3px
+  );
+  box-shadow: inset 5px 0 10px rgba(0, 0, 0, 0.35), inset -2px 0 5px rgba(0, 0, 0, 0.2);
+  border-left: 1px solid rgba(0, 0, 0, 0.4);
+  border-radius: 0 1px 1px 0;
+}
+
+.book-edge-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 38px;
+  transform-origin: top center;
+  transform: rotateX(-90deg);
+  background: linear-gradient(to bottom, #d5ccb8, #ede7d6);
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.cover-crease {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 8px;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.15) 50%, transparent 100%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.cover-sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0.12) 0%, transparent 45%, rgba(0, 0, 0, 0.25) 100%);
+  pointer-events: none;
+  z-index: 11;
+}
+
+.bg-spotlight {
+  background: radial-gradient(circle at 50% 42%, #14171d 0%, #080a0e 45%, #000000 85%);
+}

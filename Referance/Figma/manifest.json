@@ -1,0 +1,106 @@
+{
+  "fileKey": "0WW7OwtWFVtYtIXQGuPdk2",
+  "name": "NovalCast📖",
+  "lastModified": "2026-09-19T11:20:39Z",
+  "thumbnailUrl": "https://s3-alpha.figma.com/thumbnails/3ecffb82-a1ff-4fea-9dec-a1dc88231a54?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4GOSFWCUPSYUQSX%2F20260917%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20260917T000000Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=ca3aeb0a7eef6219f6fa9a3a740f926d8ac23ece6d38b49655a700720071a1b9",
+  "frames": [
+    {
+      "id": "6:2",
+      "name": "NovalCast - AudioBook Home Exactly Recreated",
+      "type": "FRAME",
+      "box": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 919
+      },
+      "jsonFile": "NovalCast_-_AudioBook_Home_Exactly_Recreated_6-2.json",
+      "imageFile": "NovalCast_-_AudioBook_Home_Exactly_Recreated_6-2.png",
+      "renderUrl": "https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/a23ab8b2-fccf-4654-b8a5-41344d96d88a"
+    },
+    {
+      "id": "6:327",
+      "name": "Book Details & Audio Player",
+      "type": "FRAME",
+      "box": {
+        "x": 1312,
+        "y": 0,
+        "width": 1280,
+        "height": 2515.2041015625
+      },
+      "jsonFile": "Book_Details___Audio_Player_6-327.json",
+      "imageFile": "Book_Details___Audio_Player_6-327.png",
+      "renderUrl": "https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/27a8178a-5138-4803-a7ed-ff42a7cd2c20"
+    },
+    {
+      "id": "6:986",
+      "name": "My Library & Collections",
+      "type": "FRAME",
+      "box": {
+        "x": 2624,
+        "y": 0,
+        "width": 1280,
+        "height": 1690
+      },
+      "jsonFile": "My_Library___Collections_6-986.json",
+      "imageFile": "My_Library___Collections_6-986.png",
+      "renderUrl": "https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/39854daf-8e3c-40d3-9b53-940dc4543913"
+    },
+    {
+      "id": "6:1535",
+      "name": "Search & Browse Genres",
+      "type": "FRAME",
+      "box": {
+        "x": 3936,
+        "y": 0,
+        "width": 1280,
+        "height": 2177.60986328125
+      },
+      "jsonFile": "Search___Browse_Genres_6-1535.json",
+      "imageFile": "Search___Browse_Genres_6-1535.png",
+      "renderUrl": "https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/731d505c-0347-4882-af3c-f2ec688e9f5b"
+    },
+    {
+      "id": "24:3",
+      "name": "Main Hero Screen Container (Exact viewport fit)",
+      "type": "FRAME",
+      "box": {
+        "x": -1312,
+        "y": 42,
+        "width": 1280,
+        "height": 640
+      },
+      "jsonFile": "Main_Hero_Screen_Container__Exact_viewport_fit__24-3.json",
+      "imageFile": "Main_Hero_Screen_Container__Exact_viewport_fit__24-3.png",
+      "renderUrl": "https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/21011fc5-3ccd-4546-86e6-5f40a2fa13aa"
+    },
+    {
+      "id": "24:217",
+      "name": "Html → Body",
+      "type": "FRAME",
+      "box": {
+        "x": 5354,
+        "y": 42,
+        "width": 1280,
+        "height": 1341.2099609375
+      },
+      "jsonFile": "Html___Body_24-217.json",
+      "imageFile": "Html___Body_24-217.png",
+      "renderUrl": "https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/f12cf6b9-4427-4f9f-bc55-940b6c4e0ea4"
+    },
+    {
+      "id": "26:581",
+      "name": "Html → Body",
+      "type": "FRAME",
+      "box": {
+        "x": 6864,
+        "y": 79,
+        "width": 1280,
+        "height": 1205.530029296875
+      },
+      "jsonFile": "Html___Body_26-581.json",
+      "imageFile": "Html___Body_26-581.png",
+      "renderUrl": "https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/342ee07e-06ad-4c66-b679-db110fc8af76"
+    }
+  ]
+}

@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"primary-container":"#f5d77f","surface-tint":"#e1c46e","on-tertiary-fixed":"#241a00","secondary":"#c0c6da","on-tertiary":"#3c2f00","primary-fixed-dim":"#e1c46e","background":"#10141a","outline-variant":"#4c4638","surface-bright":"#353940","surface-container-high":"#262a31","on-primary-container":"#725c0f","on-surface-variant":"#cfc6b3","primary":"#fff5e1","surface-container":"#1c2026","surface-container-low":"#181c22","error":"#ffb4ab","inverse-primary":"#725c0f","on-error-container":"#ffdad6","surface-variant":"#31353c","surface-dim":"#10141a","inverse-on-surface":"#2d3137","tertiary-fixed":"#ffe088","tertiary":"#fff5e1","on-primary-fixed-variant":"#574500","secondary-fixed-dim":"#c0c6da","on-error":"#690005","surface-container-highest":"#31353c","on-primary-fixed":"#231b00","on-secondary":"#2a3040","on-secondary-fixed":"#151b2a","outline":"#98907f","on-secondary-fixed-variant":"#414657","tertiary-fixed-dim":"#e9c349","error-container":"#93000a","on-tertiary-container":"#745c00","surface":"#10141a","primary-fixed":"#ffe087","on-tertiary-fixed-variant":"#574500","secondary-fixed":"#dde2f7","tertiary-container":"#fdd55a","on-surface":"#dfe2eb","on-secondary-container":"#afb5c8","inverse-surface":"#dfe2eb","surface-container-lowest":"#0a0e14","on-background":"#dfe2eb","on-primary":"#3c2f00","secondary-container":"#414657"},borderRadius:{DEFAULT:"1rem",lg:"2rem",xl:"3rem",full:"9999px"},spacing:{"space-3xl":"4rem","space-sm":"0.75rem","header-height":"4.5rem","space-xl":"2rem","space-2xl":"3rem","card-hero-min-height":"20rem","space-2xs":"0.25rem","sidebar-width":"5rem","space-lg":"1.5rem","space-xs":"0.5rem","space-md":"1rem"},fontFamily:{"body-sm":["Plus Jakarta Sans"],"label-badge":["Plus Jakarta Sans"],"label-numeric":["Space Grotesk"],"headline-sm":["Plus Jakarta Sans"],"display-lg":["Plus Jakarta Sans"],"label-caps":["Space Grotesk"],"body-lg":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"headline-xl":["Plus Jakarta Sans"],"body-md":["Plus Jakarta Sans"]},fontSize:{"body-sm":["12px",{lineHeight:"18px",fontWeight:"400"}],"label-badge":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"700"}],"label-numeric":["12px",{lineHeight:"16px",letterSpacing:"0.04em",fontWeight:"500"}],"headline-sm":["15px",{lineHeight:"22px",letterSpacing:"0.01em",fontWeight:"600"}],"display-lg":["36px",{lineHeight:"44px",letterSpacing:"0.02em",fontWeight:"800"}],"label-caps":["11px",{lineHeight:"14px",letterSpacing:"0.08em",fontWeight:"600"}],"body-lg":["15px",{lineHeight:"24px",fontWeight:"400"}],"headline-lg":["22px",{lineHeight:"30px",letterSpacing:"0.02em",fontWeight:"700"}],"headline-md":["18px",{lineHeight:"26px",letterSpacing:"0.01em",fontWeight:"600"}],"headline-xl":["28px",{lineHeight:"36px",letterSpacing:"0.03em",fontWeight:"700"}],"body-md":["13px",{lineHeight:"20px",fontWeight:"400"}]}}}};</script></head><body class="bg-background font-body-md text-on-surface min-h-screen relative selection:bg-primary-container selection:text-on-primary-container"><aside class="fixed left-0 top-0 h-full w-sidebar-width bg-surface-container-lowest z-50 flex flex-col items-center justify-between py-space-lg shadow-[4px_0_24px_rgba(0,0,0,0.4)]"><div class="flex flex-col items-center gap-space-xl w-full"><a class="flex items-center justify-center w-12 h-12 rounded-full bg-surface-container hover:bg-surface-container-high transition-all group" data-path="book-details" href="#"><span class="material-symbols-outlined text-primary-container text-[26px] group-hover:scale-110 transition-transform">auto_awesome</span></a><nav class="flex flex-col items-center gap-space-md w-full px-space-xs" data-active-classes="bg-surface-container-high text-primary-container shadow-[0_0_16px_rgba(245,215,127,0.25)] font-bold"><a class="flex items-center justify-center w-11 h-11 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-primary-container transition-all" data-path="book-details" href="#" title="Featured Spotlight"><span class="material-symbols-outlined text-[22px]">local_fire_department</span></a><a class="flex items-center justify-center w-11 h-11 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-primary-container transition-all" data-path="search" href="#" title="Search &amp; Browse"><span class="material-symbols-outlined text-[22px]">search</span></a><a aria-current="page" class="flex items-center justify-center w-11 h-11 rounded-full transition-all bg-surface-container-high text-primary-container shadow-[0_0_16px_rgba(245,215,127,0.25)] font-bold" data-path="library" href="#" title="My Library"><span class="material-symbols-outlined text-[22px]">local_library</span></a><a class="flex items-center justify-center w-11 h-11 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-primary-container transition-all" data-path="favorites" href="#" title="Favorites &amp; Saved"><span class="material-symbols-outlined text-[22px]">favorite</span></a><a class="flex items-center justify-center w-11 h-11 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-primary-container transition-all" data-path="genres" href="#" title="Genres &amp; Categories"><span class="material-symbols-outlined text-[22px]">category</span></a></nav></div><div class="flex flex-col items-center gap-space-md"><button class="flex items-center justify-center w-11 h-11 rounded-full bg-surface-container-low hover:bg-surface-container-high text-secondary hover:text-primary-container transition-all shadow-[0_4px_12px_rgba(0,0,0,0.3)] group" type="button"><span class="material-symbols-outlined text-[22px] group-hover:rotate-12 transition-transform">smart_toy</span></button></div></aside><div class="pl-sidebar-width min-h-screen flex flex-col"><header class="fixed top-0 left-sidebar-width right-0 h-header-height bg-surface/85 backdrop-blur-2xl z-40 flex items-center justify-between px-space-xl shadow-[0_4px_20px_rgba(0,0,0,0.35)]"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs"><img alt="Aura AudioBook Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VwbqYchJjKZgqgY-D0qdlUfCd1ReV1AS-BGZvff4hsCvJ2hEsK8_ofBQYRH4TBwcj_o2K-d5g7Vr6B3KrYs2RHldhj3zV0lQUyNtaGTAJHNmbsmCY2A90uMhz8s5ob6zG06w3srz3WM1omj3tiRfVaALjK7uo3kM9f8pbliepK240BFbEDzhs5C4HFxpN-0yiXG9MHrzhjpjKG1AEXISBb83_qExtkrhGcDTqU0OCnUJF6kaZ7R9-23Q"/><span class="font-headline-sm text-headline-sm text-primary tracking-wide hidden sm:inline-block">AURA</span></div><div class="h-5 w-px bg-surface-variant hidden md:block"></div><nav class="flex items-center gap-space-xs bg-surface-container-low p-space-2xs rounded-full" data-active-classes="bg-surface-container-highest text-primary-container font-headline-sm shadow-[0_0_12px_rgba(245,215,127,0.2)]"><a class="px-space-md py-space-2xs rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all font-headline-sm text-headline-sm" data-path="ebook-catalog" href="#">E-book</a><a class="px-space-md py-space-2xs rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all font-headline-sm text-headline-sm flex items-center gap-space-2xs" data-path="book-details" href="#">AudioBook<span class="text-primary-container">✦</span></a></nav></div><div class="flex items-center gap-space-md"><button class="relative flex items-center justify-center w-10 h-10 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface transition-all" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary-container shadow-[0_0_6px_#f5d77f]"></span></button><div class="flex items-center gap-space-sm pl-space-xs"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-header-height pb-24 flex-1 bg-background relative px-space-xl overflow-hidden"><div class="absolute top-12 left-1/4 w-96 h-96 bg-primary-container/5 rounded-full blur-3xl pointer-events-none -z-10"></div><div class="absolute bottom-24 right-12 w-80 h-80 bg-secondary-container/10 rounded-full blur-3xl pointer-events-none -z-10"></div><div class="flex flex-col w-full pb-16 space-y-space-2xl">
+<!-- Top Stat & Status Bar -->
+<section class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-space-lg">
+<div class="flex flex-col gap-space-2xs">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-primary-container shadow-[0_0_8px_#f5d77f]"></span>
+<span class="font-label-caps text-label-caps text-primary-container uppercase">Personal Sanctuary</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-primary tracking-tight">My Library</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Archived journeys, active narratives &amp; personal anthologies.</p>
+</div>
+<!-- Quick Listening Metrics Bento Pills -->
+<div class="grid grid-cols-3 gap-space-sm w-full lg:w-auto">
+<div class="bg-surface-container-low/90 backdrop-blur-md px-space-md py-space-sm rounded-DEFAULT flex flex-col justify-center min-w-[130px] shadow-sm">
+<div class="flex items-center gap-space-2xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-primary-container">headphones</span>
+<span class="font-label-caps text-label-caps uppercase">Listened</span>
+</div>
+<span class="font-label-numeric text-headline-md text-primary font-bold mt-space-2xs">48h 20m</span>
+</div>
+<div class="bg-surface-container-low/90 backdrop-blur-md px-space-md py-space-sm rounded-DEFAULT flex flex-col justify-center min-w-[130px] shadow-sm">
+<div class="flex items-center gap-space-2xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-primary-container">menu_book</span>
+<span class="font-label-caps text-label-caps uppercase">Completed</span>
+</div>
+<span class="font-label-numeric text-headline-md text-primary font-bold mt-space-2xs">12 Books</span>
+</div>
+<div class="bg-surface-container-low/90 backdrop-blur-md px-space-md py-space-sm rounded-DEFAULT flex flex-col justify-center min-w-[130px] shadow-sm">
+<div class="flex items-center gap-space-2xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-primary-container">local_fire_department</span>
+<span class="font-label-caps text-label-caps uppercase">Streak</span>
+</div>
+<span class="font-label-numeric text-headline-md text-primary-container font-bold mt-space-2xs">7 Days</span>
+</div>
+</div>
+</section>
+<!-- Filter & View Switcher Pills -->
+<section class="flex flex-wrap items-center justify-between gap-space-md">
+<div class="flex flex-wrap items-center gap-space-xs bg-surface-container-lowest/80 p-space-2xs rounded-full shadow-inner" id="filter-pills">
+<button class="filter-btn px-space-md py-space-2xs rounded-full bg-surface-container-high text-primary-container font-headline-sm text-headline-sm shadow-[0_0_12px_rgba(245,215,127,0.2)] flex items-center gap-space-2xs transition-all" type="button">
+<span>All Books</span>
+<span class="font-label-numeric text-label-numeric opacity-80">(24)</span>
+</button>
+<button class="filter-btn px-space-md py-space-2xs rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container transition-all font-headline-sm text-headline-sm flex items-center gap-space-2xs" type="button">
+<span>Currently Listening</span>
+<span class="font-label-numeric text-label-numeric text-primary-container">(3)</span>
+</button>
+<button class="filter-btn px-space-md py-space-2xs rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container transition-all font-headline-sm text-headline-sm flex items-center gap-space-2xs" type="button">
+<span>Completed</span>
+<span class="font-label-numeric text-label-numeric opacity-80">(12)</span>
+</button>
+<button class="filter-btn px-space-md py-space-2xs rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container transition-all font-headline-sm text-headline-sm flex items-center gap-space-2xs" type="button">
+<span>Saved &amp; Wishlist</span>
+<span class="font-label-numeric text-label-numeric opacity-80">(9)</span>
+</button>
+<button class="filter-btn px-space-md py-space-2xs rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container transition-all font-headline-sm text-headline-sm flex items-center gap-space-2xs" type="button">
+<span class="material-symbols-outlined text-[16px]">download_done</span>
+<span>Downloaded</span>
+</button>
+</div>
+<!-- Quick Search Field -->
+<div class="relative min-w-[260px] max-w-xs flex-1 lg:flex-initial">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant pointer-events-none">search</span>
+<input class="w-full bg-surface-container-low pl-9 pr-4 py-2 rounded-full font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container shadow-sm transition-all" placeholder="Filter title or author..." type="text"/>
+</div>
+</section>
+<!-- CONTINUE LISTENING (Featured Hero Cards Row matching Reference IKIGAI / THE BRIDGE HOME) -->
+<section class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<h2 class="font-headline-lg text-headline-lg text-primary">Continue Listening</h2>
+<span class="font-label-badge text-label-badge bg-surface-container px-space-xs py-0.5 rounded-full text-primary-container">IN PROGRESS</span>
+</div>
+<a class="font-headline-sm text-headline-sm text-on-surface-variant hover:text-primary-container transition-colors" href="#">view all</a>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-space-lg">
+<!-- Feature Card 1: The Bridge Home -->
+<article class="relative bg-surface-container-low/95 rounded-lg p-space-lg flex flex-col justify-between overflow-hidden shadow-xl group hover:shadow-[0_12px_40px_-8px_rgba(245,215,127,0.18)] transition-all">
+<!-- Ambient internal glow -->
+<div class="absolute -right-12 -top-12 w-64 h-64 bg-primary-container/10 rounded-full blur-3xl pointer-events-none"></div>
+<!-- Floating Trending / Status Tag -->
+<div class="absolute top-0 right-8 bg-gradient-to-r from-primary-container to-surface-tint text-on-tertiary px-space-md py-1 rounded-b-DEFAULT font-label-caps text-label-caps uppercase tracking-wider shadow-md">
+          Active Track
+        </div>
+<div class="flex flex-col sm:flex-row gap-space-lg items-start relative z-10">
+<div class="flex-1 flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<h3 class="font-headline-xl text-headline-xl text-primary font-bold tracking-wide">THE BRIDGE HOME</h3>
+<div class="flex items-center gap-1 bg-surface-container-lowest/80 px-space-xs py-0.5 rounded-full text-primary-container">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-numeric text-label-numeric">4.8</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Written by : Padma Venkatraman</p>
+<div class="flex flex-wrap items-center gap-space-md text-on-surface-variant mt-space-2xs">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-primary-container">visibility</span>
+<span class="font-label-numeric text-label-numeric">1,11,994</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-primary-container">schedule</span>
+<span class="font-label-numeric text-label-numeric">2 hrs 50 mins</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-primary-container">format_list_numbered</span>
+<span class="font-label-numeric text-label-numeric">21 chapters</span>
+</div>
+</div>
+<div class="mt-space-xs">
+<span class="font-label-caps text-label-caps text-primary uppercase">Description</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3 mt-0.5">
+                Rukku is Viji's older sister who she has developed deep affection for; her sister unconditionally and does everything to protect her when life becomes precarious in the sprawling seaside metropolis.
+              </p>
+</div>
+<!-- Listening Progress Track -->
+<div class="mt-space-sm flex flex-col gap-1 w-full max-w-sm">
+<div class="flex justify-between items-center text-on-surface-variant">
+<span class="font-label-numeric text-label-numeric text-primary-container">65% finished</span>
+<span class="font-label-numeric text-label-numeric">1 hr 05 mins left</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary-container to-surface-tint rounded-full w-[65%]"></div>
+</div>
+</div>
+</div>
+<!-- Realistic Book Cover Thumbnail -->
+<div class="relative flex-shrink-0 self-center sm:self-start w-36 aspect-[2/3] rounded-DEFAULT overflow-hidden shadow-[0_16px_32px_rgba(0,0,0,0.7)] group-hover:scale-105 transition-transform duration-300">
+<img class="w-full h-full object-cover" data-alt="Dark atmospheric book cover for The Bridge Home featuring an architectural bridge over deep night waters with radiant warm lantern light reflections, neo-editorial minimalist design in champagne gold and midnight blue tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjlDEpKYK_Z8Zor7H3i9X8Q9lJW6RK2pYhMQVeNGSBwt5D3sA8D0IH4e8phxDVnejcSQGcJU8j9MdTPHc4jwro9WyLNSzm7HAa6gdN-joQkhYK8FDf4XlItd6vGhDgwMY2WKmYWs6GePfZhDMK2Uyv9vekQy_VOASBrQpwg9tkhwweLG5yKq9ZgvcZvoh4bBN2XVJ5dYwRIvCD-Dvbi3Cwrq9PjKveqXB252ElZj2362SSf2DDYLQb"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-2 left-2 right-2 flex justify-between items-center">
+<span class="font-label-badge text-[10px] text-primary bg-surface-container-lowest/80 px-1.5 py-0.5 rounded">AUDIO + TEXT</span>
+</div>
+</div>
+</div>
+<!-- Action Row -->
+<div class="flex items-center gap-space-sm mt-space-md pt-space-xs relative z-10">
+<button class="px-space-lg py-space-xs rounded-full bg-primary-container hover:bg-surface-tint text-on-primary font-headline-sm text-headline-sm flex items-center gap-space-2xs shadow-[0_0_16px_rgba(245,215,127,0.3)] transition-transform active:scale-95" type="button">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+<span>Resume</span>
+</button>
+<button class="px-space-md py-space-xs rounded-full bg-surface-container hover:bg-surface-container-high text-primary-container font-headline-sm text-headline-sm flex items-center gap-space-2xs transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>
+<span>Read Now</span>
+</button>
+<button class="w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-primary-container flex items-center justify-center transition-colors ml-auto" type="button">
+<span class="material-symbols-outlined text-[18px]">bookmark_added</span>
+</button>
+</div>
+</article>
+<!-- Feature Card 2: Swords Of The Son -->
+<article class="relative bg-surface-container-low/95 rounded-lg p-space-lg flex flex-col justify-between overflow-hidden shadow-xl group hover:shadow-[0_12px_40px_-8px_rgba(245,215,127,0.18)] transition-all">
+<!-- Ambient internal glow -->
+<div class="absolute -right-12 -top-12 w-64 h-64 bg-secondary-container/20 rounded-full blur-3xl pointer-events-none"></div>
+<!-- Floating Category Tag -->
+<div class="absolute top-0 right-8 bg-surface-container-highest text-primary-container px-space-md py-1 rounded-b-DEFAULT font-label-caps text-label-caps uppercase tracking-wider">
+          Epic Fantasy
+        </div>
+<div class="flex flex-col sm:flex-row gap-space-lg items-start relative z-10">
+<div class="flex-1 flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<h3 class="font-headline-xl text-headline-xl text-primary font-bold tracking-wide">SWORDS OF THE SON</h3>
+<div class="flex items-center gap-1 bg-surface-container-lowest/80 px-space-xs py-0.5 rounded-full text-primary-container">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-numeric text-label-numeric">4.1</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Written by : R. A. Vane &amp; E. Corvo</p>
+<div class="flex flex-wrap items-center gap-space-md text-on-surface-variant mt-space-2xs">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-primary-container">visibility</span>
+<span class="font-label-numeric text-label-numeric">37,904</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-primary-container">schedule</span>
+<span class="font-label-numeric text-label-numeric">6 hrs 15 mins</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-primary-container">format_list_numbered</span>
+<span class="font-label-numeric text-label-numeric">34 chapters</span>
+</div>
+</div>
+<div class="mt-space-xs">
+<span class="font-label-caps text-label-caps text-primary uppercase">Description</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3 mt-0.5">
+                The ancient dynasty fractures as silent blades move in the dark palace cloisters. A fallen heir awakens with forgotten relics and the whisper of forgotten dynasties.
+              </p>
+</div>
+<!-- Listening Progress Track -->
+<div class="mt-space-sm flex flex-col gap-1 w-full max-w-sm">
+<div class="flex justify-between items-center text-on-surface-variant">
+<span class="font-label-numeric text-label-numeric text-primary-container">30% finished</span>
+<span class="font-label-numeric text-label-numeric">4 hrs 20 mins left</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary-container to-surface-tint rounded-full w-[30%]"></div>
+</div>
+</div>
+</div>
+<!-- Realistic Book Cover Thumbnail -->
+<div class="relative flex-shrink-0 self-center sm:self-start w-36 aspect-[2/3] rounded-DEFAULT overflow-hidden shadow-[0_16px_32px_rgba(0,0,0,0.7)] group-hover:scale-105 transition-transform duration-300">
+<img class="w-full h-full object-cover" data-alt="Atmospheric fantasy book jacket for Swords of the Son showing an ornate celestial sword hilt resting amidst obsidian stone runes with subtle cold mist and soft golden particles" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPuqVfQzGdFjrz7gMJnIZOW8hNn9znrOGG4rU7dGJE8oo4pbR1jyEBIv7ynRU1zGxxq_bMx1ZidDkxLXDLEVwCKHNf3mgex0e_3f3Szeg-zIcYIVf0kNJvb0QAbr1LCjqA0YGSRl5iLrFCfgFLg6R9-1nGYWKfJql-ooPe0tyqB56qpi9iSQ7qGQZZzmrfRDzrHfclvJF_2xvAlPi2IxQd6iOPAbBqx9Mcu6PvPkkm8AfmhgK3dkJg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-2 left-2 right-2 flex justify-between items-center">
+<span class="font-label-badge text-[10px] text-primary bg-surface-container-lowest/80 px-1.5 py-0.5 rounded">CH. 11</span>
+</div>
+</div>
+</div>
+<!-- Action Row -->
+<div class="flex items-center gap-space-sm mt-space-md pt-space-xs relative z-10">
+<button class="px-space-lg py-space-xs rounded-full bg-primary-container hover:bg-surface-tint text-on-primary font-headline-sm text-headline-sm flex items-center gap-space-2xs shadow-[0_0_16px_rgba(245,215,127,0.3)] transition-transform active:scale-95" type="button">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+<span>Resume</span>
+</button>
+<button class="px-space-md py-space-xs rounded-full bg-surface-container hover:bg-surface-container-high text-primary-container font-headline-sm text-headline-sm flex items-center gap-space-2xs transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>
+<span>Read Now</span>
+</button>
+<button class="w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-primary-container flex items-center justify-center transition-colors ml-auto" type="button">
+<span class="material-symbols-outlined text-[18px]">bookmark_added</span>
+</button>
+</div>
+</article>
+</div>
+</section>
+<!-- SAVED & POPULAR SHELVES (Matching reference horizontal rack with star badge, views, diamond action) -->
+<section class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-lg text-headline-lg text-primary">Saved &amp; Finished Books</h2>
+<a class="font-headline-sm text-headline-sm text-on-surface-variant hover:text-primary-container transition-colors" href="#">view all</a>
+</div>
+<!-- 5-column Book Rail Grid -->
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-space-lg">
+<!-- Book Card 1: Mist & Whispers -->
+<article class="flex flex-col items-center group cursor-pointer">
+<!-- Floating star rating above cover -->
+<div class="mb-space-xs bg-surface-container-low/90 backdrop-blur-md px-space-xs py-0.5 rounded-full flex items-center gap-1 text-primary-container shadow-sm group-hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-numeric text-label-numeric">4.1</span>
+</div>
+<!-- Book Jacket Presentation -->
+<div class="w-full aspect-[2/3] rounded-DEFAULT overflow-hidden shadow-[0_12px_28px_rgba(0,0,0,0.6)] bg-surface-container-low relative group-hover:scale-105 group-hover:shadow-[0_16px_36px_rgba(245,215,127,0.15)] transition-all duration-300">
+<img class="w-full h-full object-cover" data-alt="Whimsical storybook illustration cover with Mist and Whispers title, mysterious swirling golden vapor and ethereal child silhouette walking into enchanted autumnal forest" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuQiN1zizKvyh9CGZ9QzAWC2UlXi0RPG9GRATNnBJp6QXlsAOFxXeL65osHhmUY7qpJ3-mAT0iIvh6zEHat_FGywd06MUs6JI5sw3xiQRxrSEURy856uQ-ajc0nklZC-z6TKy2Y3Ye4M9Gk60I7DdfWq7vqt5ltOvMujKdwAoA6jy_9AUGRjbbCFGq4e9Sa3v_QlH-a1AUYy0xu8PH3oy9w5xvI0JGh_kYvSmQGmgjX16jThCv30RC"/>
+<div class="absolute inset-0 bg-primary-container/0 group-hover:bg-primary-container/10 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-container text-[36px] opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md">play_circle</span>
+</div>
+</div>
+<!-- Title & Metadata -->
+<div class="w-full mt-space-sm flex flex-col items-center text-center">
+<h4 class="font-headline-sm text-headline-sm text-primary group-hover:text-primary-container transition-colors truncate w-full">Mist &amp; Whispers</h4>
+<div class="flex items-center justify-center gap-space-xs text-on-surface-variant mt-1 w-full">
+<span class="material-symbols-outlined text-[14px]">visibility</span>
+<span class="font-label-numeric text-label-numeric">23,444</span>
+<span class="text-primary-container/60 hover:text-primary-container transition-colors ml-1">✧</span>
+</div>
+</div>
+</article>
+<!-- Book Card 2: Eighty Days -->
+<article class="flex flex-col items-center group cursor-pointer">
+<div class="mb-space-xs bg-surface-container-low/90 backdrop-blur-md px-space-xs py-0.5 rounded-full flex items-center gap-1 text-primary-container shadow-sm group-hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-numeric text-label-numeric">3.7</span>
+</div>
+<div class="w-full aspect-[2/3] rounded-DEFAULT overflow-hidden shadow-[0_12px_28px_rgba(0,0,0,0.6)] bg-surface-container-low relative group-hover:scale-105 group-hover:shadow-[0_16px_36px_rgba(245,215,127,0.15)] transition-all duration-300">
+<img class="w-full h-full object-cover" data-alt="Vintage adventure journal cover titled Eighty Days with stylized hot air balloon floating over intricate Victorian city map in pale sepia and gold foil line work" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAoVNFtcVTF9ycLAy60TZyyiBr0_KQkeYtTXagF5i50ZUFQ8yVRVyAaZOJatfwT_Dmq-gLhqFokwLR31KKr7c4NRXk5stjkxZC93os65StOVxCkWvnk-6MVQKQrs6QlC8grggE-TiayQ33UFLrhPYiqBdgP4vfRuXA8EHmahzOEZ3vkXlxrWiZo7lxZN2ay8gm53bozsltEFnWfZR_F4EmC2SsgUT-Rc5N3QZ-X53ergAToMy4aLyAR"/>
+<div class="absolute inset-0 bg-primary-container/0 group-hover:bg-primary-container/10 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-container text-[36px] opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md">play_circle</span>
+</div>
+</div>
+<div class="w-full mt-space-sm flex flex-col items-center text-center">
+<h4 class="font-headline-sm text-headline-sm text-primary group-hover:text-primary-container transition-colors truncate w-full">Eighty Days</h4>
+<div class="flex items-center justify-center gap-space-xs text-on-surface-variant mt-1 w-full">
+<span class="material-symbols-outlined text-[14px]">visibility</span>
+<span class="font-label-numeric text-label-numeric">13,094</span>
+<span class="text-primary-container/60 hover:text-primary-container transition-colors ml-1">✧</span>
+</div>
+</div>
+</article>
+<!-- Book Card 3: The White Raven -->
+<article class="flex flex-col items-center group cursor-pointer">
+<div class="mb-space-xs bg-surface-container-low/90 backdrop-blur-md px-space-xs py-0.5 rounded-full flex items-center gap-1 text-primary-container shadow-sm group-hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-numeric text-label-numeric">4.3</span>
+</div>
+<div class="w-full aspect-[2/3] rounded-DEFAULT overflow-hidden shadow-[0_12px_28px_rgba(0,0,0,0.6)] bg-surface-container-low relative group-hover:scale-105 group-hover:shadow-[0_16px_36px_rgba(245,215,127,0.15)] transition-all duration-300">
+<img class="w-full h-full object-cover" data-alt="Poetic literary novel cover titled The White Raven showing an ethereal snowy raven perched over the silhouetted face of an empress in charcoal and goldleaf accents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmd4P0uwyqEPcFDWBOMkaQTMhgBXan9OOdZfXvmQTUfyAgXIQpGd4pe4dNqbJSJ0j8F05uQujzFbe0pzf_HcqKFYYE9Ttjk4BjEO87YIClvT4CbGQE9Rdxfh5rg4vbonkgigvO9QaFnkw0tGUVoGm-edhceShJi_VvXbfgx454tc7yts-l1PMd3j4rLmbKNDfLFnIKjBvm79C_dansxnsK0cr6_07-JLZoMp-NhdtCnlETu1cwbX_x"/>
+<div class="absolute inset-0 bg-primary-container/0 group-hover:bg-primary-container/10 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-container text-[36px] opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md">play_circle</span>
+</div>
+</div>
+<div class="w-full mt-space-sm flex flex-col items-center text-center">
+<h4 class="font-headline-sm text-headline-sm text-primary group-hover:text-primary-container transition-colors truncate w-full">The White Raven</h4>
+<div class="flex items-center justify-center gap-space-xs text-on-surface-variant mt-1 w-full">
+<span class="material-symbols-outlined text-[14px]">visibility</span>
+<span class="font-label-numeric text-label-numeric">27,804</span>
+<span class="text-primary-container/60 hover:text-primary-container transition-colors ml-1">✧</span>
+</div>
+</div>
+</article>
+<!-- Book Card 4: Swords Of The Son -->
+<article class="flex flex-col items-center group cursor-pointer">
+<div class="mb-space-xs bg-surface-container-low/90 backdrop-blur-md px-space-xs py-0.5 rounded-full flex items-center gap-1 text-primary-container shadow-sm group-hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-numeric text-label-numeric">4.1</span>
+</div>
+<div class="w-full aspect-[2/3] rounded-DEFAULT overflow-hidden shadow-[0_12px_28px_rgba(0,0,0,0.6)] bg-surface-container-low relative group-hover:scale-105 group-hover:shadow-[0_16px_36px_rgba(245,215,127,0.15)] transition-all duration-300">
+<img class="w-full h-full object-cover" data-alt="Monochromatic dark fantasy book cover featuring Swords Of The Son title with ornate sword emblems, cracked stone texture and mysterious blue ambient backlighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1mzRNBzAS6k_jK1ysyi0iy_L8g3sayLIfseB-g_YaEY5UKuiX0hifowg9AfAxfty5xAufEEMFCFdcF5WOFXORnptwZCiph8Yv64AlU8wwIlhOjUovPM_YlS4PdBKE5iBQYwy4qLxImgOFtYz_ZvrnTpH-CcWnmgel90KjgaIK3JTvf720MgKlTMMTaQr1KWuaHd2J8p8zD2I5U1m-YR_dMu4mTIwe3AcPVbJcwYmOYFiAGcHdmEy7"/>
+<div class="absolute inset-0 bg-primary-container/0 group-hover:bg-primary-container/10 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-container text-[36px] opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md">play_circle</span>
+</div>
+</div>
+<div class="w-full mt-space-sm flex flex-col items-center text-center">
+<h4 class="font-headline-sm text-headline-sm text-primary group-hover:text-primary-container transition-colors truncate w-full">Swords Of The Son</h4>
+<div class="flex items-center justify-center gap-space-xs text-on-surface-variant mt-1 w-full">
+<span class="material-symbols-outlined text-[14px]">visibility</span>
+<span class="font-label-numeric text-label-numeric">37,904</span>
+<span class="text-primary-container/60 hover:text-primary-container transition-colors ml-1">✧</span>
+</div>
+</div>
+</article>
+<!-- Book Card 5: Adorning The Dark -->
+<article class="flex flex-col items-center group cursor-pointer">
+<div class="mb-space-xs bg-surface-container-low/90 backdrop-blur-md px-space-xs py-0.5 rounded-full flex items-center gap-1 text-primary-container shadow-sm group-hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-numeric text-label-numeric">3.6</span>
+</div>
+<div class="w-full aspect-[2/3] rounded-DEFAULT overflow-hidden shadow-[0_12px_28px_rgba(0,0,0,0.6)] bg-surface-container-low relative group-hover:scale-105 group-hover:shadow-[0_16px_36px_rgba(245,215,127,0.15)] transition-all duration-300">
+<img class="w-full h-full object-cover" data-alt="Nocturnal pine forest book cover for Adorning the Dark by Andrew Peterson with glowing moon through dense pine tree branches in emerald green and dark navy hues" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbhDIHcAbP6Cd7jP3X--z-cbY6I9vHHOxK33vRbwx_bnLIsIZWWmN3ASU0iqcRLqDEjP7KXWXmfM0AMw0dmCf-wlcI3c8cKyhXZvGs_oKgQ07HSOpFd6WM4gRFSLussa5tFmgZ2ouLJJpvXDnztqrU1kDQ9POYJfd6ZZNOVPpCGYF-uk-0mGBSIr5e6szAXqUGlqWh_qdmbbYEDimU37o2u6JD1R7MOkdK_TfYW6y7xei_n8ALMHsq"/>
+<div class="absolute inset-0 bg-primary-container/0 group-hover:bg-primary-container/10 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-container text-[36px] opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md">play_circle</span>
+</div>
+</div>
+<div class="w-full mt-space-sm flex flex-col items-center text-center">
+<h4 class="font-headline-sm text-headline-sm text-primary group-hover:text-primary-container transition-colors truncate w-full">Adorning The Dark</h4>
+<div class="flex items-center justify-center gap-space-xs text-on-surface-variant mt-1 w-full">
+<span class="material-symbols-outlined text-[14px]">visibility</span>
+<span class="font-label-numeric text-label-numeric">17,999</span>
+<span class="text-primary-container/60 hover:text-primary-container transition-colors ml-1">✧</span>
+</div>
+</div>
+</article>
+</div>
+</section>
+<!-- CURATED COLLECTIONS / FOLDERS -->
+<section class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<h2 class="font-headline-lg text-headline-lg text-primary">Curated Collections</h2>
+<span class="text-primary-container">✦</span>
+</div>
+<button class="flex items-center gap-space-2xs text-on-surface-variant hover:text-primary-container font-headline-sm text-headline-sm transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">create_new_folder</span>
+<span>New Collection</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
+<!-- Collection 1: Studio Ghibli Special -->
+<div class="bg-surface-container-low rounded-lg p-space-md flex flex-col justify-between shadow-md hover:shadow-xl transition-all group border-0">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary-container text-[20px]">filter_vintage</span>
+<span class="font-headline-sm text-headline-sm text-primary">Ghibli Studio Special</span>
+</div>
+<span class="font-label-numeric text-label-numeric text-on-surface-variant">6 Titles</span>
+</div>
+<!-- Overlapping 3-Cover Stack -->
+<div class="flex items-center justify-center py-space-md">
+<div class="relative w-44 h-28 flex items-center justify-center">
+<div class="w-16 h-24 rounded bg-surface-container-high absolute -left-2 rotate-[-8deg] overflow-hidden shadow-lg opacity-80 group-hover:rotate-[-12deg] group-hover:-left-4 transition-all">
+<img class="w-full h-full object-cover" data-alt="Soft anime watercolor illustration cover of enchanted rolling green hills under cloudy sky in Studio Ghibli cinematic style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8160xK5ql68pqZ_6B-Or3aJ8pPYQOO6cT8pKwGRzMu6Q9myReJ8G84cWWrwweZ4qEOflt5dC4ApEkIjIsbe4RJMymoFxcQsjTjKTTYs_3_Wdyei2GrIszrh9QDLiJrmPwxCF5QUxSRSmd43wkqpjIRyYbCTTvrgcj3e4H7MW1BkDS3G9N8xQRJp_tjdjUFTAInGfs6ZAT5cgnC2Ueuiwvb4NKodwYKIjzuqRfHTusa1aj9RKFfqW1"/>
+</div>
+<div class="w-16 h-24 rounded bg-surface-container-high absolute -right-2 rotate-[8deg] overflow-hidden shadow-lg opacity-80 group-hover:rotate-[12deg] group-hover:-right-4 transition-all">
+<img class="w-full h-full object-cover" data-alt="Whimsical anime forest spirit illustration with warm hearth fire and cozy cottage in lush deep woods" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9Nk-ANfKiOHVz0-Y9xccC3CSllh7Bu3VC67iu8DGUIgcQVAnX0ajxcdx6rw263m6j01VWoPIhojlsqSYP1My94oKgDrQ7yqL-3bI3NWfmQfIrJSh8d4vBWna5OhmNU755qVHzRxax7DcVChl7LEnLOGXXDfC2HBAnbXGK_kv0ha-dqcEFzoJYusYvs6zn0ubzTAscbi4h-X79gv6Kp5E7peP5uSbnVFIL2miQa05ToR_fpp6J6-6b"/>
+</div>
+<div class="w-18 h-26 rounded bg-surface-container-highest relative z-10 overflow-hidden shadow-2xl group-hover:scale-105 transition-transform">
+<img class="w-full h-full object-cover" data-alt="Charming painted animation book jacket showing a small flying airship above cloud sea in rich amber and midnight blue tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDv6ou4kNbE8O6j-c1EI0y8igA29Nfd8lNmEwAeF3ivwj3tHLHc4YMeCxdHvHQM4asMW5ujhKrSSfCRoKh0K1bXwM7bJNE_FVFEQxG4iCLpNgAu1C9R5FiX6QC9HXDcDvtJZAmwc9eXs9msHF3OfvtpomyJw78CTMlMo_X0QzkP8d-4qWV4KyOFfcENEiguxJsd0EdZvEPhZ4yiXXMnFaipz8Y7AvhtPYgTEhBoyo3eYu8xzhwnFU55"/>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<span>Audiobook &amp; Soundtracks</span>
+<span class="material-symbols-outlined text-[18px] group-hover:text-primary-container transition-colors">arrow_forward</span>
+</div>
+</div>
+<!-- Collection 2: Philosophy & Mindset -->
+<div class="bg-surface-container-low rounded-lg p-space-md flex flex-col justify-between shadow-md hover:shadow-xl transition-all group border-0">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary-container text-[20px]">psychology</span>
+<span class="font-headline-sm text-headline-sm text-primary">Philosophy &amp; Mindset</span>
+</div>
+<span class="font-label-numeric text-label-numeric text-on-surface-variant">9 Titles</span>
+</div>
+<!-- Overlapping 3-Cover Stack -->
+<div class="flex items-center justify-center py-space-md">
+<div class="relative w-44 h-28 flex items-center justify-center">
+<div class="w-16 h-24 rounded bg-surface-container-high absolute -left-2 rotate-[-8deg] overflow-hidden shadow-lg opacity-80 group-hover:rotate-[-12deg] group-hover:-left-4 transition-all">
+<img class="w-full h-full object-cover" data-alt="Minimalist Japanese cherry blossom branch book cover with Ikigai typography against pale cream and slate backdrop" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1ZK_ZnxKGYgHWE8zGUjt2fNWvnr-yOqV08ID-X13GRjcpAEFYPBXCoc-NsrHgZQrscGRtWyLAhutMeAKiW1yIkieLVedI9jX5amyx7PKcvFB4sO2ERrr6wTx_uFwDh9ds6AObKoYcx702Rpjv76JVdUoc-CGnOJ1eVkAjk1O08VBNB-pitHKC3mmv9gLrPOo6zPa2kKSJ8Fwc7v9u7Uugu-SL-JWQ_5y7ljYgqnO09diRL8VFz--f"/>
+</div>
+<div class="w-16 h-24 rounded bg-surface-container-high absolute -right-2 rotate-[8deg] overflow-hidden shadow-lg opacity-80 group-hover:rotate-[12deg] group-hover:-right-4 transition-all">
+<img class="w-full h-full object-cover" data-alt="Stoic marble sculpture face enveloped in dark shadow with subtle gold leaf geometric grid lines" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxle4FSnuOIh1CJ4Vgeakt6yXX0fIWrDfJ2uYhaNJOysbbBFAIXsAmHUEUZtT2uOOb7YpG6RC6ME8gNOhXfSEefMLrTkhlt-rEoQENd2pKiUGegt7CSslabmISyPOgX8aIcm22LafaW0czeaal7CGWEDJGKWzrAVPPvI1cLayAeuNZy_MTro4zzMHMjn1uFdnYYyGpE4JDO7kl219w8WCm_zvfFJEtIxIHltIJBOkiRMbH_jBZIXcn"/>
+</div>
+<div class="w-18 h-26 rounded bg-surface-container-highest relative z-10 overflow-hidden shadow-2xl group-hover:scale-105 transition-transform">
+<img class="w-full h-full object-cover" data-alt="Contemplative zen garden path with circular stone portal leading to radiant twilight horizon, luxury book cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQ63CqlfaW4XDRWz5zVpDG-PtgalWHptzld60WOtUEOpWTeJalbgdGDWdRdl3Ub28RMcDdbGyxTmaS2u3a5saCcMOq5GX1RBF7AOB2oRfRg-IoJiykMdJCgRJ0NDHsMndDaAM53miwe9N_sljthD9F8ErTlbgNl21e2yC0mHvkI61BRrp4biL981awfkdNYtJ-RycD1AmPfXM7eYCsCehbg4Tus235cFbvvMpd6_KZLBwwJSjpcuqD"/>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<span>Essays &amp; Guided Audio</span>
+<span class="material-symbols-outlined text-[18px] group-hover:text-primary-container transition-colors">arrow_forward</span>
+</div>
+</div>
+<!-- Collection 3: Midnight Fantasy -->
+<div class="bg-surface-container-low rounded-lg p-space-md flex flex-col justify-between shadow-md hover:shadow-xl transition-all group border-0">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary-container text-[20px]">auto_stories</span>
+<span class="font-headline-sm text-headline-sm text-primary">Midnight Fantasy</span>
+</div>
+<span class="font-label-numeric text-label-numeric text-on-surface-variant">14 Titles</span>
+</div>
+<!-- Overlapping 3-Cover Stack -->
+<div class="flex items-center justify-center py-space-md">
+<div class="relative w-44 h-28 flex items-center justify-center">
+<div class="w-16 h-24 rounded bg-surface-container-high absolute -left-2 rotate-[-8deg] overflow-hidden shadow-lg opacity-80 group-hover:rotate-[-12deg] group-hover:-left-4 transition-all">
+<img class="w-full h-full object-cover" data-alt="Ethereal gothic cathedral spires under starlight with flying lunar ravens and subtle gold constellations" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsqkGBK3_ZlymUfcS60mhhArlHBWNWaXPSewG67otLoND4nZQyxMp4y7Fy4mtDa42cEb9yb79gaMwWAXb_7-eDvBbhoPG3sO1vjDbl4TWQCbmkGUNQIiVBVFgpT_heDJMx1Lh21IPMWgU8AzlRd9fCToqowT45N8Jy_4KSPRWfvD4IVyev1orSAB9PZonZXCGkLV0qrO-LeO_ggFx61mDiOQWm7J5tBce9WszwUlcpyWHWFrhpCdD9"/>
+</div>
+<div class="w-16 h-24 rounded bg-surface-container-high absolute -right-2 rotate-[8deg] overflow-hidden shadow-lg opacity-80 group-hover:rotate-[12deg] group-hover:-right-4 transition-all">
+<img class="w-full h-full object-cover" data-alt="Dark fantasy dragon eye glowing amber behind runic obsidian chains, moody editorial book design" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCj5EKXBzTPqMFXM7Ji0S8-qOfV63GAcgh-g2dv8GTZS_6kVJ6wqR9yr2amdacFmSI-lIG6lwjekJwh-AMfWlbAlTvbAZEF-Ec5bctMDUlL9W7qzODenstww4aaXwGS9SuzRf2MoP1e5easf2LCXhdUGWws7fuaRGDYz0ngpOneEGu1B9Nupfu5XXPVMAhsSlcXtIZSesgoHRwg9fHdo1ni9U3tlJWrWYSEhlV_4VMLAd5sHDwoxRa9"/>
+</div>
+<div class="w-18 h-26 rounded bg-surface-container-highest relative z-10 overflow-hidden shadow-2xl group-hover:scale-105 transition-transform">
+<img class="w-full h-full object-cover" data-alt="Gilded medieval tome with intricate filigree gold embossing on deep midnight velvet book jacket" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDeXFbTpXuDT1FzZ4Ps91hLw13OKNuuXh55JIYNZRTKLtdi9F1-giMpEMM2vqa2UpL_GCB8NKFf0TvcgZohYta0cmiFW-LscTkHZwaB8G61Exe8m3cdXv5A-uWNr_P6OSg8gDLmwy5BYz0Vo2zB8USXsTv0Vl3rWpt7EEjRcpcII5Idt6uhoL0Ueiu4_wVk9UKirKTOOiEcC-yQrTkXSogv7pj_susrFWwoAWqkWylkRv_W-TUxiO0f"/>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<span>Dramatized Multi-cast</span>
+<span class="material-symbols-outlined text-[18px] group-hover:text-primary-container transition-colors">arrow_forward</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Floating Assistant Mascot Widget (matching the reference bottom right mascot pill) -->
+<aside class="fixed bottom-24 right-8 z-30 flex items-center">
+<button class="relative flex items-center justify-center w-14 h-14 rounded-full bg-surface-container-high hover:bg-surface-bright text-primary-container shadow-[0_8px_24px_rgba(0,0,0,0.6)] group hover:scale-110 transition-all" type="button">
+<span class="material-symbols-outlined text-[28px] group-hover:rotate-12 transition-transform">smart_toy</span>
+<span class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-primary-container animate-ping"></span>
+<span class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-primary-container"></span>
+</button>
+</aside>
+</div>
+<script>
+  // Simple interactive filter pill toggling
+  document.querySelectorAll('#filter-pills .filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#filter-pills .filter-btn').forEach(el => {
+        el.classList.remove('bg-surface-container-high', 'text-primary-container', 'shadow-[0_0_12px_rgba(245,215,127,0.2)]');
+        el.classList.add('text-on-surface-variant');
+      });
+      btn.classList.add('bg-surface-container-high', 'text-primary-container', 'shadow-[0_0_12px_rgba(245,215,127,0.2)]');
+      btn.classList.remove('text-on-surface-variant');
+    });
+  });
+</script></main><aside class="fixed bottom-0 left-sidebar-width right-0 h-20 bg-surface-container-lowest/90 backdrop-blur-2xl z-40 flex items-center justify-between px-space-xl shadow-[0_-8px_32px_rgba(0,0,0,0.6)]"><div class="flex items-center gap-space-md w-1/4 min-w-[220px]"><div class="w-12 h-12 rounded-DEFAULT bg-surface-container-high overflow-hidden flex-shrink-0 relative"><div class="absolute inset-0 bg-primary-container/10 flex items-center justify-center"><span class="material-symbols-outlined text-primary-container text-[24px]">graphic_eq</span></div></div><div class="flex flex-col min-w-0"><span class="font-headline-sm text-headline-sm text-on-surface truncate">The Midnight Vault</span><span class="font-body-sm text-body-sm text-on-surface-variant truncate">Alistair Finch • Ch. 4</span></div><button class="text-on-surface-variant hover:text-primary-container transition-colors ml-space-2xs" type="button"><span class="material-symbols-outlined text-[20px]">favorite_border</span></button></div><div class="flex flex-col items-center gap-space-2xs flex-1 max-w-xl px-space-md"><div class="flex items-center gap-space-md"><button class="text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">shuffle</span></button><button class="text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">replay_10</span></button><button class="flex items-center justify-center w-10 h-10 rounded-full bg-primary-container text-on-primary-container hover:scale-105 transition-transform shadow-[0_0_16px_rgba(245,215,127,0.35)]" type="button"><span class="material-symbols-outlined text-[24px]">play_arrow</span></button><button class="text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">forward_30</span></button><button class="text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">repeat</span></button></div><div class="flex items-center gap-space-sm w-full"><span class="font-label-numeric text-label-numeric text-on-surface-variant">14:20</span><div class="h-1.5 flex-1 bg-surface-container-highest rounded-full overflow-hidden relative group cursor-pointer"><div class="h-full bg-primary-container rounded-full w-2/5 relative"></div></div><span class="font-label-numeric text-label-numeric text-on-surface-variant">42:50</span></div></div><div class="flex items-center justify-end gap-space-md w-1/4 min-w-[200px]"><button class="text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">speed</span></button><button class="text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">format_list_bulleted</span></button><div class="flex items-center gap-space-xs text-on-surface-variant"><span class="material-symbols-outlined text-[20px]">volume_up</span><div class="w-20 h-1.5 bg-surface-container-highest rounded-full overflow-hidden"><div class="h-full bg-on-surface-variant rounded-full w-3/4"></div></div></div></div></aside></div></body></html>

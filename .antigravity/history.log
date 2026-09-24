@@ -1,0 +1,60 @@
+# NovelCast Antigravity Session History Log
+
+## [2026-09-19 01:14:00] - Session Initialized
+- Initialized `.antigravity` context directory for persistent local session storage.
+- Created `context.md` for session status, active goal tracking, and file map.
+- Created `state.json` for machine-readable state and task tracking.
+- Created `project.md` for architecture and codebase documentation.
+- Created workspace rules (`AGENTS.md`, `GEMINI.md`, `.agents/rules/session_persistence.md`) to instruct Antigravity to always read `.antigravity/context.md` and `.antigravity/state.json` when starting, and update them on completion.
+
+## [2026-09-19 01:32:00] - Codebase Organization & Hygiene
+- Added comprehensive `.gitignore` to prevent committing secrets (`.env`) and 20MB of screenshot artifacts.
+- Created `.env.example` as a template for team onboarding and audio API integration.
+- Promoted build, inspection, and screenshot tools to `scripts/` (`build-css.js`, `inspect.js`, `screenshots.js`).
+- Quarantined 20MB of visual regression PNGs and zip backups into `archive/`.
+- Removed legacy `.workbuddy-ai` folder.
+- Created `package.json` with npm scripts (`npm start`, `npm run dev`, `npm run build:css`, `npm run inspect`, `npm run screenshots`).
+- Created thorough `README.md` with complete directory guide and quickstart instructions.
+- Synced `.antigravity/` persistence files with the updated clean codebase structure.
+
+## [2026-09-19 01:41:00] - Created Custom Skills: claude-remember & review
+- Created `claude-remember` skill: persistent memory and context compression protocol using `.antigravity/` across sessions and restarts.
+- Created `review` skill: interactive co-planning workflow prompting the user with options via `ask_question` so the user leads logic and architecture while the agent executes code.
+- Deployed skills globally in `C:\Users\Nakul\.gemini\config\skills\` and locally in `.agents/skills/`.
+- Updated `AGENTS.md`, `GEMINI.md`, and `.antigravity/rules.md` with both protocols.
+
+## [2026-09-20 02:47:00] - Finalized Logo with logo.svg
+- Copied root `logo.svg` to `frontend/logo.svg` and `frontend/assets/logo.svg`.
+- Updated sidebar brand mark, main application header, and floating landing nav to reference `logo.svg`.
+- Verified rendering on `#/home` and `#/landing` via Playwright.
+
+## [2026-09-22 19:54:00] - Editorial Auth Cleanup & Supabase Email Confirmation
+- Removed Apple ID and Google OAuth buttons and 'or' divider from `frontend/js/views/loginView.js`.
+- Configured Supabase Auth email confirmation requirement: direct sign-in blocked until user verifies email via confirmation link.
+- Added dedicated `#confirmation-notice` UI state with golden envelope medallion, target email display, resend verification action, and "Proceed to Sign In" transition.
+- Handled unconfirmed login attempts by catching `email_not_confirmed` error and providing instant inline resend action.
+- Verified end-to-end flow via automated Playwright test in `scripts/test-email-confirmation-login.js`.
+
+## [2026-09-22 19:58:00] - Security Hardening: Dynamic Environment Ingestion & Official Logo
+- Completely eradicated hardcoded Supabase URL and API keys from `frontend/js/auth.js`.
+- Implemented `scripts/generate-env.js` and automated npm triggers (`prestart`, `predev`, `generate:env`) that dynamically extract `.env` keys to `frontend/js/env.js` and `frontend/env.json`.
+- Added generated env files to `.gitignore` to guarantee zero secret exposure in git.
+- Replaced the circular 'N' placeholder with the official `logo.svg` across the top navigation bar and prominently above the login card header.
+- Verified dynamic env loading and logo presentation with Playwright test in `scripts/test-env-and-logo.js`.
+
+## [2026-09-22 23:00:00] - Skill Setup: unslop
+- Installed `unslop` skill (v2.3.0 from `theclaymethod/unslop`) with full command suite (`rewrite`, `cleanup`, `teach`, `mimic`), reference contract, voice presets, and helper scripts.
+- Installed to both Antigravity global root (`C:\Users\Nakul\.gemini\config\skills\unslop`) and workspace root (`.agents\skills\unslop`).
+
+## [2026-09-24 19:55:00] - Reader: Book vs PDF Modes
+- Transformed the top toolbar pill switcher from [Sepia]/[Obsidian] into [Book]/[PDF] modes.
+- Added full Continuous Vertical Scroll PDF layout matching the user's reference with reading pace (`240 WPM pace`), time remaining (`1 hr 12m left`), progress indicators, Volume/Chapter header (`VOLUME VIII · CHAPTER 2337`), and interactive bottom scrubber bar.
+- Preserved skeuomorphic double-page spread with red ribbon bookmark for Book mode.
+## [2026-09-24 20:45:00] - Codebase Deduplication, Directory Reorganization & Git Push
+- Executed collaborative review (/review) for complete workspace deduplication and file organization.
+- Removed redundant media: purged duplicate animated_hero.webp (saves 3.6 MB), duplicate and unused luxury_logo.svg (saves 2.7 MB), and duplicate root logo.svg, keeping canonical vector in frontend/logo.svg and frontend/assets/logo.svg.
+- Purged legacy code: deleted frontend/legacy_pages/ (8 obsolete HTML files) and legacy page-specific scripts (home.js, tailwind-app.js, tailwind-home.js, tailwind-landing.js, book-details.js, landing.js, library.js, reader.js, search.js, coming-soon.css) fully superseded by modular SPA views.
+- Cleaned heavy reference dependencies: deleted Referance/design/node_modules/ (saves 92 MB of disk space), dist/, and .claude/ folders; purged loose git database files from .agents/skills/unslop/.
+- Hardened .gitignore to exclude 11MB Referance/Figma/figma-file.json, nested node_modules, build outputs, and all secrets.
+- Rebuilt Tailwind CSS bundle frontend/css/site.css (reduced from 142 KB to 101 KB).
+- Updated README.md to accurately document modern SPA architecture, views, directory layout, and test commands.

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"primary-container":"#f5d77f","surface-tint":"#e1c46e","on-tertiary-fixed":"#241a00","secondary":"#c0c6da","on-tertiary":"#3c2f00","primary-fixed-dim":"#e1c46e","background":"#10141a","outline-variant":"#4c4638","surface-bright":"#353940","surface-container-high":"#262a31","on-primary-container":"#725c0f","on-surface-variant":"#cfc6b3","primary":"#fff5e1","surface-container":"#1c2026","surface-container-low":"#181c22","error":"#ffb4ab","inverse-primary":"#725c0f","on-error-container":"#ffdad6","surface-variant":"#31353c","surface-dim":"#10141a","inverse-on-surface":"#2d3137","tertiary-fixed":"#ffe088","tertiary":"#fff5e1","on-primary-fixed-variant":"#574500","secondary-fixed-dim":"#c0c6da","on-error":"#690005","surface-container-highest":"#31353c","on-primary-fixed":"#231b00","on-secondary":"#2a3040","on-secondary-fixed":"#151b2a","outline":"#98907f","on-secondary-fixed-variant":"#414657","tertiary-fixed-dim":"#e9c349","error-container":"#93000a","on-tertiary-container":"#745c00","surface":"#10141a","primary-fixed":"#ffe087","on-tertiary-fixed-variant":"#574500","secondary-fixed":"#dde2f7","tertiary-container":"#fdd55a","on-surface":"#dfe2eb","on-secondary-container":"#afb5c8","inverse-surface":"#dfe2eb","surface-container-lowest":"#0a0e14","on-background":"#dfe2eb","on-primary":"#3c2f00","secondary-container":"#414657"},borderRadius:{DEFAULT:"1rem",lg:"2rem",xl:"3rem",full:"9999px"},spacing:{"space-3xl":"4rem","space-sm":"0.75rem","header-height":"4.5rem","space-xl":"2rem","space-2xl":"3rem","card-hero-min-height":"20rem","space-2xs":"0.25rem","sidebar-width":"5rem","space-lg":"1.5rem","space-xs":"0.5rem","space-md":"1rem"},fontFamily:{"body-sm":["Plus Jakarta Sans"],"label-badge":["Plus Jakarta Sans"],"label-numeric":["Space Grotesk"],"headline-sm":["Plus Jakarta Sans"],"display-lg":["Plus Jakarta Sans"],"label-caps":["Space Grotesk"],"body-lg":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"headline-xl":["Plus Jakarta Sans"],"body-md":["Plus Jakarta Sans"]},fontSize:{"body-sm":["12px",{lineHeight:"18px",fontWeight:"400"}],"label-badge":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"700"}],"label-numeric":["12px",{lineHeight:"16px",letterSpacing:"0.04em",fontWeight:"500"}],"headline-sm":["15px",{lineHeight:"22px",letterSpacing:"0.01em",fontWeight:"600"}],"display-lg":["36px",{lineHeight:"44px",letterSpacing:"0.02em",fontWeight:"800"}],"label-caps":["11px",{lineHeight:"14px",letterSpacing:"0.08em",fontWeight:"600"}],"body-lg":["15px",{lineHeight:"24px",fontWeight:"400"}],"headline-lg":["22px",{lineHeight:"30px",letterSpacing:"0.02em",fontWeight:"700"}],"headline-md":["18px",{lineHeight:"26px",letterSpacing:"0.01em",fontWeight:"600"}],"headline-xl":["28px",{lineHeight:"36px",letterSpacing:"0.03em",fontWeight:"700"}],"body-md":["13px",{lineHeight:"20px",fontWeight:"400"}]}}}};</script></head><body class="bg-background font-body-md text-on-surface min-h-screen relative selection:bg-primary-container selection:text-on-primary-container"><aside class="fixed left-0 top-0 h-full w-sidebar-width bg-surface-container-lowest z-50 flex flex-col items-center justify-between py-space-lg shadow-[4px_0_24px_rgba(0,0,0,0.4)]"><div class="flex flex-col items-center gap-space-xl w-full"><a class="flex items-center justify-center w-12 h-12 rounded-full bg-surface-container hover:bg-surface-container-high transition-all group" data-path="book-details" href="#"><span class="material-symbols-outlined text-primary-container text-[26px] group-hover:scale-110 transition-transform">auto_awesome</span></a><nav class="flex flex-col items-center gap-space-md w-full px-space-xs" data-active-classes="bg-surface-container-high text-primary-container shadow-[0_0_16px_rgba(245,215,127,0.25)] font-bold"><a aria-current="page" class="flex items-center justify-center w-11 h-11 rounded-full transition-all bg-surface-container-high text-primary-container shadow-[0_0_16px_rgba(245,215,127,0.25)] font-bold" data-path="book-details" href="#" title="Featured Spotlight"><span class="material-symbols-outlined text-[22px]">local_fire_department</span></a><a class="flex items-center justify-center w-11 h-11 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-primary-container transition-all" data-path="search" href="#" title="Search &amp; Browse"><span class="material-symbols-outlined text-[22px]">search</span></a><a class="flex items-center justify-center w-11 h-11 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-primary-container transition-all" data-path="library" href="#" title="My Library"><span class="material-symbols-outlined text-[22px]">local_library</span></a><a class="flex items-center justify-center w-11 h-11 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-primary-container transition-all" data-path="favorites" href="#" title="Favorites &amp; Saved"><span class="material-symbols-outlined text-[22px]">favorite</span></a><a class="flex items-center justify-center w-11 h-11 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-primary-container transition-all" data-path="genres" href="#" title="Genres &amp; Categories"><span class="material-symbols-outlined text-[22px]">category</span></a></nav></div><div class="flex flex-col items-center gap-space-md"><button class="flex items-center justify-center w-11 h-11 rounded-full bg-surface-container-low hover:bg-surface-container-high text-secondary hover:text-primary-container transition-all shadow-[0_4px_12px_rgba(0,0,0,0.3)] group" type="button"><span class="material-symbols-outlined text-[22px] group-hover:rotate-12 transition-transform">smart_toy</span></button></div></aside><div class="pl-sidebar-width min-h-screen flex flex-col"><header class="fixed top-0 left-sidebar-width right-0 h-header-height bg-surface/85 backdrop-blur-2xl z-40 flex items-center justify-between px-space-xl shadow-[0_4px_20px_rgba(0,0,0,0.35)]"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs"><img alt="Aura AudioBook Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VwbqYchJjKZgqgY-D0qdlUfCd1ReV1AS-BGZvff4hsCvJ2hEsK8_ofBQYRH4TBwcj_o2K-d5g7Vr6B3KrYs2RHldhj3zV0lQUyNtaGTAJHNmbsmCY2A90uMhz8s5ob6zG06w3srz3WM1omj3tiRfVaALjK7uo3kM9f8pbliepK240BFbEDzhs5C4HFxpN-0yiXG9MHrzhjpjKG1AEXISBb83_qExtkrhGcDTqU0OCnUJF6kaZ7R9-23Q"/><span class="font-headline-sm text-headline-sm text-primary tracking-wide hidden sm:inline-block">AURA</span></div><div class="h-5 w-px bg-surface-variant hidden md:block"></div><nav class="flex items-center gap-space-xs bg-surface-container-low p-space-2xs rounded-full" data-active-classes="bg-surface-container-highest text-primary-container font-headline-sm shadow-[0_0_12px_rgba(245,215,127,0.2)]"><a class="px-space-md py-space-2xs rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all font-headline-sm text-headline-sm" data-path="ebook-catalog" href="#">E-book</a><a aria-current="page" class="px-space-md py-space-2xs rounded-full transition-all flex items-center gap-space-2xs bg-surface-container-highest text-primary-container font-headline-sm shadow-[0_0_12px_rgba(245,215,127,0.2)]" data-path="book-details" href="#">AudioBook<span class="text-primary-container">✦</span></a></nav></div><div class="flex items-center gap-space-md"><button class="relative flex items-center justify-center w-10 h-10 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface transition-all" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary-container shadow-[0_0_6px_#f5d77f]"></span></button><div class="flex items-center gap-space-sm pl-space-xs"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-header-height pb-24 flex-1 bg-background relative px-space-xl overflow-hidden"><div class="absolute top-12 left-1/4 w-96 h-96 bg-primary-container/5 rounded-full blur-3xl pointer-events-none -z-10"></div><div class="absolute bottom-24 right-12 w-80 h-80 bg-secondary-container/10 rounded-full blur-3xl pointer-events-none -z-10"></div><div class="flex flex-col w-full">
+<!-- Subtle Ambient Glow Canvas Decor -->
+<div class="relative w-full max-w-7xl mx-auto px-space-xs sm:px-space-md lg:px-space-lg space-y-space-2xl pb-16">
+<!-- Top Breadcrumb & Metadata Line -->
+<div class="flex items-center justify-between text-on-surface-variant font-label-caps text-label-caps tracking-widest uppercase pt-space-xs">
+<div class="flex items-center gap-space-xs">
+<a class="hover:text-primary-container transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[16px]">arrow_back</span>
+<span>Catalog</span>
+</a>
+<span>/</span>
+<span>Audiobook</span>
+<span>/</span>
+<span class="text-primary-container">Philosophy &amp; Longevity</span>
+</div>
+<div class="flex items-center gap-space-sm text-on-surface-variant">
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span> Streaming Ready • Dolby Atmos HD</span>
+</div>
+</div>
+<!-- MAIN SPOTLIGHT HERO CARD (Modeled after reference image) -->
+<section class="relative rounded-lg bg-surface-container-low shadow-[0_16px_48px_rgba(0,0,0,0.6)] overflow-hidden p-space-lg sm:p-space-xl lg:p-space-2xl">
+<!-- Background Ambient Bokeh Orbs -->
+<div class="absolute -top-12 -right-12 w-96 h-96 bg-primary-container/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute -bottom-16 left-1/3 w-80 h-80 bg-secondary-container/15 rounded-full blur-3xl pointer-events-none"></div>
+<div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-center">
+<!-- Left Details Column (7 cols) -->
+<div class="lg:col-span-7 flex flex-col gap-space-md">
+<!-- Title & Badges Row -->
+<div class="flex flex-wrap items-center gap-space-sm">
+<h1 class="font-display-lg text-display-lg text-primary tracking-wide uppercase font-extrabold drop-shadow-[0_2px_12px_rgba(245,215,127,0.25)]">
+              IKIGAI
+            </h1>
+<!-- Star Rating Capsule -->
+<div class="flex items-center gap-1 px-space-sm py-1 rounded-full bg-surface-container-highest shadow-sm">
+<span class="material-symbols-outlined text-primary-container text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-numeric text-label-numeric text-primary-container font-semibold">4.8</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">(18.4k)</span>
+</div>
+<!-- Trending Badge -->
+<span class="px-space-md py-0.5 rounded-full bg-primary-container text-on-primary-container font-label-caps text-label-caps font-bold uppercase shadow-[0_0_12px_rgba(245,215,127,0.4)]">
+              Trending #1
+            </span>
+</div>
+<!-- Authors & Narrator -->
+<div class="flex flex-col gap-0.5 text-on-surface-variant font-body-md text-body-md">
+<p>
+              Written by:
+              <span class="text-on-surface font-headline-sm text-headline-sm ml-1 text-primary-fixed">Héctor García &amp; Francesc Miralles</span>
+</p>
+<p class="flex items-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-primary-container">mic</span>
+              Narrated by: <span class="text-on-surface font-medium">Kenji Takahashi</span> • Audio edition 2024
+            </p>
+</div>
+<!-- Metadata Icons Bar -->
+<div class="flex flex-wrap items-center gap-space-md text-on-surface-variant font-label-numeric text-label-numeric py-space-xs">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-secondary">visibility</span>
+<span>1,23,444 listens</span>
+</div>
+<span class="text-surface-variant">•</span>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-secondary">schedule</span>
+<span>3 hrs 30 mins</span>
+</div>
+<span class="text-surface-variant">•</span>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-secondary">menu_book</span>
+<span>17 chapters</span>
+</div>
+<span class="text-surface-variant">•</span>
+<div class="flex items-center gap-1.5 text-primary-container">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Unabridged</span>
+</div>
+</div>
+<!-- Description / Synopsis -->
+<div class="space-y-space-2xs">
+<span class="font-label-caps text-label-caps text-primary-container uppercase tracking-wider block">Description</span>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed line-clamp-4">
+              Ikigai is a book which talks about finding your purpose and then following it with all heart to live a happy and satisfying life. The authors take us on this gentle search along with them and make us understand how the long-lived centenarians of Okinawa, Japan enjoy continuous flow, resilient longevity, and the blissful art of daily mindful fulfillment.
+            </p>
+</div>
+<!-- Action Buttons Row (Exact pill style from design) -->
+<div class="flex flex-wrap items-center gap-space-md pt-space-xs">
+<button class="flex items-center justify-center gap-space-xs px-space-xl py-space-sm rounded-full bg-primary-container text-on-primary-container font-headline-sm text-headline-sm hover:scale-105 active:scale-95 transition-all shadow-[0_4px_24px_rgba(245,215,127,0.35)]" id="heroPlayBtn" type="button">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+<span>Listen Now</span>
+</button>
+<button class="flex items-center justify-center gap-space-xs px-space-xl py-space-sm rounded-full bg-surface-container-high text-primary-container hover:bg-surface-bright font-headline-sm text-headline-sm transition-all shadow-sm" type="button">
+<span class="material-symbols-outlined text-[20px]">auto_stories</span>
+<span>Read Now</span>
+</button>
+<div class="flex items-center gap-space-xs ml-auto sm:ml-0">
+<button aria-label="Bookmark" class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary-container hover:bg-surface-container-high transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]">bookmark_add</span>
+</button>
+<button aria-label="Download Audiobook" class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary-container hover:bg-surface-container-high transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+<button aria-label="Share" class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary-container hover:bg-surface-container-high transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]">share</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Right 3D Book Cover Presentation (5 cols) -->
+<div class="lg:col-span-5 flex justify-center lg:justify-end">
+<div class="relative group">
+<!-- Radiant Background Glow behind book -->
+<div class="absolute -inset-4 bg-primary-container/20 rounded-2xl blur-2xl group-hover:bg-primary-container/30 transition-all duration-700"></div>
+<!-- 3D Hardcover Book Container -->
+<div class="relative w-64 sm:w-72 md:w-80 aspect-[2/3] rounded-DEFAULT overflow-hidden shadow-[0_24px_50px_rgba(0,0,0,0.85)] transform transition-transform duration-500 group-hover:-translate-y-2 group-hover:rotate-1">
+<!-- Book Spine Simulation Effect -->
+<div class="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-black/60 via-white/10 to-transparent z-20 pointer-events-none"></div>
+<!-- Realistic Book Cover Art -->
+<img class="w-full h-full object-cover" data-alt="Modern Japanese hardcover book cover for IKIGAI. Elegant minimal white texture with delicate cherry blossom branches painted in indigo watercolor. Golden and black Japanese calligraphy and clean sans-serif typography IKIGAI: The Japanese Secret to a Long and Happy Life. Premium art book aesthetic, studio lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuATKSAk8QGkxvw9uq0V1ySz3joFP0HPCv8XtRmN4xii5kmt9zdI7HWOMoyW4KT3HlSLr0V-BClnOeM3Jw8S9_juKvH-ZTelCWZc3_yTOX97l1tNdqEWPED7gDbC_zMolgvc1GASogKcxzXc4Vm6MCbR4l4PdUnCudkfjuRar0Ah61PasW0NBBe1xIOiKEtweeUZCITLjUeKX7aEfSI215E1DN7AXRcvgk2nUPuOii8liWHh1vyrNw3q"/>
+<!-- Overlay Gradient for Depth -->
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/80 via-transparent to-transparent pointer-events-none"></div>
+<!-- Top Right Floater Tag on Cover -->
+<div class="absolute top-4 right-4 z-20 bg-primary-container text-on-primary-container font-label-badge text-label-badge uppercase font-extrabold px-space-sm py-1 rounded shadow-lg">
+                Exclusive
+              </div>
+<!-- Book Bottom Overlay Info -->
+<div class="absolute bottom-4 left-4 right-4 z-20 flex items-center justify-between text-on-surface">
+<div class="flex items-center gap-1.5 bg-surface-container-lowest/85 backdrop-blur-md px-space-sm py-1 rounded-full">
+<span class="material-symbols-outlined text-[14px] text-primary-container">headphones</span>
+<span class="font-label-numeric text-label-numeric">Dolby 3D Audio</span>
+</div>
+<span class="text-primary-container material-symbols-outlined text-[22px]">auto_awesome</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- INTERACTIVE EXPANDED AUDIOBOOK SUITE -->
+<section class="rounded-lg bg-surface-container p-space-lg sm:p-space-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex flex-col gap-space-lg relative overflow-hidden">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div>
+<span class="font-label-caps text-label-caps text-primary-container uppercase tracking-widest">Now Selected</span>
+<h2 class="font-headline-lg text-headline-lg text-primary">Chapter 04: Find Flow in Everything You Do</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">The psychology of effortless immersion according to Mihaly Csikszentmihalyi</p>
+</div>
+<!-- Quick playback modifiers -->
+<div class="flex items-center gap-space-xs">
+<button class="px-space-md py-1.5 rounded-full bg-surface-container-high hover:bg-surface-bright text-on-surface font-label-numeric text-label-numeric transition-colors" type="button">
+            1.0x Speed
+          </button>
+<button class="px-space-md py-1.5 rounded-full bg-surface-container-high hover:bg-surface-bright text-on-surface font-label-numeric text-label-numeric transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">bedtime</span>
+<span>Sleep: 30m</span>
+</button>
+<button class="w-9 h-9 rounded-full bg-surface-container-high hover:bg-surface-bright text-primary-container flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">equalizer</span>
+</button>
+</div>
+</div>
+<!-- Waveform Progress Visualizer & Scrubber -->
+<div class="space-y-space-2xs">
+<div class="flex items-center justify-between font-label-numeric text-label-numeric text-on-surface-variant">
+<span class="text-primary-container font-semibold" id="currentAudioTime">01:14:22</span>
+<div class="flex items-center gap-2">
+<span class="text-secondary">Chapter 4 of 17</span>
+<span>•</span>
+<span>03:30:00 Total</span>
+</div>
+</div>
+<!-- Interactive Audio Waveform Canvas SVG -->
+<div class="relative w-full h-14 bg-surface-container-low rounded-DEFAULT px-space-md flex items-center justify-between gap-1 overflow-hidden cursor-pointer group">
+<div class="absolute inset-0 bg-primary-container/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<!-- Waveform Bars Mock -->
+<div class="flex items-end gap-[3px] w-full h-10 py-1">
+<!-- Played waveform -->
+<div class="w-1.5 h-[40%] bg-primary-container rounded-full"></div>
+<div class="w-1.5 h-[65%] bg-primary-container rounded-full"></div>
+<div class="w-1.5 h-[90%] bg-primary-container rounded-full"></div>
+<div class="w-1.5 h-[50%] bg-primary-container rounded-full"></div>
+<div class="w-1.5 h-[75%] bg-primary-container rounded-full"></div>
+<div class="w-1.5 h-[100%] bg-primary-container rounded-full"></div>
+<div class="w-1.5 h-[80%] bg-primary-container rounded-full"></div>
+<div class="w-1.5 h-[60%] bg-primary-container rounded-full"></div>
+<div class="w-1.5 h-[45%] bg-primary-container rounded-full"></div>
+<div class="w-1.5 h-[70%] bg-primary-container rounded-full"></div>
+<div class="w-1.5 h-[85%] bg-primary-container rounded-full"></div>
+<div class="w-1.5 h-[95%] bg-primary-container rounded-full"></div>
+<div class="w-1.5 h-[60%] bg-primary-container rounded-full"></div>
+<div class="w-1.5 h-[40%] bg-primary-container rounded-full"></div>
+<div class="w-1.5 h-[80%] bg-primary-container rounded-full"></div>
+<div class="w-1.5 h-[100%] bg-primary-container rounded-full"></div>
+<div class="w-1.5 h-[90%] bg-primary-container rounded-full"></div>
+<div class="w-1.5 h-[55%] bg-primary-container rounded-full"></div>
+<!-- Playhead scrubber divider -->
+<div class="w-2 h-full bg-primary flex items-center justify-center rounded-full shadow-[0_0_12px_#fff5e1] z-10 scale-110"></div>
+<!-- Unplayed waveform -->
+<div class="w-1.5 h-[75%] bg-surface-bright rounded-full"></div>
+<div class="w-1.5 h-[45%] bg-surface-bright rounded-full"></div>
+<div class="w-1.5 h-[60%] bg-surface-bright rounded-full"></div>
+<div class="w-1.5 h-[85%] bg-surface-bright rounded-full"></div>
+<div class="w-1.5 h-[50%] bg-surface-bright rounded-full"></div>
+<div class="w-1.5 h-[35%] bg-surface-bright rounded-full"></div>
+<div class="w-1.5 h-[70%] bg-surface-bright rounded-full"></div>
+<div class="w-1.5 h-[90%] bg-surface-bright rounded-full"></div>
+<div class="w-1.5 h-[65%] bg-surface-bright rounded-full"></div>
+<div class="w-1.5 h-[40%] bg-surface-bright rounded-full"></div>
+<div class="w-1.5 h-[80%] bg-surface-bright rounded-full"></div>
+<div class="w-1.5 h-[95%] bg-surface-bright rounded-full"></div>
+<div class="w-1.5 h-[75%] bg-surface-bright rounded-full"></div>
+<div class="w-1.5 h-[50%] bg-surface-bright rounded-full"></div>
+<div class="w-1.5 h-[30%] bg-surface-bright rounded-full"></div>
+<div class="w-1.5 h-[65%] bg-surface-bright rounded-full"></div>
+<div class="w-1.5 h-[40%] bg-surface-bright rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Controls Hub -->
+<div class="flex flex-wrap items-center justify-between gap-space-md pt-space-xs">
+<div class="flex items-center gap-space-md">
+<button class="text-on-surface-variant hover:text-primary-container transition-colors flex items-center gap-1 font-label-numeric text-label-numeric" title="Rewind 15 seconds" type="button">
+<span class="material-symbols-outlined text-[24px]">replay_10</span>
+<span>-15s</span>
+</button>
+<button class="w-14 h-14 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-[0_0_24px_rgba(245,215,127,0.4)]" id="playerToggleBtn" type="button">
+<span class="material-symbols-outlined text-[32px]" id="playIconSpan" style="font-variation-settings: 'FILL' 1;">pause</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary-container transition-colors flex items-center gap-1 font-label-numeric text-label-numeric" title="Forward 30 seconds" type="button">
+<span class="material-symbols-outlined text-[24px]">forward_30</span>
+<span>+30s</span>
+</button>
+</div>
+<div class="flex items-center gap-space-lg">
+<div class="hidden sm:flex items-center gap-space-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">volume_up</span>
+<div class="w-28 h-2 bg-surface-container-high rounded-full overflow-hidden cursor-pointer">
+<div class="h-full bg-primary-container rounded-full w-4/5"></div>
+</div>
+</div>
+<button class="flex items-center gap-1.5 px-space-md py-1.5 rounded-full bg-surface-container-high text-on-surface hover:text-primary-container transition-colors font-headline-sm text-headline-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">notes</span>
+<span>Add Audio Note</span>
+</button>
+</div>
+</div>
+</section>
+<!-- TWO-COLUMN CONTENT GRID: Chapters vs Reviews & Related -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+<!-- LEFT SECTION (Chapters Track - 7 cols) -->
+<section class="lg:col-span-7 flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-sm">
+<h3 class="font-headline-lg text-headline-lg text-primary">Chapter Index</h3>
+<span class="px-space-sm py-0.5 rounded-full bg-surface-container-high text-primary-container font-label-numeric text-label-numeric">17 Tracks</span>
+</div>
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-caps text-label-caps">
+<span>Sort:</span>
+<button class="text-primary-container font-semibold">Chronological</button>
+</div>
+</div>
+<!-- Chapter Items List -->
+<div class="space-y-space-xs">
+<!-- Item 1 -->
+<div class="flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container hover:bg-surface-container-high transition-colors group cursor-pointer">
+<div class="flex items-center gap-space-md min-w-0">
+<span class="font-label-numeric text-label-numeric text-on-surface-variant w-6 text-center">01</span>
+<div class="w-9 h-9 rounded-full bg-surface-container-highest group-hover:bg-primary-container group-hover:text-on-primary-container text-primary-container flex items-center justify-center transition-colors shrink-0">
+<span class="material-symbols-outlined text-[20px]">check</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary-container transition-colors truncate">The Art of Staying Young While Growing Old</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Introduction to Okinawa &amp; active retirement</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm shrink-0 ml-space-sm">
+<span class="font-label-numeric text-label-numeric text-on-surface-variant">18:24</span>
+<span class="material-symbols-outlined text-[20px] text-on-surface-variant group-hover:text-primary-container transition-colors">play_circle</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container hover:bg-surface-container-high transition-colors group cursor-pointer">
+<div class="flex items-center gap-space-md min-w-0">
+<span class="font-label-numeric text-label-numeric text-on-surface-variant w-6 text-center">02</span>
+<div class="w-9 h-9 rounded-full bg-surface-container-highest group-hover:bg-primary-container group-hover:text-on-primary-container text-primary-container flex items-center justify-center transition-colors shrink-0">
+<span class="material-symbols-outlined text-[20px]">check</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary-container transition-colors truncate">Little Joys and Meaning in Everyday Work</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Discovering micro-intentions in modern stress</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm shrink-0 ml-space-sm">
+<span class="font-label-numeric text-label-numeric text-on-surface-variant">22:15</span>
+<span class="material-symbols-outlined text-[20px] text-on-surface-variant group-hover:text-primary-container transition-colors">play_circle</span>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container hover:bg-surface-container-high transition-colors group cursor-pointer">
+<div class="flex items-center gap-space-md min-w-0">
+<span class="font-label-numeric text-label-numeric text-on-surface-variant w-6 text-center">03</span>
+<div class="w-9 h-9 rounded-full bg-surface-container-highest group-hover:bg-primary-container group-hover:text-on-primary-container text-primary-container flex items-center justify-center transition-colors shrink-0">
+<span class="material-symbols-outlined text-[20px]">check</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary-container transition-colors truncate">From Logotherapy to Ikigai</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Viktor Frankl’s pursuit of existence</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm shrink-0 ml-space-sm">
+<span class="font-label-numeric text-label-numeric text-on-surface-variant">19:40</span>
+<span class="material-symbols-outlined text-[20px] text-on-surface-variant group-hover:text-primary-container transition-colors">play_circle</span>
+</div>
+</div>
+<!-- Item 4 (Active Chapter) -->
+<div class="flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container-high shadow-[0_4px_16px_rgba(245,215,127,0.15)] group cursor-pointer">
+<div class="flex items-center gap-space-md min-w-0">
+<span class="font-label-numeric text-label-numeric text-primary-container font-bold w-6 text-center">04</span>
+<div class="w-9 h-9 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(245,215,127,0.4)]">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">graphic_eq</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-primary font-bold truncate">Find Flow in Everything You Do</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-container/20 text-primary-container font-label-badge text-label-badge uppercase">Playing</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Deep immersion, rituals, and undivided focus</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm shrink-0 ml-space-sm">
+<span class="font-label-numeric text-label-numeric text-primary-container font-semibold">24:10</span>
+<span class="material-symbols-outlined text-[22px] text-primary-container">pause_circle</span>
+</div>
+</div>
+<!-- Item 5 -->
+<div class="flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container hover:bg-surface-container-high transition-colors group cursor-pointer">
+<div class="flex items-center gap-space-md min-w-0">
+<span class="font-label-numeric text-label-numeric text-on-surface-variant w-6 text-center">05</span>
+<div class="w-9 h-9 rounded-full bg-surface-container-highest group-hover:bg-primary-container group-hover:text-on-primary-container text-secondary flex items-center justify-center transition-colors shrink-0">
+<span class="material-symbols-outlined text-[20px]">lock_open</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary-container transition-colors truncate">Masters of Longevity: Ogimi Elders Speak</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Interviews and daily routines from the village of centenarians</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm shrink-0 ml-space-sm">
+<span class="font-label-numeric text-label-numeric text-on-surface-variant">27:32</span>
+<span class="material-symbols-outlined text-[20px] text-on-surface-variant group-hover:text-primary-container transition-colors">play_circle</span>
+</div>
+</div>
+<!-- Item 6 -->
+<div class="flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container hover:bg-surface-container-high transition-colors group cursor-pointer">
+<div class="flex items-center gap-space-md min-w-0">
+<span class="font-label-numeric text-label-numeric text-on-surface-variant w-6 text-center">06</span>
+<div class="w-9 h-9 rounded-full bg-surface-container-highest group-hover:bg-primary-container group-hover:text-on-primary-container text-secondary flex items-center justify-center transition-colors shrink-0">
+<span class="material-symbols-outlined text-[20px]">lock_open</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary-container transition-colors truncate">The Ikigai Diet: Hara Hachi Bu</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Eighty percent fullness and antioxidant staples</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm shrink-0 ml-space-sm">
+<span class="font-label-numeric text-label-numeric text-on-surface-variant">16:50</span>
+<span class="material-symbols-outlined text-[20px] text-on-surface-variant group-hover:text-primary-container transition-colors">play_circle</span>
+</div>
+</div>
+</div>
+<button class="w-full py-space-sm rounded-DEFAULT bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-primary-container transition-all font-headline-sm text-headline-sm flex items-center justify-center gap-2 mt-space-xs" type="button">
+<span>Show all 17 Chapters</span>
+<span class="material-symbols-outlined text-[18px]">expand_more</span>
+</button>
+</section>
+<!-- RIGHT SECTION (Reviews & Recommendations - 5 cols) -->
+<section class="lg:col-span-5 flex flex-col gap-space-xl">
+<!-- Ratings Breakdown Card -->
+<div class="rounded-lg bg-surface-container p-space-lg flex flex-col gap-space-md shadow-md">
+<div class="flex items-center justify-between">
+<h3 class="font-headline-md text-headline-md text-primary">Audience Reviews</h3>
+<span class="font-label-numeric text-label-numeric text-primary-container">18,412 Ratings</span>
+</div>
+<div class="flex items-center gap-space-lg">
+<div class="flex flex-col items-center">
+<span class="font-display-lg text-display-lg text-primary-container font-extrabold leading-none">4.8</span>
+<div class="flex items-center text-primary-container pt-1">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star_half</span>
+</div>
+<span class="font-label-badge text-label-badge text-on-surface-variant mt-1">94% Recommended</span>
+</div>
+<!-- Rating Bars -->
+<div class="flex-1 space-y-1.5 font-label-numeric text-label-numeric text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="w-3">5★</span>
+<div class="flex-1 h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full w-[84%]"></div>
+</div>
+<span class="w-8 text-right">84%</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3">4★</span>
+<div class="flex-1 h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full w-[11%]"></div>
+</div>
+<span class="w-8 text-right">11%</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3">3★</span>
+<div class="flex-1 h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full w-[3%]"></div>
+</div>
+<span class="w-8 text-right">3%</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3">2★</span>
+<div class="flex-1 h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full w-[1%]"></div>
+</div>
+<span class="w-8 text-right">1%</span>
+</div>
+</div>
+</div>
+<!-- Featured Community Quotes -->
+<div class="p-space-sm rounded-DEFAULT bg-surface-container-low flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface">Maya S.</span>
+<div class="flex items-center text-primary-container">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant italic">
+              "Takahashi's voice carries such an extraordinary, meditative cadence. Listening to chapter 4 genuinely reframed how I approach my morning studio work."
+            </p>
+</div>
+</div>
+<!-- YOU MIGHT ALSO LIKE (From reference styling) -->
+<div class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<h3 class="font-headline-md text-headline-md text-primary">You Might Also Like</h3>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary-container transition-colors uppercase tracking-wider" href="#">View All</a>
+</div>
+<!-- Mini Related Shelf Grid -->
+<div class="grid grid-cols-2 gap-space-md">
+<!-- Book 1: The Bridge Home (from image) -->
+<div class="rounded-DEFAULT bg-surface-container p-space-sm flex flex-col gap-space-xs hover:bg-surface-container-high transition-colors group cursor-pointer">
+<div class="relative w-full aspect-[2/3] rounded overflow-hidden bg-surface-container-lowest">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Book cover for The Bridge Home by Padma Venkatraman. Emotional artistic illustration of two young sisters looking at a glowing lantern bridge at night in India, dark navy aesthetic with warm golden lantern reflections." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrU3Hvu1DDF90bAk8RXMuLI6xiaeSUhB2lsDUjYp-q1tgiVNLoFA-9rf1R5242z_Z8rJ_hKDGR-xQhabYdOItLkY60KN9frn_MVbT8gOQfqf0U-9YUaaZ7TAHV3jcJcS-6LTy3AnZ8-X4DWZchqWM51oQRaKzA_NNyyO8hMTiTCw2kUSp5CbpsNe9BG3hZgxdSSyCZKxM2ilyzEfq7I4tQzNi1s2GI-OzfLBSDUHnWclzOWPCogWjb"/>
+<div class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-surface-container-lowest/80 backdrop-blur-md flex items-center gap-0.5">
+<span class="material-symbols-outlined text-primary-container text-[12px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-numeric text-label-numeric text-primary font-bold">4.7</span>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate group-hover:text-primary-container transition-colors">The Bridge Home</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Padma Venkatraman</span>
+<div class="flex items-center justify-between text-on-surface-variant font-label-numeric text-label-numeric mt-1">
+<span>2h 50m</span>
+<span class="material-symbols-outlined text-[16px] text-primary-container">headphones</span>
+</div>
+</div>
+</div>
+<!-- Book 2: Eighty Days (from image) -->
+<div class="rounded-DEFAULT bg-surface-container p-space-sm flex flex-col gap-space-xs hover:bg-surface-container-high transition-colors group cursor-pointer">
+<div class="relative w-full aspect-[2/3] rounded overflow-hidden bg-surface-container-lowest">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Book cover illustration for Eighty Days. Atmospheric historical journey illustration with Victorian airships, compass rosettes, and deep dark midnight teal aesthetic with golden line art." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmv1tbhcZXjjIsJnZVM-ChDOcqYkzaAd-qX8ycrRBc164hhBlcGHAhPsTn2vwTvQWaWM-3jLD_-QGq4KjAAhF06URVYVYysui0WxM3xaRLq6jrxB8kz0Xve-_H2MSXHrkEWQKmtRDV6MbxbEfA-N_DgzzjMsmD4cE44wYDlXDaxGVaT2D0BrUjrfmvlWUXjqnX34eDmtmy6Cr-cAvfbaYT8Qx0SiGniYEsYRWW2ct48bBVb5MuTYpx"/>
+<div class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-surface-container-lowest/80 backdrop-blur-md flex items-center gap-0.5">
+<span class="material-symbols-outlined text-primary-container text-[12px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-numeric text-label-numeric text-primary font-bold">4.3</span>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate group-hover:text-primary-container transition-colors">Eighty Days</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Matthew Goodman</span>
+<div class="flex items-center justify-between text-on-surface-variant font-label-numeric text-label-numeric mt-1">
+<span>4h 15m</span>
+<span class="material-symbols-outlined text-[16px] text-primary-container">headphones</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- HORIZONTAL CAROUSEL SHELF: POPULAR AUDIOBOOKS (Matching Reference layout) -->
+<section class="flex flex-col gap-space-md pt-space-md">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-headline-xl text-headline-xl text-primary font-bold">Popular Books</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Listener-acclaimed philosophical narratives and epics</p>
+</div>
+<a class="font-label-caps text-label-caps text-primary-container hover:underline uppercase tracking-wider" href="#">View All</a>
+</div>
+<!-- Carousel Track Grid -->
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-space-md">
+<!-- Shelf Card 1: Mist & Whispers -->
+<div class="rounded-DEFAULT bg-surface-container p-space-sm flex flex-col gap-space-2xs hover:bg-surface-container-high transition-all group cursor-pointer shadow-sm">
+<div class="relative w-full aspect-[2/3] rounded overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Book cover of Mist and Whispers featuring an enigmatic mythical fox creature walking through an enchanted autumnal foggy forest, ambient gold and charcoal tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwsuAQ5dfdTAwhao332kyAiiZ7UAwjGww9t_oLLgaVkQ9Adq2MzdDS3NF5dv47ZxVEjj9BNWIn14QhNxOtkWq0uImqkdrjuvbHHp3_oT8ha6Oq6X_O-xwZKk6EOeZKs91xI68rOanPOVmGcPZTyDxgEIQDdn9w28494KwlqNxZFyvNyvWVbWo-q-6u1WM13TD8QCAYR8Js8rBwh5O0_imBumXBI0YqNM__ZgfAu1gW4JAflIsHnK7C"/>
+<div class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-surface-container-lowest/80 backdrop-blur-md flex items-center gap-1">
+<span class="material-symbols-outlined text-primary-container text-[12px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-numeric text-label-numeric text-primary font-medium">4.1</span>
+</div>
+</div>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate group-hover:text-primary-container transition-colors pt-1">Mist &amp; Whispers</span>
+<div class="flex items-center justify-between text-on-surface-variant font-label-numeric text-label-numeric">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">visibility</span> 23,444</span>
+<span class="material-symbols-outlined text-[16px] text-secondary hover:text-primary-container">bookmark_border</span>
+</div>
+</div>
+<!-- Shelf Card 2: Eighty Days -->
+<div class="rounded-DEFAULT bg-surface-container p-space-sm flex flex-col gap-space-2xs hover:bg-surface-container-high transition-all group cursor-pointer shadow-sm">
+<div class="relative w-full aspect-[2/3] rounded overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Audiobook cover for Eighty Days featuring an adventurer looking towards stormy clouds with vintage world map compass elements in deep midnight blue." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGDAba-Xrhl7uXRjvRQUKbkAGd13YQYkLfk7QnPgwHnTGvbYnbdib-vqWgPTIiX8sG6FW_ubrVAQch2zC3PcRGXAbGTNs8PB2OKHn9JI5uMiGc5HrLqbO21b_m9ehXYttIQh2pXkqPvJgBxDlnvKgqSurCCsPI5EjpTz7RG9G7V_DVqY27TKDH61jrjrfoxeMUIwAXqe9zXRpUV5yf01FMo_My-RgzglMqDTLru3ePDXQHv6dTywUL"/>
+<div class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-surface-container-lowest/80 backdrop-blur-md flex items-center gap-1">
+<span class="material-symbols-outlined text-primary-container text-[12px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-numeric text-label-numeric text-primary font-medium">3.7</span>
+</div>
+</div>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate group-hover:text-primary-container transition-colors pt-1">Eighty Days</span>
+<div class="flex items-center justify-between text-on-surface-variant font-label-numeric text-label-numeric">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">visibility</span> 13,094</span>
+<span class="material-symbols-outlined text-[16px] text-secondary hover:text-primary-container">bookmark_border</span>
+</div>
+</div>
+<!-- Shelf Card 3: The White Raven -->
+<div class="rounded-DEFAULT bg-surface-container p-space-sm flex flex-col gap-space-2xs hover:bg-surface-container-high transition-all group cursor-pointer shadow-sm">
+<div class="relative w-full aspect-[2/3] rounded overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Book cover for The White Raven with a striking double exposure silhouette of a woman's profile transitioning into a soaring white raven amidst deep obsidian night." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiY6oHgNyNTXa39ERsJ-lp-UWEDgkKKNl-cXlsRh6oIBrmHmSODTUtirbXUMiuU6-VgdPdaZ9QJwCuBSvA-osLgL_iGmiRRmogHH7tGMT205CBzZfOfUutAaS6c--edgb4njsPPKZxLpz_xI_krFO_ve7HW3UwcUMTkDqcEtcTaP2cKfhBwJGQSV-Dal7gzwpDsS-ru8kQCMMZWwgfsoyYgC6zHHd0GDgk-4SGLS2El49zc3HHFQUR"/>
+<div class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-surface-container-lowest/80 backdrop-blur-md flex items-center gap-1">
+<span class="material-symbols-outlined text-primary-container text-[12px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-numeric text-label-numeric text-primary font-medium">4.3</span>
+</div>
+</div>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate group-hover:text-primary-container transition-colors pt-1">The White Raven</span>
+<div class="flex items-center justify-between text-on-surface-variant font-label-numeric text-label-numeric">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">visibility</span> 27,804</span>
+<span class="material-symbols-outlined text-[16px] text-secondary hover:text-primary-container">bookmark_border</span>
+</div>
+</div>
+<!-- Shelf Card 4: Swords Of The Son -->
+<div class="rounded-DEFAULT bg-surface-container p-space-sm flex flex-col gap-space-2xs hover:bg-surface-container-high transition-all group cursor-pointer shadow-sm">
+<div class="relative w-full aspect-[2/3] rounded overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Fantasy book jacket Swords Of The Son, dark magical castle illuminated with ethereal glowing blue light runes and mystic mist, gothic aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBGJOx_jBdP4qDDtl2_zAkHO5xwkjjhlIyZTE4XCTOvBmoIu1c09AtGRJFHbQegS6lBs2lFl01DsrnEjX3zAvaD92CHipl-sSpaV5vub-PCpCHL6Bvkkiiq3zfnVG5_y7J_1tval5hLOnTvlFUk63OAE0QQ6gc5t5rVV7eTLyEhG1GECWjyF_UJAvp1vmGvoSeSMC_tK4B8MnyBHEc8blc5xH6ThLIrdImkjCBpcpXW7C2jJMakQdk"/>
+<div class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-surface-container-lowest/80 backdrop-blur-md flex items-center gap-1">
+<span class="material-symbols-outlined text-primary-container text-[12px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-numeric text-label-numeric text-primary font-medium">4.1</span>
+</div>
+</div>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate group-hover:text-primary-container transition-colors pt-1">Swords Of The Son</span>
+<div class="flex items-center justify-between text-on-surface-variant font-label-numeric text-label-numeric">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">visibility</span> 37,904</span>
+<span class="material-symbols-outlined text-[16px] text-secondary hover:text-primary-container">bookmark_border</span>
+</div>
+</div>
+<!-- Shelf Card 5: Adorning The Dark -->
+<div class="rounded-DEFAULT bg-surface-container p-space-sm flex flex-col gap-space-2xs hover:bg-surface-container-high transition-all group cursor-pointer shadow-sm">
+<div class="relative w-full aspect-[2/3] rounded overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Book jacket for Adorning The Dark with deep dark forest trees, golden constellation stars glowing in the canopy, literary aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOdemGzZMPiKiD2af_S_lgnUq9pxVLLY0k2bpBmoD3XogVfdgRVMLR21lK2J0TaIh0d_Gl7V9ltKrvjtsKyWgLB0w---UujNlYb-EQhVPQ3GN0J7itdilz2sZ9K1gq8Cf8pxwLyV74QYoDeUC1Mv7_KdWF_YJrMGgj1f9-HIjP2g7ygHHDuDWmeAW1fnxRfNId8goIAd5vc-OB6VhbK4RgjQjJAy6Vd0UVwl_50Dja-_gb6k1rgY3E"/>
+<div class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-surface-container-lowest/80 backdrop-blur-md flex items-center gap-1">
+<span class="material-symbols-outlined text-primary-container text-[12px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-numeric text-label-numeric text-primary font-medium">3.6</span>
+</div>
+</div>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate group-hover:text-primary-container transition-colors pt-1">Adorning The Dark</span>
+<div class="flex items-center justify-between text-on-surface-variant font-label-numeric text-label-numeric">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">visibility</span> 17,999</span>
+<span class="material-symbols-outlined text-[16px] text-secondary hover:text-primary-container">bookmark_border</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Micro-Interactivity Script -->
+<script>
+    (function() {
+      const playerToggle = document.getElementById('playerToggleBtn');
+      const iconSpan = document.getElementById('playIconSpan');
+      const heroPlay = document.getElementById('heroPlayBtn');
+      let isPlaying = true;
+
+      function togglePlayback() {
+        isPlaying = !isPlaying;
+        if (iconSpan) {
+          iconSpan.textContent = isPlaying ? 'pause' : 'play_arrow';
+        }
+      }
+
+      if (playerToggle) {
+        playerToggle.addEventListener('click', togglePlayback);
+      }
+      if (heroPlay) {
+        heroPlay.addEventListener('click', togglePlayback);
+      }
+    })();
+  </script>
+</div></main><aside class="fixed bottom-0 left-sidebar-width right-0 h-20 bg-surface-container-lowest/90 backdrop-blur-2xl z-40 flex items-center justify-between px-space-xl shadow-[0_-8px_32px_rgba(0,0,0,0.6)]"><div class="flex items-center gap-space-md w-1/4 min-w-[220px]"><div class="w-12 h-12 rounded-DEFAULT bg-surface-container-high overflow-hidden flex-shrink-0 relative"><div class="absolute inset-0 bg-primary-container/10 flex items-center justify-center"><span class="material-symbols-outlined text-primary-container text-[24px]">graphic_eq</span></div></div><div class="flex flex-col min-w-0"><span class="font-headline-sm text-headline-sm text-on-surface truncate">The Midnight Vault</span><span class="font-body-sm text-body-sm text-on-surface-variant truncate">Alistair Finch • Ch. 4</span></div><button class="text-on-surface-variant hover:text-primary-container transition-colors ml-space-2xs" type="button"><span class="material-symbols-outlined text-[20px]">favorite_border</span></button></div><div class="flex flex-col items-center gap-space-2xs flex-1 max-w-xl px-space-md"><div class="flex items-center gap-space-md"><button class="text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">shuffle</span></button><button class="text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">replay_10</span></button><button class="flex items-center justify-center w-10 h-10 rounded-full bg-primary-container text-on-primary-container hover:scale-105 transition-transform shadow-[0_0_16px_rgba(245,215,127,0.35)]" type="button"><span class="material-symbols-outlined text-[24px]">play_arrow</span></button><button class="text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">forward_30</span></button><button class="text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">repeat</span></button></div><div class="flex items-center gap-space-sm w-full"><span class="font-label-numeric text-label-numeric text-on-surface-variant">14:20</span><div class="h-1.5 flex-1 bg-surface-container-highest rounded-full overflow-hidden relative group cursor-pointer"><div class="h-full bg-primary-container rounded-full w-2/5 relative"></div></div><span class="font-label-numeric text-label-numeric text-on-surface-variant">42:50</span></div></div><div class="flex items-center justify-end gap-space-md w-1/4 min-w-[200px]"><button class="text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">speed</span></button><button class="text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">format_list_bulleted</span></button><div class="flex items-center gap-space-xs text-on-surface-variant"><span class="material-symbols-outlined text-[20px]">volume_up</span><div class="w-20 h-1.5 bg-surface-container-highest rounded-full overflow-hidden"><div class="h-full bg-on-surface-variant rounded-full w-3/4"></div></div></div></div></aside></div></body></html>
