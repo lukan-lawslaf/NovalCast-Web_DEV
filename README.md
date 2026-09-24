@@ -8,36 +8,45 @@
 
 ## ✨ Features
 
-- **Editorial Landing Page** — hero with a continuous 3D perspective "book parade" (isometric 3D books built with pure CSS transforms, hover elevation, sheen, and page-edge textures)
-- **Audiobook & E-Book App** — main application dashboard for browsing and switching between e-book and audiobook modes
-- **Book Detail Pages** — ratings, trending ranks, author & narrator info, chapter counts, listen stats, and genre browsing
-- **My Library** — personal collection view for saved titles
-- **Immersive E-Book Reader** — chapter navigation with annotation support: marginal notes, highlights, reader stats, and an interactive ikigai-style diagram
-- **Continuous Scroll Mode** — distraction-free vertical reading mode with progress tracking, estimated time left, and reading pace (WPM)
+- **Editorial Landing Page (`#/landing`)** — hero with a continuous 3D perspective "book parade" (isometric 3D books built with pure CSS transforms, interactive tilt, sheen, and ambient ASCII background)
+- **Audiobook & E-Book Discovery (`#/home`)** — main application dashboard for browsing curated shelves and genre spotlights
+- **Book Detail Pages (`#/book`)** — ratings, trending ranks, author & narrator info, chapter counts, reviews, and reading launchpad
+- **My Library & Manuscript Uploads (`#/library`)** — personal collection with drag-and-drop file upload zone (EPUB, PDF, TXT, MD) and reading progress tracking
+- **Bespoke Reader (`#/reader`)** — dual modes: Classic Book double-page spread and distraction-free Continuous Scroll PDF layout with real-time reading pace (WPM)
+- **Sanctuary Access (`#/login`)** — luxury editorial authentication modal with Supabase email verification
 
 ## 🛠️ Tech Stack
 
 | Layer | Technology |
 |---|---|
-| Structure | HTML5 |
-| Styling | Tailwind CSS (CDN — forms & container queries plugins) |
-| Fonts | Google Fonts — Bodoni Moda, Playfair Display, Plus Jakarta Sans, Cinzel |
+| Architecture | Single Page Application (SPA Hash Router) |
+| Structure | HTML5 / JavaScript (Vanilla ES6+) |
+| Styling | Tailwind CSS (CDN & compiled utility tokens) |
+| Auth & State | Supabase Authentication |
+| Fonts | Google Fonts — Cormorant Garamond, Bodoni Moda, Playfair Display, Plus Jakarta Sans, Cinzel |
 | Icons | Material Symbols |
-| 3D Effects | Custom CSS transforms (`perspective`, `preserve-3d`, gradients) |
-
-No build tools, no dependencies to install — every page runs directly in the browser.
+| 3D & Visuals | CSS 3D transforms (`perspective`, `preserve-3d`), React Bits Canvas PixelCard, ASCII stream |
 
 ## 📁 Project Structure
 
 ```
 NovalCast-Web_DEV/
-├── index.html   # Landing page — Editorial Book Collection (3D book parade)
-├── 2.html       # Audiobook & E-Book application (main app)
-├── 3.html       # Audiobook detail page (e.g. IKIGAI)
-├── 4.html       # My Library
-├── 5.html       # Book detail / browse by genre
-├── 6.html       # E-book reader with notes, highlights & annotations
-└── 7.html       # Continuous scroll reading mode
+├── index.html           # Root entry redirect (routes to frontend/index.html)
+├── frontend/            # Unified SPA Web Application
+│   ├── index.html       # Main application shell & Tailwind design system
+│   ├── assets/          # Static media & official vector branding
+│   ├── css/             # Custom styles (site.css, landing.css, pixel-card.css, reader.css)
+│   └── js/              # Modular application logic
+│       ├── views/       # View controllers (landing, home, book, reader, library, login, search)
+│       ├── components/  # Canvas PixelCard component
+│       ├── auth.js      # Supabase authentication service
+│       ├── data.js      # Catalog dataset & book normalizer
+│       └── router.js    # Client-side hash router
+├── backend/             # Roadmap for TTS voice streaming & account sync
+├── Referance/           # High-fidelity Figma ASTs & Google Stitch reference screens
+├── scripts/             # Build and asset extraction tooling
+├── tests/               # Playwright automated test suite
+└── package.json         # NPM scripts and dev dependencies
 ```
 
 ## 🚀 Getting Started
@@ -48,18 +57,21 @@ NovalCast-Web_DEV/
    cd NovalCast-Web_DEV
    ```
 
-2. **Open any page in your browser**
+2. **Run locally**
 
-   Just double-click `index.html`, or serve locally (recommended, so CDN assets and fonts load cleanly):
+   Serve using npm or any static server (recommended, so assets and fonts load cleanly):
    ```bash
-   # Python
-   python -m http.server 5500
-   # or Node
-   npx serve .
-   ```
-   Then visit `http://localhost:5500`.
+   # Using npm
+   npm start
+   # or
+   npm run dev
 
-> **Note:** Pages currently link to each other by filename (`index.html`, `2.html`, …).
+   # or Python
+   python -m http.server 3000
+   ```
+   Then visit `http://localhost:3000`.
+
+> **Note:** The application uses client-side hash routing (`#/landing`, `#/home`, `#/book`, `#/reader`, `#/library`, `#/login`, `#/search`).
 
 ## 🗺️ Roadmap
 
