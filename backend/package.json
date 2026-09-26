@@ -1,0 +1,31 @@
+{
+  "name": "novelcast-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NovelCast backend — ingests public domain books from Gutendex / Project Gutenberg / Open Library into MongoDB Atlas and serves the reading catalog API.",
+  "main": "index.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "seed": "node src/scripts/seedCurated.js",
+    "smoke": "node src/scripts/smokeTest.js"
+  },
+  "keywords": [
+    "novelcast",
+    "ebooks",
+    "gutendex",
+    "gutenberg",
+    "mongodb"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.3",
+    "express": "^5.2.1",
+    "mongoose": "^9.10.2"
+  }
+}

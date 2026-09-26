@@ -21,14 +21,20 @@ function generateEnv() {
         const key = trimmed.slice(0, idx).trim();
         const val = trimmed.slice(idx + 1).trim();
 
-        // Safely extract client-needed Supabase keys
+        // Safely extract client-needed Supabase keys and API_BASE
         if (key.toLowerCase() === 'supabase_url') {
           envConfig.SUPABASE_URL = val;
         } else if (key.toLowerCase() === 'supabase_api' || key.toLowerCase() === 'supabase_anon_key') {
           envConfig.SUPABASE_ANON_KEY = val;
+        } else if (key.toLowerCase() === 'api_base' || key.toLowerCase() === 'backend_url') {
+          envConfig.API_BASE = val;
         }
       }
     }
+  }
+
+  if (!envConfig.API_BASE) {
+    envConfig.API_BASE = 'http://localhost:4000/api';
   }
 
   // Write JS loader

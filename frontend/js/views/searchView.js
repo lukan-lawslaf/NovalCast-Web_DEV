@@ -6,19 +6,22 @@ window.NovelCastViews.search = {
     const NCPage = window.NCPage;
     const query = NC.readQuery();
     const initialQ = query.q || '';
-    const featured = NC.books[0];
+    const initialGenre = query.genre || '';
+    const featured = NC.books.find(b => b.trending) || NC.books[0];
 
-    const genres = [
-      { name: 'Philosophy', desc: 'Inner wisdom & meaning of life', count: '12 books', icon: 'psychology' },
-      { name: 'Memoir', desc: 'True personal human journeys', count: '8 books', icon: 'auto_stories' },
-      { name: 'Classic Fiction', desc: 'Timeless literary masterpieces', count: '15 books', icon: 'menu_book' },
-      { name: 'Self-Development', desc: 'Mindfulness & practical productivity', count: '19 books', icon: 'trending_up' },
-      { name: 'Poetry', desc: 'Rhythmic, evocative lyricism', count: '6 books', icon: 'history_edu' },
-      { name: 'Sci-Fi', desc: 'Futuristic worlds & technology', count: '11 books', icon: 'rocket_launch' }
+    const genreCards = [
+      { name: 'Adventure & Sea', search: 'Adventure', desc: 'Voyages across open seas & uncharted continents', count: '3 classics', icon: 'sailing' },
+      { name: 'Science Fiction', search: 'Science Fiction', desc: 'Extraterrestrial invasions & time travel', count: '3 classics', icon: 'rocket_launch' },
+      { name: 'Gothic & Horror', search: 'Gothic', desc: 'Nocturnal castles, monsters & spectral dread', count: '3 classics', icon: 'castle' },
+      { name: 'Classic Detective', search: 'Detective', desc: 'Analytical deduction & unsolved London crimes', count: '3 classics', icon: 'search' },
+      { name: 'Romance & Drama', search: 'Romance', desc: 'Passionate devotion & societal conflicts', count: '3 classics', icon: 'favorite' },
+      { name: 'Literary & Psychological', search: 'Psychological', desc: 'Human soul, conscience & existential shifts', count: '3 classics', icon: 'psychology' }
     ];
 
+    const hasInitialSearch = Boolean(initialQ || initialGenre);
+
     return `
-      <!-- Search & Filter Header Section (Stitch Reference) -->
+      <!-- Search & Filter Header Section -->
       <section class="relative w-full pt-2 pb-6 flex flex-col gap-space-lg">
         <!-- Ambient gold background glow behind search -->
         <div class="absolute -top-10 left-1/3 w-80 h-32 bg-primary-container/10 blur-[90px] pointer-events-none -z-10 rounded-full"></div>
@@ -30,15 +33,15 @@ window.NovelCastViews.search = {
             <input 
               class="bg-transparent border-none outline-none w-full text-on-surface placeholder:text-outline font-body-md text-body-md selection:bg-primary-container selection:text-on-primary-container" 
               id="search-input" 
-              placeholder="Search by title, author, narrator, or genre..." 
+              placeholder="Search by title, author, genre, or keyword..." 
               type="text"
-              value="${NC.escapeHtml(initialQ)}"
+              value="${NC.escapeHtml(initialQ || initialGenre)}"
             />
             <div class="flex items-center gap-space-xs text-on-surface-variant">
-              <button id="search-clear" class="flex items-center justify-center w-8 h-8 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-colors hidden" title="Clear search" type="button">
+              <button id="search-clear" class="flex items-center justify-center w-8 h-8 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-colors ${hasInitialSearch ? '' : 'hidden'}" title="Clear search" type="button">
                 <span class="material-symbols-outlined text-[18px]">close</span>
               </button>
-              <button class="flex items-center justify-center w-8 h-8 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-colors" title="Voice Search" type="button">
+              <button class="flex items-center justify-center w-8 h-8 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-colors" title="Voice Search" type="button" onclick="window.NovelCast.toast('Voice search active — speak your book title')">
                 <span class="material-symbols-outlined text-[18px]">mic</span>
               </button>
               <span class="hidden sm:inline-block px-space-xs py-0.5 rounded bg-surface-container-highest text-outline font-label-numeric text-[10px]">ESC</span>
@@ -48,39 +51,46 @@ window.NovelCastViews.search = {
 
         <!-- Filter Pills Carousel -->
         <div class="flex items-center gap-space-xs overflow-x-auto no-scrollbar py-space-2xs w-full max-w-5xl mx-auto px-space-2xs" id="search-chips">
-          <button class="filter-chip px-space-md py-space-xs rounded-full bg-primary-container text-on-primary-container font-headline-sm text-headline-sm shadow-[0_0_18px_rgba(245,215,127,0.3)] transition-all flex items-center gap-space-2xs whitespace-nowrap shrink-0" data-filter="all" type="button">
-            <span>Trending Now</span>
+          <button class="filter-chip px-space-md py-space-xs rounded-full ${(!initialGenre || initialGenre === 'all') ? 'bg-primary-container text-on-primary-container shadow-[0_0_18px_rgba(245,215,127,0.3)]' : 'bg-surface-container-low text-on-surface-variant'} font-headline-sm text-headline-sm transition-all flex items-center gap-space-2xs whitespace-nowrap shrink-0" data-filter="all" type="button">
+            <span>All 20 Classics</span>
             <span class="text-[11px] font-label-numeric">✦</span>
           </button>
-          <button class="filter-chip px-space-md py-space-xs rounded-full bg-surface-container-low text-on-surface-variant hover:text-primary hover:bg-surface-container-high font-headline-sm text-headline-sm transition-all whitespace-nowrap shrink-0" data-filter="philosophy" type="button">
-            Japanese Philosophy
+          <button class="filter-chip px-space-md py-space-xs rounded-full ${initialGenre === 'Gothic' ? 'bg-primary-container text-on-primary-container' : 'bg-surface-container-low text-on-surface-variant'} hover:text-primary hover:bg-surface-container-high font-headline-sm text-headline-sm transition-all whitespace-nowrap shrink-0" data-filter="Gothic" type="button">
+            Gothic & Horror
           </button>
-          <button class="filter-chip px-space-md py-space-xs rounded-full bg-surface-container-low text-on-surface-variant hover:text-primary hover:bg-surface-container-high font-headline-sm text-headline-sm transition-all whitespace-nowrap shrink-0" data-filter="memoir" type="button">
-            Self-Discovery
+          <button class="filter-chip px-space-md py-space-xs rounded-full ${initialGenre === 'Science Fiction' ? 'bg-primary-container text-on-primary-container' : 'bg-surface-container-low text-on-surface-variant'} hover:text-primary hover:bg-surface-container-high font-headline-sm text-headline-sm transition-all whitespace-nowrap shrink-0" data-filter="Science Fiction" type="button">
+            Science Fiction
           </button>
-          <button class="filter-chip px-space-md py-space-xs rounded-full bg-surface-container-low text-on-surface-variant hover:text-primary hover:bg-surface-container-high font-headline-sm text-headline-sm transition-all whitespace-nowrap shrink-0" data-filter="classic" type="button">
-            Bestsellers
+          <button class="filter-chip px-space-md py-space-xs rounded-full ${initialGenre === 'Adventure' ? 'bg-primary-container text-on-primary-container' : 'bg-surface-container-low text-on-surface-variant'} hover:text-primary hover:bg-surface-container-high font-headline-sm text-headline-sm transition-all whitespace-nowrap shrink-0" data-filter="Adventure" type="button">
+            Adventure & Sea
           </button>
-          <button class="filter-chip px-space-md py-space-xs rounded-full bg-surface-container-low text-on-surface-variant hover:text-primary hover:bg-surface-container-high font-headline-sm text-headline-sm transition-all whitespace-nowrap shrink-0" data-filter="fantasy" type="button">
-            Fantasy & Lore
+          <button class="filter-chip px-space-md py-space-xs rounded-full ${initialGenre === 'Detective' ? 'bg-primary-container text-on-primary-container' : 'bg-surface-container-low text-on-surface-variant'} hover:text-primary hover:bg-surface-container-high font-headline-sm text-headline-sm transition-all whitespace-nowrap shrink-0" data-filter="Detective" type="button">
+            Classic Detective
+          </button>
+          <button class="filter-chip px-space-md py-space-xs rounded-full ${initialGenre === 'Romance' ? 'bg-primary-container text-on-primary-container' : 'bg-surface-container-low text-on-surface-variant'} hover:text-primary hover:bg-surface-container-high font-headline-sm text-headline-sm transition-all whitespace-nowrap shrink-0" data-filter="Romance" type="button">
+            Romance & Drama
           </button>
         </div>
       </section>
 
       <!-- Live Search Results (hidden when empty) -->
-      <section id="search-results-section" class="mb-10 max-w-6xl mx-auto ${initialQ ? '' : 'hidden'}">
+      <section id="search-results-section" class="mb-10 max-w-6xl mx-auto ${hasInitialSearch ? '' : 'hidden'}">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-[18px] font-bold text-[#F3DCA0]" id="results-count">Results</h3>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary-container text-[20px]">filter_list</span>
+            <h3 class="text-[18px] font-bold text-[#F1D69E]" id="results-count">Results</h3>
+          </div>
+          <span class="text-xs font-mono text-[#8C98AC]" id="search-origin-badge">MongoDB Atlas Search</span>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5" id="search-results-grid"></div>
       </section>
 
       <!-- Default Discovery View -->
-      <div id="search-default-view" class="${initialQ ? 'hidden' : ''} max-w-6xl mx-auto">
-        <!-- Featured Spotlight Card (Modeled after Stitch Search screen) -->
+      <div id="search-default-view" class="${hasInitialSearch ? 'hidden' : ''} max-w-6xl mx-auto">
+        <!-- Featured Spotlight Card -->
         ${featured ? `
           <section class="w-full mb-space-2xl">
-            <div class="relative w-full rounded-lg bg-surface-container-low shadow-[0_16px_40px_rgba(0,0,0,0.5)] overflow-hidden p-space-lg md:p-space-xl backdrop-blur-xl border border-outline-variant/30">
+            <div class="relative w-full rounded-2xl bg-surface-container-low shadow-[0_16px_40px_rgba(0,0,0,0.5)] overflow-hidden p-space-lg md:p-space-xl backdrop-blur-xl border border-outline-variant/30">
               <div class="absolute -right-16 -top-16 w-80 h-80 bg-primary-container/10 rounded-full blur-[70px] pointer-events-none"></div>
               <div class="absolute left-1/3 bottom-0 w-60 h-60 bg-secondary-container/20 rounded-full blur-[80px] pointer-events-none"></div>
               <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-center">
@@ -98,15 +108,15 @@ window.NovelCastViews.search = {
                       <span class="material-symbols-outlined text-primary-container text-[16px]">star</span>
                       <span class="font-label-numeric text-label-numeric text-primary font-bold">${featured.rating.toFixed(1)}</span>
                     </div>
-                    <span class="px-space-sm py-0.5 rounded-full bg-primary-container text-on-primary-container font-label-badge text-label-badge shadow-[0_0_12px_rgba(245,215,127,0.3)]">Trending #1</span>
+                    <span class="px-space-sm py-0.5 rounded-full bg-primary-container text-on-primary-container font-label-badge text-label-badge shadow-[0_0_12px_rgba(245,215,127,0.3)]">Curated Masterpiece</span>
                   </div>
                   <p class="font-body-md text-body-md text-secondary mb-space-sm">
-                    Written by : <span class="text-on-surface font-medium">${NC.escapeHtml(featured.author)}</span> • Narrated by <span class="text-primary-container">${NC.escapeHtml(featured.narrator || 'Kenji Takahashi')}</span>
+                    Written by : <span class="text-on-surface font-medium">${NC.escapeHtml(featured.author)}</span> • Narrated by <span class="text-primary-container">${NC.escapeHtml(featured.narrator)}</span>
                   </p>
                   <div class="flex items-center gap-space-lg mb-space-md text-on-surface-variant font-label-numeric text-label-numeric flex-wrap">
                     <div class="flex items-center gap-space-2xs">
                       <span class="material-symbols-outlined text-[16px] text-primary-container">visibility</span>
-                      <span>${NC.escapeHtml(featured.listens)} listeners</span>
+                      <span>${NC.escapeHtml(featured.listens)} readers</span>
                     </div>
                     <div class="flex items-center gap-space-2xs">
                       <span class="material-symbols-outlined text-[16px] text-primary-container">schedule</span>
@@ -125,9 +135,9 @@ window.NovelCastViews.search = {
                       <span class="material-symbols-outlined text-[20px]">play_circle</span>
                       <span>Listen Now</span>
                     </button>
-                    <a class="flex items-center gap-space-xs px-space-lg py-space-sm rounded-full bg-surface-container text-primary-container hover:bg-surface-container-high font-headline-sm text-headline-sm font-semibold transition-all shadow-md" href="#/reader?book=${featured.id}">
+                    <a class="flex items-center gap-space-xs px-space-lg py-space-sm rounded-full bg-surface-container text-primary-container hover:bg-surface-container-high font-headline-sm text-headline-sm font-semibold transition-all shadow-md" href="#/reader?book=${featured.id}&chapter=1">
                       <span class="material-symbols-outlined text-[20px]">menu_book</span>
-                      <span>Read Now</span>
+                      <span>Read Chapter 1</span>
                     </a>
                   </div>
                 </div>
@@ -135,7 +145,7 @@ window.NovelCastViews.search = {
                 <div class="lg:col-span-4 flex justify-center items-center relative">
                   <a class="relative group cursor-pointer" href="#/book?book=${featured.id}">
                     <div class="absolute -inset-4 bg-gradient-to-tr from-primary-container/25 via-primary-container/10 to-transparent rounded-lg blur-2xl"></div>
-                    <div class="relative w-48 sm:w-56 h-72 sm:h-80 rounded-lg overflow-hidden shadow-[0_24px_48px_rgba(0,0,0,0.8)] bg-surface-container-highest transform transition-transform duration-500 group-hover:scale-105 border border-outline-variant/30">
+                    <div class="relative w-48 sm:w-56 h-72 sm:h-80 rounded-xl overflow-hidden shadow-[0_24px_48px_rgba(0,0,0,0.8)] bg-surface-container-highest transform transition-transform duration-500 group-hover:scale-105 border border-outline-variant/30">
                       ${window.NovelCastView.cover(featured)}
                     </div>
                   </a>
@@ -150,12 +160,12 @@ window.NovelCastViews.search = {
           <div class="flex items-center justify-between mb-5">
             <div class="flex items-center gap-2">
               <span class="material-symbols-outlined text-primary-container text-[22px]">category</span>
-              <h3 class="text-[19px] font-bold tracking-wide text-primary">Browse by Genre</h3>
+              <h3 class="text-[19px] font-bold tracking-wide text-primary">Browse Curated Genres</h3>
             </div>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            ${genres.map(g => `
-              <div class="genre-card relative p-6 rounded-2xl bg-surface-container-low border border-outline-variant/30 hover:border-primary-container/50 transition-all duration-300 hover:-translate-y-1 shadow-xl cursor-pointer group" data-genre-search="${g.name}">
+            ${genreCards.map(g => `
+              <div class="genre-card relative p-6 rounded-2xl bg-surface-container-low border border-outline-variant/30 hover:border-primary-container/50 transition-all duration-300 hover:-translate-y-1 shadow-xl cursor-pointer group" data-genre-search="${g.search}">
                 <div class="flex items-start justify-between">
                   <div>
                     <span class="text-[11px] uppercase tracking-wider text-primary-container font-bold">${g.count}</span>
@@ -174,7 +184,7 @@ window.NovelCastViews.search = {
           <div class="flex items-center justify-between mb-5">
             <div class="flex items-center gap-2">
               <span class="material-symbols-outlined text-primary-container text-[22px]">auto_stories</span>
-              <h3 class="text-[19px] font-bold tracking-wide text-primary">All Books Catalog</h3>
+              <h3 class="text-[19px] font-bold tracking-wide text-primary">Complete Shelf (${NC.books.length} Novels)</h3>
             </div>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
@@ -195,73 +205,114 @@ window.NovelCastViews.search = {
     const defaultView = document.getElementById('search-default-view');
     const chips = document.querySelectorAll('#search-chips .filter-chip');
 
-    function performSearch(q, filterType = 'all') {
-      const term = (q || '').trim().toLowerCase();
-      let matched = NC.books;
+    let currentFilter = 'all';
+    let searchDebounceTimer = null;
 
-      if (filterType !== 'all') {
-        if (filterType === 'trending') {
-          matched = matched.filter(b => b.trending);
-        } else {
-          matched = matched.filter(b => (b.genre || '').toLowerCase().includes(filterType) || (b.tags || []).some(t => t.includes(filterType)));
-        }
+    async function performSearch(q, filterType = currentFilter) {
+      const term = (q || '').trim();
+      currentFilter = filterType;
+
+      if (!term && (filterType === 'all' || !filterType)) {
+        if (resultsSection) resultsSection.classList.add('hidden');
+        if (defaultView) defaultView.classList.remove('hidden');
+        if (clearBtn) clearBtn.classList.add('hidden');
+        return;
       }
 
+      if (resultsSection) resultsSection.classList.remove('hidden');
+      if (defaultView) defaultView.classList.add('hidden');
+      if (clearBtn) clearBtn.classList.remove('hidden');
+
+      // 1. Immediate local match for zero perceived latency
+      let matched = NC.books;
+      if (filterType && filterType !== 'all') {
+        const ft = filterType.toLowerCase();
+        matched = matched.filter(b => (b.genre || '').toLowerCase().includes(ft) || (b.tags || []).some(t => t.toLowerCase().includes(ft)));
+      }
       if (term) {
-        matched = matched.filter(b => 
-          b.title.toLowerCase().includes(term) ||
-          b.author.toLowerCase().includes(term) ||
-          (b.narrator && b.narrator.toLowerCase().includes(term)) ||
-          b.genre.toLowerCase().includes(term) ||
-          (b.description && b.description.toLowerCase().includes(term))
+        const lt = term.toLowerCase();
+        matched = matched.filter(b =>
+          b.title.toLowerCase().includes(lt) ||
+          b.author.toLowerCase().includes(lt) ||
+          b.genre.toLowerCase().includes(lt) ||
+          (b.description && b.description.toLowerCase().includes(lt))
         );
       }
 
-      if (term || filterType !== 'all') {
-        resultsSection.classList.remove('hidden');
-        defaultView.classList.add('hidden');
-        resultsCount.textContent = `${matched.length} Book${matched.length === 1 ? '' : 's'} Found`;
-        resultsGrid.innerHTML = matched.length ? matched.map(b => NCPage.popularCard(b)).join('') : `
+      renderResults(matched, term);
+
+      // 2. Asynchronously query backend search for full-text MongoDB match
+      try {
+        const backendResults = await NC.searchCatalog(term, filterType === 'all' ? '' : filterType);
+        if (backendResults && backendResults.length > 0) {
+          renderResults(backendResults, term);
+        }
+      } catch (e) {
+        // Fallback already rendered
+      }
+    }
+
+    function renderResults(list, term) {
+      if (!resultsGrid || !resultsCount) return;
+      resultsCount.textContent = `${list.length} Book${list.length === 1 ? '' : 's'} Found`;
+      resultsGrid.innerHTML = list.length
+        ? list.map(b => NCPage.popularCard(b)).join('')
+        : `
           <div class="col-span-full py-16 text-center text-[#7F8B9C]">
             <span class="material-symbols-outlined text-[48px] text-[#4A5568] mb-2 block">search_off</span>
             <p class="text-base font-medium text-white">No titles found for "${NC.escapeHtml(term)}"</p>
-            <p class="text-xs mt-1">Try searching for "Philosophy", "Ikigai", or "Fiction"</p>
+            <p class="text-xs mt-1">Try searching for "Moby Dick", "Dracula", "Gothic", or "Verne"</p>
           </div>
         `;
-        if (clearBtn) clearBtn.classList.remove('hidden');
-      } else {
-        resultsSection.classList.add('hidden');
-        defaultView.classList.remove('hidden');
-        if (clearBtn) clearBtn.classList.add('hidden');
-      }
 
       if (window.NovelCastApp && window.NovelCastApp.bindInteractiveElements) {
-        window.NovelCastApp.bindInteractiveElements();
+        window.NovelCastApp.bindInteractiveElements(resultsGrid);
       }
     }
 
     if (input) {
-      input.addEventListener('input', () => performSearch(input.value));
-      if (input.value) performSearch(input.value);
+      input.addEventListener('input', () => {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => {
+          performSearch(input.value);
+        }, 180);
+      });
+      // Handle initial search from URL
+      const query = NC.readQuery();
+      const initialTerm = query.q || query.genre || '';
+      if (initialTerm) {
+        performSearch(initialTerm, query.genre || 'all');
+      }
     }
 
     if (clearBtn) {
       clearBtn.addEventListener('click', () => {
-        input.value = '';
+        if (input) input.value = '';
+        currentFilter = 'all';
+        chips.forEach(c => {
+          c.classList.remove('bg-primary-container', 'text-on-primary-container');
+          c.classList.add('bg-surface-container-low', 'text-on-surface-variant');
+        });
+        const allChip = document.querySelector('#search-chips [data-filter="all"]');
+        if (allChip) {
+          allChip.classList.add('bg-primary-container', 'text-on-primary-container');
+          allChip.classList.remove('bg-surface-container-low', 'text-on-surface-variant');
+        }
         performSearch('');
-        input.focus();
+        if (input) input.focus();
       });
     }
 
     chips.forEach(btn => {
       btn.addEventListener('click', () => {
         chips.forEach(c => {
-          c.classList.remove('bg-goldAccent', 'text-[#121620]', 'font-bold');
-          c.classList.add('bg-[#161C26]', 'text-[#A6B2C3]', 'font-medium');
+          c.classList.remove('bg-primary-container', 'text-on-primary-container', 'shadow-[0_0_18px_rgba(245,215,127,0.3)]');
+          c.classList.add('bg-surface-container-low', 'text-on-surface-variant');
         });
-        btn.classList.add('bg-goldAccent', 'text-[#121620]', 'font-bold');
-        btn.classList.remove('bg-[#161C26]', 'text-[#A6B2C3]', 'font-medium');
-        performSearch(input ? input.value : '', btn.dataset.filter);
+        btn.classList.add('bg-primary-container', 'text-on-primary-container', 'shadow-[0_0_18px_rgba(245,215,127,0.3)]');
+        btn.classList.remove('bg-surface-container-low', 'text-on-surface-variant');
+        if (input) input.value = '';
+        performSearch('', btn.dataset.filter);
       });
     });
 
@@ -270,7 +321,7 @@ window.NovelCastViews.search = {
         const genre = card.dataset.genreSearch;
         if (input) {
           input.value = genre;
-          performSearch(genre);
+          performSearch(genre, genre);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       });

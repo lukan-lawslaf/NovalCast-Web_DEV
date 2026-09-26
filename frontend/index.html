@@ -20,13 +20,16 @@
       theme: {
         extend: {
           colors: {
-            appDark: '#0D1117',
-            appCard: '#151921',
-            appCardBorder: 'rgba(217, 180, 126, 0.22)',
-            goldAccent: '#F3D182',
-            goldMuted: '#BBA06B',
-            textGray: '#8E96A4',
-            lightMuted: '#ADB5BD',
+            appDark: '#0E1217',
+            appSidebar: '#0C1016',
+            appCard: '#161B24',
+            appCardBorder: 'rgba(241, 214, 158, 0.32)',
+            goldAccent: '#F1D69E',
+            goldLight: '#FBF0D9',
+            goldDark: '#D4A757',
+            goldMuted: '#BFA15F',
+            textGray: '#8E97A6',
+            lightMuted: '#A2ABB9',
             obsidian: {
               950: '#06080b',
               900: '#0b0e13',
@@ -174,7 +177,8 @@
     }
     
     body {
-      background-color: #080A0E;
+      background: linear-gradient(135deg, #222B3A 0%, #151A24 50%, #0B0E14 100%);
+      background-attachment: fixed;
       font-family: 'Plus Jakarta Sans', sans-serif;
       -webkit-font-smoothing: antialiased;
     }
@@ -209,25 +213,25 @@
 
     /* Golden text glow */
     .gold-glow {
-      text-shadow: 0 0 16px rgba(243, 209, 130, 0.4);
+      text-shadow: 0 0 16px rgba(241, 214, 158, 0.4);
     }
 
     /* Custom utility styles for smooth SPA app shell */
     .nav-active {
-      color: #F5D77F !important;
-      background: #181D26 !important;
-      box-shadow: 0 0 18px rgba(243, 209, 130, 0.22);
+      color: #F1D69E !important;
+      background: #181E29 !important;
+      box-shadow: 0 0 18px rgba(241, 214, 158, 0.22);
     }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="min-h-screen bg-[#05070A] text-slate-200 antialiased selection:bg-goldAccent/30 selection:text-white">
+<body class="min-h-screen bg-gradient-to-br from-[#181E29] via-[#131722] to-[#0E1217] bg-fixed text-slate-200 antialiased selection:bg-goldAccent/30 selection:text-white">
   
   <div class="flex w-full relative min-h-screen">
     
     <!-- Unified Sidebar Navigation -->
-    <aside id="app-sidebar" class="w-16 md:w-[72px] flex flex-col items-center py-7 gap-8 border-r border-[#1B2230]/70 shrink-0 z-40 bg-[#0E1218] sticky top-0 h-screen transition-all">
+    <aside id="app-sidebar" class="w-16 md:w-[72px] flex flex-col items-center py-7 gap-8 border-r border-[#1B2230]/70 shrink-0 z-40 bg-[#0C1016] sticky top-0 h-screen transition-all">
       <!-- App Brand Mark -->
       <a href="#/landing" class="w-8 h-8 flex items-center justify-center hover:opacity-80 transition-opacity" title="NovelCast">
         <img src="logo.svg" alt="NovelCast Logo" class="w-full h-full object-contain" />
@@ -301,7 +305,7 @@
           </button>
           <button id="header-user-btn" aria-label="User Profile" class="relative w-9 h-9 rounded-full bg-[#161B24] border border-[#232B39] flex items-center justify-center text-[#B0BAC8] hover:text-goldAccent hover:border-goldAccent/50 transition-all cursor-pointer focus:outline-none" onclick="window.NovelCastAuth && window.NovelCastAuth.isAuthenticated() ? window.NovelCastRouter.navigate('library') : window.NovelCastRouter.navigate('login')" title="Account / My Library">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" stroke-dasharray="40" stroke-dashoffset="0" opacity="1"></path><circle cx="12" cy="7" r="4" opacity="1"></circle></g></svg>
-            <span id="user-auth-indicator" class="hidden absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-goldAccent ring-2 ring-[#0E1218] shadow-[0_0_6px_#f5d77f]"></span>
+            <span id="user-auth-indicator" class="hidden absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-goldAccent ring-2 ring-[#0E1218] shadow-[0_0_6px_#f1d69e]"></span>
           </button>
         </div>
       </header>
@@ -313,6 +317,7 @@
 
     </div>
   </div>
+
 
   <!-- Persistent Global Audio Player Bar -->
   <div id="global-audio-player" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-2xl bg-[#141924]/95 backdrop-blur-xl border border-goldAccent/30 rounded-full px-5 py-3 shadow-[0_12px_40px_rgba(0,0,0,0.8)] flex items-center justify-between gap-4 transition-all duration-300 translate-y-24 opacity-0 pointer-events-none">

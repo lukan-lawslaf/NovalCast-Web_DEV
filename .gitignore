@@ -4,8 +4,10 @@ node_modules/
 
 # Environment and Secrets
 .env
+*.env
 .env.local
 .env.*.local
+atlas-credentials.env
 frontend/js/env.js
 frontend/env.json
 

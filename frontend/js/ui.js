@@ -12,34 +12,17 @@ window.NovelCastView = (function () {
   }
   function cover(book) {
     if (!book) return '';
-    if (book.id === 'ikigai') {
-      return `<div class="w-full h-full bg-[#A0CAD7] flex flex-col items-center justify-between p-3.5 text-center relative overflow-hidden">
-        <div class="text-[7px] tracking-[0.2em] uppercase text-[#355263] font-medium">The International Bestseller</div>
-        <div class="my-auto">
-          <div class="w-20 h-14 mx-auto mb-2 opacity-85">
-            <svg class="w-full h-full" fill="none" viewBox="0 0 100 80">
-              <path d="M10 65 Q 40 45 65 30 T 95 15" fill="none" stroke="#463A32" stroke-width="2.5"></path>
-              <circle cx="45" cy="40" fill="#E8B0B8" r="3.5"></circle>
-              <circle cx="58" cy="32" fill="#F4CCD2" r="4.5"></circle>
-              <circle cx="70" cy="25" fill="#E8B0B8" r="3"></circle>
-              <circle cx="82" cy="18" fill="#F4CCD2" r="4"></circle>
-              <circle cx="35" cy="50" fill="#E5A6AF" r="3"></circle>
-            </svg>
-          </div>
-          <h3 class="font-serifTitle text-[22px] tracking-[0.18em] font-bold text-[#1E2E3A] leading-tight">IKIGAI</h3>
-          <p class="text-[8px] tracking-wide text-[#344D5E] font-medium mt-1">The Japanese Secret<br>to a Long and Happy Life</p>
-        </div>
-        <div class="text-[6.5px] tracking-tight text-[#486375] font-semibold">
-          HÉCTOR GARCÍA AND FRANCESC MIRALLES
-        </div>
-      </div>`;
+    const imgUrl = book.coverUrl || book.cover;
+    if (imgUrl) {
+      return `<img src="${imgUrl}" alt="${window.NovelCast.escapeHtml(book.title)}" class="w-full h-full object-cover brightness-95 group-hover:scale-105 transition-transform duration-300" loading="lazy" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';" /><div class="w-full h-full" style="display:none;">${fallbackCoverSvg(book)}</div>`;
     }
-    if (book.cover) {
-      return `<img src="${book.cover}" alt="${window.NovelCast.escapeHtml(book.title)}" class="w-full h-full object-cover brightness-95 group-hover:scale-105 transition-transform duration-300" loading="lazy" />`;
-    }
+    return fallbackCoverSvg(book);
+  }
+
+  function fallbackCoverSvg(book) {
     const tone = book.accent || '#161d28';
     const initials = (book.title || 'Novel').replace(/[^A-Z0-9 ]/gi, '').split(' ').filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('') || 'NC';
-    const format = (book.format || 'MANUSCRIPT').toUpperCase();
+    const format = (book.genre || book.format || 'CLASSIC').toUpperCase();
 
     return `<svg viewBox="0 0 200 284" preserveAspectRatio="xMidYMid slice" class="cover-art w-full h-full select-none" aria-hidden="true">
       <defs>

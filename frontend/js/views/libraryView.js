@@ -81,7 +81,7 @@ window.NovelCastViews.library = {
       <section class="mb-10">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h3 class="text-[17px] font-bold text-[#F3DCA0] flex items-center gap-2">
+            <h3 class="text-[17px] font-bold text-[#F1D69E] flex items-center gap-2">
               <span>Upload Book or Manuscript</span>
               <span class="text-xs font-normal text-[#8A97AA]">— Drag and drop or browse files</span>
             </h3>
@@ -135,7 +135,7 @@ window.NovelCastViews.library = {
       <!-- User Uploaded Books Section (null if nothing added) -->
       <section class="mb-12">
         <div class="flex items-center justify-between mb-5">
-          <h3 class="text-[18px] font-bold text-[#F3DCA0]">
+          <h3 class="text-[18px] font-bold text-[#F1D69E]">
             My Uploaded Novels (${userUploads.length})
           </h3>
         </div>

@@ -36,7 +36,7 @@ window.NovelCastViews.landing = {
           <nav class="hidden md:flex items-center gap-8 text-[13px] tracking-wide text-neutral-400 font-normal">
             <a class="hover:text-white transition-colors duration-200" href="#/home">Catalogs</a>
             <a class="hover:text-white transition-colors duration-200" href="#/search">Editions</a>
-            <a class="hover:text-white transition-colors duration-200" href="#/book?book=ikigai">Audiobooks</a>
+            <a class="hover:text-white transition-colors duration-200" href="#/book?book=pride-and-prejudice">Audiobooks</a>
             <a class="hover:text-white transition-colors duration-200" href="#/library">Sanctuary</a>
           </nav>
 
@@ -74,23 +74,23 @@ window.NovelCastViews.landing = {
           <div class="parade-stage w-full flex items-end justify-center relative z-20 pt-16 md:pt-24 pb-8 overflow-visible">
             <div class="flex items-end -space-x-16 md:-space-x-22 lg:-space-x-26 pl-16 pr-8 sm:px-0">
               
-              <!-- Book 1: Paris Poetry -->
-              <div class="book-3d-wrapper opacity-50 hover:opacity-100" onclick="window.NovelCastRouter.navigate('book', { book: 'mist-and-whispers' })" title="Paris Poetry">
+              <!-- Book 1: Paris Poetry -> The Picture of Dorian Gray -->
+              <div class="book-3d-wrapper opacity-50 hover:opacity-100 cursor-pointer" onclick="window.NovelCastRouter.navigate('book', { book: 'the-picture-of-dorian-gray' })" title="The Picture of Dorian Gray">
                 <div class="book-edge-right"></div>
                 <div class="book-edge-top"></div>
                 <div class="relative w-full h-full rounded-r-[2px] bg-gradient-to-br from-[#df939a] via-[#ce7a85] to-[#9b4a55] text-[#3d1217] p-4 flex flex-col justify-between shadow-2xl overflow-hidden">
                   <div class="cover-crease"></div>
                   <div class="cover-sheen"></div>
-                  <span class="text-[8px] uppercase tracking-widest font-semibold opacity-70">Paris Poetry</span>
+                  <span class="text-[8px] uppercase tracking-widest font-semibold opacity-70">Oscar Wilde</span>
                   <div class="my-auto">
-                    <p class="font-serif italic text-base leading-tight">Petits<br/>Poèmes</p>
+                    <p class="font-serif italic text-base leading-tight">Dorian<br/>Gray</p>
                   </div>
-                  <span class="text-[8px] tracking-wider opacity-60">Vol. III</span>
+                  <span class="text-[8px] tracking-wider opacity-60">Classic Decadence</span>
                 </div>
               </div>
 
-              <!-- Book 2: The Grand Arcade -->
-              <div class="book-3d-wrapper opacity-75 hover:opacity-100" onclick="window.NovelCastRouter.navigate('book', { book: 'swords-of-the-son' })" title="The Grand Arcade">
+              <!-- Book 2: The Grand Arcade -> 20,000 Leagues Under the Sea -->
+              <div class="book-3d-wrapper opacity-75 hover:opacity-100 cursor-pointer" onclick="window.NovelCastRouter.navigate('book', { book: 'twenty-thousand-leagues-under-the-sea' })" title="Twenty Thousand Leagues Under the Sea">
                 <div class="book-edge-right"></div>
                 <div class="book-edge-top"></div>
                 <div class="relative w-full h-full rounded-r-[2px] bg-[#0c1322] border-l-[3px] border-amber-500/40 p-3.5 flex flex-col justify-between shadow-2xl overflow-hidden">
@@ -98,41 +98,41 @@ window.NovelCastViews.landing = {
                   <div class="cover-sheen"></div>
                   <div class="h-full w-full border border-amber-500/30 p-2.5 flex flex-col justify-between relative bg-gradient-to-b from-[#111a2e] to-[#080d17]">
                     <div class="flex justify-between items-center text-[7px] text-amber-300/80 font-mono tracking-widest">
-                      <span>EST. 1892</span>
-                      <span>NO. 4</span>
+                      <span>JULES VERNE</span>
+                      <span>1870</span>
                     </div>
                     <div class="text-center my-auto">
-                      <div class="w-7 h-7 mx-auto mb-2 border border-amber-400/50 rounded-full flex items-center justify-center text-[10px] text-amber-300">🏛️</div>
-                      <h4 class="font-serif text-xs uppercase tracking-widest text-amber-100 font-semibold leading-tight">The Grand<br/>Arcade</h4>
+                      <div class="w-7 h-7 mx-auto mb-2 border border-amber-400/50 rounded-full flex items-center justify-center text-[10px] text-amber-300">🌊</div>
+                      <h4 class="font-serif text-xs uppercase tracking-widest text-amber-100 font-semibold leading-tight">20,000<br/>Leagues</h4>
                     </div>
-                    <span class="text-[7px] text-amber-400/60 uppercase tracking-wider text-center">Oxford Press</span>
+                    <span class="text-[7px] text-amber-400/60 uppercase tracking-wider text-center">Nautilus Edition</span>
                   </div>
                 </div>
               </div>
 
-              <!-- Book 3: The Light Story -->
-              <div class="book-3d-wrapper opacity-90 hover:opacity-100" onclick="window.NovelCastRouter.navigate('book', { book: 'white-raven' })" title="The Light Story">
+              <!-- Book 3: The Light Story -> The Time Machine -->
+              <div class="book-3d-wrapper opacity-90 hover:opacity-100 cursor-pointer" onclick="window.NovelCastRouter.navigate('book', { book: 'the-time-machine' })" title="The Time Machine">
                 <div class="book-edge-right"></div>
                 <div class="book-edge-top"></div>
                 <div class="relative w-full h-full rounded-r-[2px] bg-[#0f172a] border-l-[3px] border-blue-900 p-4 flex flex-col justify-between shadow-2xl overflow-hidden">
                   <div class="cover-crease"></div>
                   <div class="cover-sheen"></div>
                   <div class="flex justify-between items-center text-[8px] uppercase tracking-widest text-blue-300/70">
-                    <span>First Edition</span>
-                    <span>Vol. II</span>
+                    <span>H. G. Wells</span>
+                    <span>1895</span>
                   </div>
                   <div class="my-auto space-y-1">
                     <span class="text-[9px] uppercase tracking-widest text-blue-200 block font-light">The</span>
-                    <h3 class="font-serif text-lg tracking-wider text-white font-bold leading-tight">LIGHT<br/>STORY</h3>
+                    <h3 class="font-serif text-lg tracking-wider text-white font-bold leading-tight">TIME<br/>MACHINE</h3>
                     <div class="w-8 h-[1px] bg-blue-400/40 my-2"></div>
-                    <p class="text-[9px] text-blue-300/70 font-serif italic">Maxwell</p>
+                    <p class="text-[9px] text-blue-300/70 font-serif italic">Sci-Fi Masterpiece</p>
                   </div>
-                  <span class="text-[8px] text-neutral-500">London, 1924</span>
+                  <span class="text-[8px] text-neutral-500">London Press</span>
                 </div>
               </div>
 
-              <!-- Book 4: As a Man Thinketh -->
-              <div class="book-3d-wrapper" onclick="window.NovelCastRouter.navigate('book', { book: 'eighty-days' })" title="As a Man Thinketh">
+              <!-- Book 4: Around the World in Eighty Days -->
+              <div class="book-3d-wrapper cursor-pointer" onclick="window.NovelCastRouter.navigate('book', { book: 'around-the-world-in-eighty-days' })" title="Around the World in Eighty Days">
                 <div class="book-edge-right"></div>
                 <div class="book-edge-top"></div>
                 <div class="relative w-full h-full rounded-r-[2px] bg-[#f5f1e8] text-neutral-900 border-l-[3px] border-neutral-400 p-4 flex flex-col justify-between shadow-2xl overflow-hidden">
@@ -140,22 +140,22 @@ window.NovelCastViews.landing = {
                   <div class="cover-sheen"></div>
                   <div class="border-b border-neutral-300 pb-1 text-center">
                     <span class="text-[7px] uppercase tracking-widest font-semibold text-neutral-500 block">
-                      The New York Times Bestseller
+                      Jules Verne Classic
                     </span>
                   </div>
                   <div class="my-auto text-left py-2">
                     <h3 class="font-serif text-2xl uppercase tracking-wider font-bold text-neutral-950 leading-none mb-1">
-                      JAMES<br/>ALLEN
+                      EIGHTY<br/>DAYS
                     </h3>
                     <div class="w-6 h-[1.5px] bg-neutral-900 my-2"></div>
-                    <p class="font-serif italic text-xs text-neutral-700">As a Man<br/>Thinketh</p>
+                    <p class="font-serif italic text-xs text-neutral-700">Phileas Fogg's<br/>Wager</p>
                   </div>
-                  <span class="text-[8px] uppercase tracking-widest font-semibold text-neutral-500">Classic Edition</span>
+                  <span class="text-[8px] uppercase tracking-widest font-semibold text-neutral-500">Adventure Edition</span>
                 </div>
               </div>
 
-              <!-- Book 5: Featured Centerpiece (Sunshine & Second Chances) -->
-              <div class="book-3d-wrapper book-featured" onclick="window.NovelCastRouter.navigate('book', { book: 'ikigai' })" title="Sunshine & Second Chances">
+              <!-- Book 5: Featured Centerpiece (Pride and Prejudice) -->
+              <div class="book-3d-wrapper book-featured cursor-pointer" onclick="window.NovelCastRouter.navigate('book', { book: 'pride-and-prejudice' })" title="Pride and Prejudice">
                 <div class="book-edge-right !w-[42px]"></div>
                 <div class="book-edge-top !h-[42px]"></div>
                 <div class="relative w-full h-full rounded-r-[2px] bg-gradient-to-b from-[#FFFDF2] via-[#FDF5D8] to-[#FCEABB] text-[#802D15] p-4 flex flex-col justify-between border-l-[4px] border-[#D4AF37] shadow-2xl overflow-hidden">
@@ -164,71 +164,71 @@ window.NovelCastViews.landing = {
                   <div class="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#d97706_1px,transparent_1px)] [background-size:10px_10px]"></div>
                   <div class="relative z-10 text-center border-b border-[#ebd79b] pb-1">
                     <span class="text-[7px] tracking-widest uppercase font-bold text-[#A85A2A] block">
-                      The Sunday Times Bestseller
+                      The Sanctuary Centerpiece
                     </span>
                   </div>
                   <div class="relative z-10 my-auto text-center space-y-0.5">
                     <h2 class="font-serif italic text-2xl md:text-3xl text-[#cf4a21] font-semibold leading-tight drop-shadow-sm">
-                      Sunshine
+                      Pride
                     </h2>
                     <p class="text-[9px] tracking-[0.25em] font-serif uppercase text-[#8d5e34] font-bold">
-                      &amp; SECOND
+                      &amp; PREJUDICE
                     </p>
                     <h3 class="font-serif text-2xl md:text-3xl text-[#dc5523] font-medium leading-none drop-shadow-sm">
-                      Chances
+                      Austen
                     </h3>
                   </div>
                   <div class="relative z-10 pt-1 flex flex-col items-center">
                     <div class="flex items-center justify-center gap-1.5 mb-1.5">
-                      <span class="text-base drop-shadow">🌻</span>
-                      <span class="text-xs opacity-80 drop-shadow">🚲</span>
-                      <span class="text-base drop-shadow">🌻</span>
+                      <span class="text-base drop-shadow">✦</span>
+                      <span class="text-xs opacity-80 drop-shadow">📖</span>
+                      <span class="text-base drop-shadow">✦</span>
                     </div>
                     <span class="font-sans text-[10px] uppercase tracking-wider font-bold text-[#56341f]">
-                      Mila Summers
+                      Jane Austen
                     </span>
                   </div>
                 </div>
               </div>
 
-              <!-- Book 6: Shadows of Time / Shadows & Dust -->
-              <div class="book-3d-wrapper opacity-95 hover:opacity-100" onclick="window.NovelCastRouter.navigate('book', { book: 'adorning-the-dark' })" title="Shadows of Time">
+              <!-- Book 6: Dracula -->
+              <div class="book-3d-wrapper opacity-95 hover:opacity-100 cursor-pointer" onclick="window.NovelCastRouter.navigate('book', { book: 'dracula' })" title="Dracula">
                 <div class="book-edge-right"></div>
                 <div class="book-edge-top"></div>
                 <div class="relative w-full h-full rounded-r-[2px] bg-gradient-to-b from-[#181920] via-[#0d0e12] to-black border-l-[3px] border-neutral-700 p-4 flex flex-col justify-between text-neutral-200 shadow-2xl overflow-hidden">
                   <div class="cover-crease"></div>
                   <div class="cover-sheen"></div>
-                  <span class="text-[8px] uppercase tracking-widest text-neutral-400">A Candle in the Attic</span>
+                  <span class="text-[8px] uppercase tracking-widest text-neutral-400">Bram Stoker</span>
                   <div class="my-auto space-y-1">
-                    <h3 class="font-serif text-lg tracking-[0.2em] text-white uppercase font-light leading-none">SHADOWS</h3>
-                    <p class="font-serif italic text-xs text-neutral-400">of time</p>
+                    <h3 class="font-serif text-lg tracking-[0.2em] text-white uppercase font-light leading-none">DRACULA</h3>
+                    <p class="font-serif italic text-xs text-neutral-400">Gothic Horror</p>
                     <div class="w-5 h-[1px] bg-neutral-600 mt-2"></div>
                   </div>
-                  <span class="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">Rowe</span>
+                  <span class="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">1897 Classic</span>
                 </div>
               </div>
 
-              <!-- Book 7: Venture -->
-              <div class="book-3d-wrapper opacity-95 hover:opacity-100" onclick="window.NovelCastRouter.navigate('book', { book: 'swords-of-the-son' })" title="Venture">
+              <!-- Book 7: Frankenstein -->
+              <div class="book-3d-wrapper opacity-95 hover:opacity-100 cursor-pointer" onclick="window.NovelCastRouter.navigate('book', { book: 'frankenstein' })" title="Frankenstein">
                 <div class="book-edge-right"></div>
                 <div class="book-edge-top"></div>
-                <div class="relative w-full h-full rounded-r-[2px] bg-[#E64A19] text-white border-l-[3px] border-orange-800 p-4 flex flex-col justify-between shadow-2xl overflow-hidden">
+                <div class="relative w-full h-full rounded-r-[2px] bg-[#1a2d24] text-white border-l-[3px] border-emerald-900 p-4 flex flex-col justify-between shadow-2xl overflow-hidden">
                   <div class="cover-crease"></div>
                   <div class="cover-sheen"></div>
-                  <span class="text-[8px] uppercase font-bold tracking-widest text-orange-200">The Series</span>
+                  <span class="text-[8px] uppercase font-bold tracking-widest text-emerald-300">Mary Shelley</span>
                   <div class="my-auto">
-                    <h3 class="font-sans font-black text-2xl uppercase leading-none tracking-tight">
-                      VEN<br/>TURE
+                    <h3 class="font-serif font-black text-xl uppercase leading-none tracking-tight">
+                      FRANKEN<br/>STEIN
                     </h3>
                   </div>
-                  <div class="border-t border-orange-300/40 pt-1">
-                    <span class="text-[8px] uppercase tracking-widest text-orange-100 font-bold">Art &amp; Culture</span>
+                  <div class="border-t border-emerald-500/40 pt-1">
+                    <span class="text-[8px] uppercase tracking-widest text-emerald-200 font-bold">Modern Prometheus</span>
                   </div>
                 </div>
               </div>
 
-              <!-- Book 8: The Island -->
-              <div class="book-3d-wrapper opacity-90 hover:opacity-100" onclick="window.NovelCastRouter.navigate('book', { book: 'white-raven' })" title="The Island">
+              <!-- Book 8: Treasure Island -->
+              <div class="book-3d-wrapper opacity-90 hover:opacity-100 cursor-pointer" onclick="window.NovelCastRouter.navigate('book', { book: 'treasure-island' })" title="Treasure Island">
                 <div class="book-edge-right"></div>
                 <div class="book-edge-top"></div>
                 <div class="relative w-full h-full rounded-r-[2px] bg-[#0c1524] border-l-[3px] border-amber-600/80 p-3.5 flex flex-col justify-between shadow-2xl overflow-hidden">
@@ -236,46 +236,46 @@ window.NovelCastViews.landing = {
                   <div class="cover-sheen"></div>
                   <div class="h-full w-full border border-amber-500/40 p-2.5 flex flex-col justify-between">
                     <div class="flex justify-center pt-1">
-                      <span class="text-amber-300 text-xs">🌙</span>
+                      <span class="text-amber-300 text-xs">🏴‍☠️</span>
                     </div>
                     <div class="text-center my-auto">
-                      <p class="font-serif text-[9px] text-amber-200 tracking-widest uppercase">The</p>
-                      <h4 class="font-serif text-sm tracking-widest text-amber-300 font-semibold uppercase">ISLAND</h4>
+                      <p class="font-serif text-[9px] text-amber-200 tracking-widest uppercase">R. L. Stevenson</p>
+                      <h4 class="font-serif text-sm tracking-widest text-amber-300 font-semibold uppercase">TREASURE<br/>ISLAND</h4>
                     </div>
-                    <span class="text-[8px] text-amber-400/70 text-center font-sans tracking-widest uppercase">AU D</span>
+                    <span class="text-[8px] text-amber-400/70 text-center font-sans tracking-widest uppercase">Seafarer</span>
                   </div>
                 </div>
               </div>
 
-              <!-- Book 9: James Allen Philosophic -->
-              <div class="book-3d-wrapper opacity-85 hover:opacity-100" onclick="window.NovelCastRouter.navigate('book', { book: 'eighty-days' })" title="James Allen Philosophic">
+              <!-- Book 9: Moby Dick -->
+              <div class="book-3d-wrapper opacity-85 hover:opacity-100 cursor-pointer" onclick="window.NovelCastRouter.navigate('book', { book: 'moby-dick' })" title="Moby Dick">
                 <div class="book-edge-right"></div>
                 <div class="book-edge-top"></div>
                 <div class="relative w-full h-full rounded-r-[2px] bg-[#eeeae0] text-black border-l-[3px] border-neutral-400 p-4 flex flex-col justify-between shadow-2xl overflow-hidden">
                   <div class="cover-crease"></div>
                   <div class="cover-sheen"></div>
-                  <span class="text-[8px] uppercase tracking-widest text-neutral-500 font-medium">New Edition</span>
+                  <span class="text-[8px] uppercase tracking-widest text-neutral-500 font-medium">Herman Melville</span>
                   <div class="my-auto py-2">
                     <h3 class="font-serif text-lg tracking-normal uppercase font-bold text-neutral-900 leading-snug">
-                      JAMES<br/>ALLEN
+                      MOBY<br/>DICK
                     </h3>
                   </div>
-                  <span class="text-[8px] uppercase tracking-wider text-neutral-600">Philosophic</span>
+                  <span class="text-[8px] uppercase tracking-wider text-neutral-600">The Whale</span>
                 </div>
               </div>
 
-              <!-- Book 10: The Deep -->
-              <div class="book-3d-wrapper opacity-65 hover:opacity-100" onclick="window.NovelCastRouter.navigate('book', { book: 'mist-and-whispers' })" title="The Deep">
+              <!-- Book 10: The Hound of the Baskervilles -->
+              <div class="book-3d-wrapper opacity-65 hover:opacity-100 cursor-pointer" onclick="window.NovelCastRouter.navigate('book', { book: 'the-hound-of-the-baskervilles' })" title="The Hound of the Baskervilles">
                 <div class="book-edge-right"></div>
                 <div class="book-edge-top"></div>
                 <div class="relative w-full h-full rounded-r-[2px] bg-[#070b14] border-l-[3px] border-teal-900 p-4 flex flex-col justify-between text-neutral-300 shadow-2xl overflow-hidden">
                   <div class="cover-crease"></div>
                   <div class="cover-sheen"></div>
-                  <span class="text-[8px] uppercase tracking-wider text-teal-400/80">The Silent Key</span>
+                  <span class="text-[8px] uppercase tracking-wider text-teal-400/80">Sherlock Holmes</span>
                   <div class="my-auto">
-                    <h4 class="font-serif text-base tracking-wider text-white font-semibold">THE DEEP</h4>
+                    <h4 class="font-serif text-base tracking-wider text-white font-semibold">BASKER<br/>VILLE</h4>
                   </div>
-                  <span class="text-[8px] text-neutral-500">M. B. Cooper</span>
+                  <span class="text-[8px] text-neutral-500">Conan Doyle</span>
                 </div>
               </div>
 

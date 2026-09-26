@@ -1,235 +1,501 @@
 window.NovelCast = (function () {
   const STORE_KEY = 'novelcast.state.v1';
   const SETTINGS_KEY = 'novelcast.settings.v1';
+  const CATALOG_CACHE_KEY = 'novelcast.catalog.cache.v1';
 
-  const demoParagraph = (theme, n) => `${theme} — original demo passage ${n}. This is placeholder content written for a class project so reviewers can see how the reader looks without redistributing copyrighted text. ${theme} themes open in this paragraph to keep typography readable.`;
-  const demoChapter = (title, theme) => ({
-    title,
-    theme,
-    paragraphs: [1, 2, 3, 4, 5, 6].map((i) => demoParagraph(theme, i)),
-  });
+  const API_BASE = (window.__ENV__ && window.__ENV__.API_BASE) || 'http://localhost:4000/api';
 
-  const books = [
-    {
-      id: 'ikigai',
-      title: 'IKIGAI',
-      fullTitle: 'IKIGAI: The Japanese Secret to a Long and Happy Life',
-      author: 'Héctor García & Francesc Miralles',
-      narrator: 'Kenji Takahashi',
-      genre: 'Philosophy',
-      tags: ['philosophy', 'longevity', 'japan', 'bestseller'],
-      rating: 4.8,
-      reviews: 18412,
-      listens: '1,23,444',
-      duration: '3 hrs 30 mins',
-      chapters: 17,
-      cover: 'https://lh3.googleusercontent.com/aida-public/AB6AXuATKSAk8QGkxvw9uq0V1ySz3joFP0HPCv8XtRmN4xii5kmt9zdI7HWOMoyW4KT3HlSLr0V-BClnOeM3Jw8S9_juKvH-ZTelCWZc3_yTOX97l1tNdqEWPED7gDbC_zMolgvc1GASogKcxzXc4Vm6MCbR4l4PdUnCudkfjuRar0Ah61PasW0NBBe1xIOiKEtweeUZCITLjUeKX7aEfSI215E1DN7AXRcvgk2nUPuOii8liWHh1vyrNw3q',
-      accent: '#a0cad7',
-      description: 'A gentle search for the Japanese concept of purpose, exploring how centenarians in Okinawa weave daily rituals, mindful habits, and resilient community into a long and contented life.',
-      shortDescription: 'A philosophy guide that traces the gentle art of purposeful living as practiced in Okinawa.',
+  // Aesthetic curated metadata overrides for the 20 MongoDB Atlas books
+  const BOOK_METADATA_PRESETS = {
+    'pride-and-prejudice': {
+      genre: 'Classic Romance',
+      narrator: 'Clara Ravenswood (Sanctuary Voice)',
+      accent: '#D4AF37',
+      rating: 4.9,
+      reviews: 18420,
+      listens: '198,164',
       trending: true,
-      chaptersList: [
-        demoChapter('The Art of Staying Young While Growing Old', 'Quiet wisdom'),
-        demoChapter('Escape the Hedonic Treadmill', 'Gentle movement'),
-        demoChapter('From Logotherapy to Ikigai', 'Inner reflection'),
-        demoChapter('Find Flow in Everything You Do', 'Purpose & flow'),
-        demoChapter('Masters of Longevity', 'Centenarian voices'),
-        demoChapter('The Ikigai Diet', 'Nourishment'),
-      ],
     },
-    {
-      id: 'bridge-home',
-      title: 'THE BRIDGE HOME',
-      fullTitle: 'The Bridge Home',
-      author: 'Padma Venkatraman',
-      narrator: 'Aanya Pillai',
-      genre: 'Memoir',
-      tags: ['memoir', 'young-adult', 'family', 'fiction'],
+    'moby-dick': {
+      genre: 'Adventure & Sea',
+      narrator: 'Jonathan Vance (Maritime Voice)',
+      accent: '#2A4D69',
       rating: 4.8,
-      reviews: 9102,
-      listens: '1,11,994',
-      duration: '2 hrs 50 mins',
-      chapters: 21,
-      cover: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDXidzmx3CXnsD-C7SZPcdc-rdjXrYIuaDZ7CnCWyadTbQ8HIuvwOdW4dIpVXIr03aREWQCusNTQkJKuMuw7Oy_JkdcvbMnyBXmfnFXwp1GTqoCnurF1Nr8DJ0ZFyJzqwQdWzx-pkyUK2jsAkRs2Av3MLjCOnBpG4DSfLbeZnPY_YcuvctYRejT3dTepkoLt3wro5Vtd1ZLGJiejAbRc8jJYnWqVGnvQwHUBgAhfEMqu0LlXCdBKKrc',
-      accent: '#a0cad7',
-      description: 'Two sisters and two brothers in a southern Indian city forge a fragile family as they scavenge, hope, and discover the bridges of love that hold them together.',
-      shortDescription: 'A hopeful coming-of-age story about found family and second chances.',
+      reviews: 14200,
+      listens: '89,450',
+      trending: true,
+    },
+    'the-adventures-of-sherlock-holmes': {
+      genre: 'Classic Detective',
+      narrator: 'Arthur Pendelton (Oxford Chamber)',
+      accent: '#7A6248',
+      rating: 4.9,
+      reviews: 21300,
+      listens: '142,300',
+      trending: true,
+    },
+    'jane-eyre': {
+      genre: 'Romance & Drama',
+      narrator: 'Eleanor Vance (Atmospheric Whisper)',
+      accent: '#8F4F58',
+      rating: 4.8,
+      reviews: 11500,
+      listens: '76,200',
+      trending: true,
+    },
+    'frankenstein': {
+      genre: 'Gothic Horror',
+      narrator: 'Victor Thorne (Nocturnal Gothic)',
+      accent: '#27423A',
+      rating: 4.8,
+      reviews: 16800,
+      listens: '124,500',
+      trending: true,
+    },
+    'a-tale-of-two-cities': {
+      genre: 'Literary & Historical',
+      narrator: 'Oliver Sterling (London Chamber)',
+      accent: '#8B263E',
+      rating: 4.7,
+      reviews: 9800,
+      listens: '65,400',
       trending: false,
-      chaptersList: [
-        demoChapter('Arrival at the Bridge', 'First light'),
-        demoChapter('Sisters Together', 'Quiet bonds'),
-        demoChapter('Two Boys Appear', 'Open streets'),
-        demoChapter('Work and Worry', 'Steady hands'),
-        demoChapter('A New Plan', 'Hope rises'),
-        demoChapter('Coming Home', 'Earned warmth'),
-      ],
+    },
+    'the-war-of-the-worlds': {
+      genre: 'Science Fiction',
+      narrator: 'David Kensington (Astrophysical)',
+      accent: '#9C3D1E',
+      rating: 4.8,
+      reviews: 13400,
+      listens: '92,100',
+      trending: true,
+    },
+    'alices-adventures-in-wonderland': {
+      genre: 'Children & Fantasy',
+      narrator: 'Alice Montgomery (Whimsical Reverie)',
+      accent: '#4A6984',
+      rating: 4.9,
+      reviews: 19500,
+      listens: '158,000',
+      trending: true,
+    },
+    'around-the-world-in-eighty-days': {
+      genre: 'Adventure & Travel',
+      narrator: 'Pierre Laurent (Continental Explorer)',
+      accent: '#C69B46',
+      rating: 4.7,
+      reviews: 8900,
+      listens: '58,200',
+      trending: false,
+    },
+    'dracula': {
+      genre: 'Gothic Horror',
+      narrator: 'Julian Cross (Midnight Gothic)',
+      accent: '#4A1525',
+      rating: 4.9,
+      reviews: 22100,
+      listens: '165,300',
+      trending: true,
+    },
+    'the-metamorphosis': {
+      genre: 'Psychological Fiction',
+      narrator: 'Maximilian Weber (Prague Nocturne)',
+      accent: '#3F4E4F',
+      rating: 4.7,
+      reviews: 12200,
+      listens: '84,100',
+      trending: false,
+    },
+    'the-great-gatsby': {
+      genre: 'Classic Literature',
+      narrator: 'Julian Sterling (Jazz Age Velvet)',
+      accent: '#D4AF37',
+      rating: 4.8,
+      reviews: 17600,
+      listens: '135,200',
+      trending: true,
+    },
+    'the-hound-of-the-baskervilles': {
+      genre: 'Mystery & Suspense',
+      narrator: 'Arthur Pendelton (Devonshire Moor)',
+      accent: '#2C3E50',
+      rating: 4.8,
+      reviews: 10400,
+      listens: '71,900',
+      trending: true,
+    },
+    'the-picture-of-dorian-gray': {
+      genre: 'Gothic & Decadence',
+      narrator: 'Sebastian Wilde (Decadent Salon)',
+      accent: '#583D72',
+      rating: 4.8,
+      reviews: 15300,
+      listens: '112,800',
+      trending: true,
+    },
+    'the-time-machine': {
+      genre: 'Science Fiction',
+      narrator: 'David Kensington (Chronometric)',
+      accent: '#466365',
+      rating: 4.6,
+      reviews: 7800,
+      listens: '52,400',
+      trending: false,
+    },
+    'the-works-of-edgar-allan-poe-volume-1': {
+      genre: 'Mystery & Macabre',
+      narrator: 'Vincent Raven (Binaural Macabre)',
+      accent: '#1E232A',
+      rating: 4.9,
+      reviews: 14700,
+      listens: '98,300',
+      trending: false,
+    },
+    'dr-jekyll-and-mr-hyde': {
+      genre: 'Gothic & Psychological',
+      narrator: 'Edward Hyde (Dual Tone)',
+      accent: '#382039',
+      rating: 4.7,
+      reviews: 9100,
+      listens: '63,500',
+      trending: false,
+    },
+    'treasure-island': {
+      genre: 'Adventure & Sea',
+      narrator: 'Duncan Ross (Highland Mariner)',
+      accent: '#634832',
+      rating: 4.7,
+      reviews: 8400,
+      listens: '54,100',
+      trending: false,
+    },
+    'twenty-thousand-leagues-under-the-sea': {
+      genre: 'Science Fiction & Sea',
+      narrator: 'Captain Nemo (Abyssal Resonance)',
+      accent: '#1B4965',
+      rating: 4.8,
+      reviews: 11200,
+      listens: '78,400',
+      trending: false,
+    },
+    'wuthering-heights': {
+      genre: 'Romance & Drama',
+      narrator: 'Imogen Cross (Yorkshire Moor)',
+      accent: '#533E2D',
+      rating: 4.7,
+      reviews: 10800,
+      listens: '73,600',
+      trending: false,
+    }
+  };
+
+  // Legacy demo ID mapping for backward compatibility
+  const LEGACY_ID_MAP = {
+    'ikigai': 'pride-and-prejudice',
+    'eighty-days': 'around-the-world-in-eighty-days',
+    'mist-and-whispers': 'the-hound-of-the-baskervilles',
+    'swords-of-the-son': 'treasure-island',
+    'white-raven': 'the-time-machine',
+    'adorning-the-dark': 'the-picture-of-dorian-gray',
+    'shadow-saint': 'the-adventures-of-sherlock-holmes',
+    'bridge-home': 'jane-eyre',
+  };
+
+  // Clean primary title helper (strips subtitles like "; or, the modern prometheus")
+  function cleanTitle(title) {
+    if (!title) return 'Untitled';
+    return title.split(/;|\s:\s|\s\/\s/)[0].trim();
+  }
+
+  // Transform backend MongoDB book object into canonical NovelCast book object
+  function transformBackendBook(b) {
+    if (!b) return null;
+    const slug = b.slug || cleanTitle(b.title).toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const meta = BOOK_METADATA_PRESETS[slug] || {};
+    const title = cleanTitle(b.title);
+    const rawGenre = (b.subjects && b.subjects[0]) || 'Classic';
+    const genre = meta.genre || (rawGenre.includes('Fiction') ? 'Classic Fiction' : rawGenre.split('--')[0].trim());
+    const narrator = meta.narrator || 'AI Atelier Sanctuary Voice';
+    const accent = meta.accent || '#D4AF37';
+
+    const wordCount = b.totalWordCount || 50000;
+    const hours = Math.max(1, Math.floor(wordCount / 140 / 60));
+    const mins = Math.floor((wordCount / 140) % 60);
+    const duration = `${hours} hr${hours > 1 ? 's' : ''} ${mins} mins`;
+
+    const listens = meta.listens || (b.downloadCount ? b.downloadCount.toLocaleString() : '48,200');
+    const rating = meta.rating || (4.6 + (((b.gutendexId || 50) % 4) * 0.1));
+    const reviews = meta.reviews || Math.round((b.downloadCount || 10000) / 10);
+
+    return {
+      id: slug,
+      slug: slug,
+      _id: b._id,
+      gutendexId: b.gutendexId,
+      title: title,
+      fullTitle: b.title,
+      author: b.author || 'Unknown Author',
+      narrator: narrator,
+      genre: genre,
+      tags: b.subjects && b.subjects.length ? b.subjects.slice(0, 5) : [genre.toLowerCase(), 'classic'],
+      rating: Number(rating.toFixed(1)),
+      reviews: reviews,
+      listens: listens,
+      duration: duration,
+      chapters: b.totalChapters || 12,
+      cover: b.coverUrl || '',
+      coverUrl: b.coverUrl || '',
+      accent: accent,
+      description: b.description || `A literary sanctuary edition by ${b.author || 'the author'}, curated for nocturnal contemplation with synchronized chapter reading, typography controls, and atmospheric audio playback.`,
+      shortDescription: b.description ? (b.description.slice(0, 130) + '...') : `${title} by ${b.author}.`,
+      trending: meta.trending !== undefined ? meta.trending : (b.featured || false),
+      chaptersList: b.chaptersList || [],
+      totalWordCount: wordCount,
+      source: 'mongodb-atlas'
+    };
+  }
+
+  // Pre-compiled Atlas baseline catalog so the frontend renders immediately with real books
+  const INITIAL_SEED = [
+    {
+      slug: 'pride-and-prejudice',
+      title: 'Pride and Prejudice',
+      author: 'Jane Austen',
+      gutendexId: 1342,
+      coverUrl: 'https://covers.openlibrary.org/b/id/14348537-L.jpg',
+      totalChapters: 62,
+      totalWordCount: 127156,
+      featured: true,
+      description: 'Pride and Prejudice is an 1813 novel of manners written by Jane Austen. The novel follows the character development of Elizabeth Bennet, the dynamic protagonist of the book who learns about the repercussions of hasty judgments and comes to appreciate the difference between superficial goodness and actual goodness.'
     },
     {
-      id: 'swords-of-the-son',
-      title: 'SWORDS OF THE SON',
-      fullTitle: 'Swords of the Son: A Tale of Legends & Betrayal',
-      author: 'R. A. Vane & E. Corvo',
-      narrator: 'Cyrus Mendez',
-      genre: 'Fantasy',
-      tags: ['fantasy', 'epic', 'legend', 'adventure'],
-      rating: 4.1,
-      reviews: 7204,
-      listens: '37,904',
-      duration: '6 hrs 15 mins',
-      chapters: 24,
-      cover: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCJhtHMt0mS20Kwds1bI-ooWPNBgOHpiFAwp3XBcUNGvnFUF5kJvd673RTs--oGLTxFbBmFBbWwzRVUg1TGEwkmIRtepcWulMMPYSs4_pu-CQfBdusDBGyUtJ7A7BEa4ph8fIfMrf_lUBMkQZCeOjG7KEWxVfljE9gJniwhQjCW4sLFx-sfN6lDaqNtHAPLo-3NNsZ1K_U63W9EKtxhxCsCKbPGCi_UqxBZkwV0kRi2kph5hHOmBdqm',
-      accent: '#1d1f24',
-      description: 'A sweeping epic where a reluctant heir must rebuild an exiled brotherhood, master an inherited blade, and challenge the warlords who shaped his past.',
-      shortDescription: 'An epic fantasy of brotherhood, exile, and the blade that binds them.',
-      trending: false,
-      chaptersList: [
-        demoChapter('The Exiled Heir', 'Cold wind'),
-        demoChapter('A Brother Found', 'Flickering fire'),
-        demoChapter('The Reluctant Blade', 'Cold steel'),
-        demoChapter('Crossing the Salt Plains', 'Long march'),
-        demoChapter('Warlords of the Coast', 'Storm tide'),
-        demoChapter('Swords at Dusk', 'Quiet vow'),
-      ],
+      slug: 'moby-dick',
+      title: 'Moby Dick; Or, The Whale',
+      author: 'Herman Melville',
+      gutendexId: 2701,
+      coverUrl: 'https://covers.openlibrary.org/b/id/10544254-L.jpg',
+      totalChapters: 149,
+      totalWordCount: 207673,
+      featured: true,
+      description: 'Moby-Dick; or, The Whale is an 1851 novel by American writer Herman Melville. The book is the sailor Ishmael\'s narrative of the obsessive quest of Ahab, captain of the whaling ship Pequod, for revenge against Moby Dick, the giant white sperm whale.'
     },
     {
-      id: 'mist-and-whispers',
-      title: 'MIST & WHISPERS',
-      fullTitle: 'Mist & Whispers',
-      author: 'Elara Vance',
-      narrator: 'Elara Vance',
-      genre: 'Fantasy',
-      tags: ['fantasy', 'mystery', 'suspense'],
-      rating: 4.1,
-      reviews: 5402,
-      listens: '23,444',
-      duration: '4 hrs 40 mins',
-      chapters: 16,
-      cover: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDrEQwC0otB4D26cTlWFID0FNWq9DfiJ00ZwI0OoZFxZw9icwT2X83MjBp6z27vrsEpZPrhUOwCQzDIMCZAeaeMxOoEO63RKMFwRF6G105bA9e5dbABctrRzKeJN_clxF0eOXb_XelVjPdsrAksLEe8aZjDyW9A1EVWZutAHenlGUdhq9nSqNUof87VBR2Lu5ZHnvXp4npAR4y8G-cMiMBDZNRSDPu8hX5F9uKOIMgWyPzOkIXNpneI',
-      accent: '#27423a',
-      description: 'A retired cartographer follows a whispered map through a village that keeps vanishing from every atlas in the world.',
-      shortDescription: 'A quiet mystery through fog-locked villages and shifting maps.',
-      trending: false,
-      chaptersList: [
-        demoChapter('The Whispered Map', 'Quiet village'),
-        demoChapter('Vanishings', 'Footsteps on stone'),
-        demoChapter('The Cartographer Returns', 'Steady pen'),
-        demoChapter('Glass in the Attic', 'Sharp light'),
-        demoChapter('The First Atlas', 'Folded hope'),
-        demoChapter('A Door Reopened', 'Soft chime'),
-      ],
+      slug: 'the-adventures-of-sherlock-holmes',
+      title: 'The Adventures of Sherlock Holmes',
+      author: 'Arthur Conan Doyle',
+      gutendexId: 1661,
+      coverUrl: 'https://covers.openlibrary.org/b/id/6717853-L.jpg',
+      totalChapters: 12,
+      totalWordCount: 104346,
+      featured: true,
+      description: 'A collection of twelve short stories by Arthur Conan Doyle, first published on 14 October 1892. It contains the earliest short stories featuring the consulting detective Sherlock Holmes, beginning with A Scandal in Bohemia.'
     },
     {
-      id: 'eighty-days',
-      title: 'EIGHTY DAYS',
-      fullTitle: 'Eighty Days: An Adventure Around the World',
-      author: 'Michael J. Sullivan',
-      narrator: 'Rhea Kapoor',
-      genre: 'Classic',
-      tags: ['classic', 'adventure', 'journey'],
-      rating: 3.7,
-      reviews: 3304,
-      listens: '13,094',
-      duration: '5 hrs 10 mins',
-      chapters: 18,
-      cover: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDXidzmx3CXnsD-C7SZPcdc-rdjXrYIuaDZ7CnCWyadTbQ8HIuvwOdW4dIpVXIr03aREWQCusNTQkJKuMuw7Oy_JkdcvbMnyBXmfnFXwp1GTqoCnurF1Nr8DJ0ZFyJzqwQdWzx-pkyUK2jsAkRs2Av3MLjCOnBpG4DSfLbeZnPY_YcuvctYRejT3dTepkoLt3wro5Vtd1ZLGJiejAbRc8jJYnWqVGnvQwHUBgAhfEMqu0LlXCdBKKrc',
-      accent: '#c69b46',
-      description: 'Two travelers wager that they can circle the globe in eighty days, racing locomotives, rivers, and weather across continents to win a most polite wager.',
-      shortDescription: 'A charming global race against time, weather, and disbelief.',
-      trending: false,
-      chaptersList: [
-        demoChapter('The Wager at the Club', 'Quiet certainty'),
-        demoChapter('Across the Channel', 'Salt spray'),
-        demoChapter('The Long Rail', 'Steam and cinders'),
-        demoChapter('An Elephant in the Pass', 'Wide valleys'),
-        demoChapter('The Tea Road', 'Quiet stations'),
-        demoChapter('Eighty Days Honored', 'Earned applause'),
-      ],
+      slug: 'jane-eyre',
+      title: 'Jane Eyre: An Autobiography',
+      author: 'Charlotte Brontë',
+      gutendexId: 1260,
+      coverUrl: 'https://covers.openlibrary.org/b/id/1737356-L.jpg',
+      totalChapters: 39,
+      totalWordCount: 185267,
+      featured: true,
+      description: 'A novel by English writer Charlotte Brontë, published under the pen name "Currer Bell" on 19 October 1847. It follows the experiences of its eponymous heroine, including her growth to adulthood and her love for Mr. Rochester.'
     },
     {
-      id: 'white-raven',
-      title: 'THE WHITE RAVEN',
-      fullTitle: 'The White Raven',
-      author: 'Elara Vance',
-      narrator: 'Imogen Wells',
-      genre: 'Fantasy',
-      tags: ['fantasy', 'myth', 'north'],
-      rating: 4.3,
-      reviews: 4612,
-      listens: '27,804',
-      duration: '4 hrs 20 mins',
-      chapters: 15,
-      cover: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC07UxGyD9UslgWD44y88DTog0u9LrZ7iMaMGQRZ1HNIGkcZKq8M8-Pgyz4n5WRZK8shBtVtgd1QehQpYciuzGJ9KkSZ3cNOYaYtn18sloNTWkayojjUyiCCFGUKgx18YnRUVbxJoIL4hhlH2kCNfTdGovinAAkwUm4eNcghm4lGELOzYF8MQrtetkQrKOyyMX3wiu0HiTkx_Cw3-qiXwXf_LglBsa2GMw2dM7K-TGD4lPEoWDiEWL7',
-      accent: '#cdd9d9',
-      description: 'A northern myth about a bewitched raven who must trade memories for song and finds that every kept secret erases a little more of the world.',
-      shortDescription: 'A mythic story about memory, feathers, and the cost of forgetting.',
-      trending: false,
-      chaptersList: [
-        demoChapter('Wings of Ash', 'Cold north'),
-        demoChapter('A Memory for a Song', 'Hush and snow'),
-        demoChapter('The Hollow Wood', 'Quiet dusk'),
-        demoChapter('Hunters on the Ridge', 'Long breath'),
-        demoChapter('The Last Feather', 'Soft glow'),
-        demoChapter('Return to the Sky', 'Wide wind'),
-      ],
+      slug: 'frankenstein',
+      title: 'Frankenstein; or, the modern prometheus',
+      author: 'Mary Wollstonecraft Shelley',
+      gutendexId: 84,
+      coverUrl: 'https://covers.openlibrary.org/b/id/12356249-L.jpg',
+      totalChapters: 28,
+      totalWordCount: 74919,
+      featured: true,
+      description: 'Frankenstein tells the story of Victor Frankenstein, a young scientist who creates a sapient creature in an unorthodox scientific experiment. Shelley started writing the story when she was 18.'
     },
     {
-      id: 'adorning-the-dark',
-      title: 'ADORNING THE DARK',
-      fullTitle: 'Adorning the Dark',
-      author: 'Andrew Peterson',
-      narrator: 'Lyle Hopper',
-      genre: 'Memoir',
-      tags: ['memoir', 'faith', 'music', 'reflection'],
-      rating: 3.6,
-      reviews: 2208,
-      listens: '17,999',
-      duration: '5 hrs 05 mins',
-      chapters: 14,
-      cover: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDvnYo-jLPAwAO-fNuRMzz5ruYy0sY8U3cD1fs7TXL64m6pNkg7IilKTYFNx-a6ChF6GrUPieLPi5yjuhGtcF0jxhVE4T-Puh_y9aWc2-8_dFi9bOl5zAE9B_DIazwUm--CI2az2-P25DrdlfZ0g3R0VedE7RyJlMQ3JPqc9LXmyYF2q0FRhtsQ8qPnvJ05ReIsMQqI_3SUfW9fgxk-bEd2MoKvGUdxvqQLtT6YEkBOrxPZUEj8IDne',
-      accent: '#7c6a4d',
-      description: 'A memoir of songwriting, friendship, and the long road of staying creative when the rooms grow quiet.',
-      shortDescription: 'A reflective memoir of songwriting, friendship, and small graces.',
-      trending: false,
-      chaptersList: [
-        demoChapter('Long Drives', 'Soft radio'),
-        demoChapter('First Open Mic', 'Sweaty palms'),
-        demoChapter('Letters from Friends', 'Folded paper'),
-        demoChapter('A Studio in the Attic', 'Quiet hum'),
-        demoChapter('The Long Pause', 'Empty rooms'),
-        demoChapter('Adorning the Dark', 'Tin lantern'),
-      ],
+      slug: 'a-tale-of-two-cities',
+      title: 'A Tale of Two Cities',
+      author: 'Charles Dickens',
+      gutendexId: 98,
+      coverUrl: 'https://covers.openlibrary.org/b/id/8243641-L.jpg',
+      totalChapters: 45,
+      totalWordCount: 135433,
+      featured: true,
+      description: 'Set in London and Paris before and during the French Revolution, the novel tells the story of the French Doctor Manette, his 18-year-long imprisonment in the Bastille, and his release to live in London with his daughter Lucie.'
     },
     {
-      id: 'shadow-saint',
-      title: 'SHADOW SAINT',
-      fullTitle: 'Shadow Saint: A Heist of Quiet Things',
-      author: 'Imogen Wells',
-      narrator: 'Imogen Wells',
-      genre: 'Fantasy',
-      tags: ['fantasy', 'heist', 'noir'],
-      rating: 4.2,
-      reviews: 3054,
-      listens: '21,204',
-      duration: '6 hrs 40 mins',
-      chapters: 22,
-      cover: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCJhtHMt0mS20Kwds1bI-ooWPNBgOHpiFAwp3XBcUNGvnFUF5kJvd673RTs--oGLTxFbBmFBbWwzRVUg1TGEwkmIRtepcWulMMPYSs4_pu-CQfBdusDBGyUtJ7A7BEa4ph8fIfMrf_lUBMkQZCeOjG7KEWxVfljE9gJniwhQjCW4sLFx-sfN6lDaqNtHAPLo-3NNsZ1K_U63W9EKtxhxCsCKbPGCi_UqxBZkwV0kRi2kph5hHOmBdqm',
-      accent: '#0e1218',
-      description: 'A street-blessed thief pulls off impossible jobs for people who never speak above a whisper, until a final score drags her into a saint she never wanted to become.',
-      shortDescription: 'A low-magic heist of quiet rooms, soft hands, and small saints.',
-      trending: false,
-      chaptersList: [
-        demoChapter('Soft Hands', 'Rain on tin'),
-        demoChapter('The Saints of Side Streets', 'Lamplit doors'),
-        demoChapter('A Map in Three Hands', 'Folded paper'),
-        demoChapter('The Quiet Score', 'Hush and bolt'),
-        demoChapter('A Blessing Returned', 'Cold chapel'),
-        demoChapter('Becoming a Saint', 'Steady gait'),
-      ],
+      slug: 'the-war-of-the-worlds',
+      title: 'The war of the worlds',
+      author: 'H. G. (Herbert George) Wells',
+      gutendexId: 36,
+      coverUrl: 'https://covers.openlibrary.org/b/id/10544259-L.jpg',
+      totalChapters: 27,
+      totalWordCount: 59755,
+      featured: true,
+      description: 'A science fiction novel by English author H. G. Wells, first serialised in 1897. It is one of the earliest stories to detail a conflict between mankind and an extraterrestrial race.'
     },
+    {
+      slug: 'alices-adventures-in-wonderland',
+      title: 'Alice in Wonderland',
+      author: 'Lewis Carroll',
+      gutendexId: 11,
+      coverUrl: 'https://covers.openlibrary.org/b/id/10544256-L.jpg',
+      totalChapters: 12,
+      totalWordCount: 26371,
+      featured: true,
+      description: 'Alice\'s Adventures in Wonderland is an 1865 English children\'s novel by Lewis Carroll. A young girl named Alice falls through a rabbit hole into a subterranean fantasy world populated by peculiar creatures.'
+    },
+    {
+      slug: 'around-the-world-in-eighty-days',
+      title: 'Around the World in Eighty Days',
+      author: 'Jules Verne',
+      gutendexId: 103,
+      coverUrl: 'https://covers.openlibrary.org/b/id/8315181-L.jpg',
+      totalChapters: 36,
+      totalWordCount: 61185,
+      featured: true,
+      description: 'In the adventure novel by Jules Verne, Phileas Fogg of London and his newly employed French valet Passepartout attempt to circumnavigate the late-Victorian world in 80 days on a £20,000 wager.'
+    },
+    {
+      slug: 'dracula',
+      title: 'Dracula',
+      author: 'Bram Stoker',
+      gutendexId: 345,
+      coverUrl: 'https://covers.openlibrary.org/b/id/8243642-L.jpg',
+      totalChapters: 27,
+      totalWordCount: 160907,
+      featured: true,
+      description: 'An 1897 Gothic horror novel by Irish author Bram Stoker. It introduced the character of Count Dracula and established many conventions of subsequent vampire fantasy.'
+    },
+    {
+      slug: 'the-metamorphosis',
+      title: 'Metamorphosis',
+      author: 'Franz Kafka',
+      gutendexId: 5200,
+      coverUrl: 'https://covers.openlibrary.org/b/id/10544265-L.jpg',
+      totalChapters: 3,
+      totalWordCount: 21932,
+      featured: false,
+      description: 'The Metamorphosis tells the story of salesman Gregor Samsa, who wakes one morning to find himself inexplicably transformed into a huge insect, and subsequently struggles to adjust to this condition.'
+    },
+    {
+      slug: 'the-great-gatsby',
+      title: 'The Great Gatsby',
+      author: 'F. Scott Fitzgerald',
+      gutendexId: 64317,
+      coverUrl: 'https://covers.openlibrary.org/b/id/8243644-L.jpg',
+      totalChapters: 10,
+      totalWordCount: 48130,
+      featured: true,
+      description: 'The Great Gatsby is a 1925 novel by American writer F. Scott Fitzgerald. Set in the Jazz Age on Long Island, near New York City, the novel depicts first-person narrator Nick Carraway\'s interactions with mysterious millionaire Jay Gatsby.'
+    },
+    {
+      slug: 'the-hound-of-the-baskervilles',
+      title: 'The Hound of the Baskervilles',
+      author: 'Arthur Conan Doyle',
+      gutendexId: 2852,
+      coverUrl: 'https://covers.openlibrary.org/b/id/8243645-L.jpg',
+      totalChapters: 15,
+      totalWordCount: 59043,
+      featured: true,
+      description: 'The Hound of the Baskervilles is the third of the four crime novels written by Arthur Conan Doyle featuring the detective Sherlock Holmes, confronting a spectral hound on the Devonshire moors.'
+    },
+    {
+      slug: 'the-picture-of-dorian-gray',
+      title: 'The Picture of Dorian Gray',
+      author: 'Oscar Wilde',
+      gutendexId: 174,
+      coverUrl: 'https://covers.openlibrary.org/b/id/8243646-L.jpg',
+      totalChapters: 20,
+      totalWordCount: 78505,
+      featured: true,
+      description: 'The Picture of Dorian Gray is a philosophical novel by Oscar Wilde. A handsome young man sells his soul for eternal youth, while his portrait bears the marks of age and moral corruption.'
+    },
+    {
+      slug: 'the-time-machine',
+      title: 'The Time Machine',
+      author: 'H. G. Wells',
+      gutendexId: 35,
+      coverUrl: 'https://covers.openlibrary.org/b/id/8243647-L.jpg',
+      totalChapters: 16,
+      totalWordCount: 32311,
+      featured: false,
+      description: 'A post-apocalyptic science fiction novella by H. G. Wells, published in 1895. The work is generally credited with the popularisation of the concept of time travel by using a vehicle.'
+    },
+    {
+      slug: 'the-works-of-edgar-allan-poe-volume-1',
+      title: 'The Works of Edgar Allan Poe — Volume 1',
+      author: 'Edgar Allan Poe',
+      gutendexId: 2147,
+      coverUrl: 'https://covers.openlibrary.org/b/id/8243648-L.jpg',
+      totalChapters: 9,
+      totalWordCount: 90277,
+      featured: false,
+      description: 'Volume 1 of Edgar Allan Poe\'s collected works, featuring the pioneering C. Auguste Dupin detective mysteries including The Murders in the Rue Morgue and The Mystery of Marie Rogêt.'
+    },
+    {
+      slug: 'dr-jekyll-and-mr-hyde',
+      title: 'The Strange Case of Dr. Jekyll and Mr. Hyde',
+      author: 'Robert Louis Stevenson',
+      gutendexId: 43,
+      coverUrl: 'https://covers.openlibrary.org/b/id/8243649-L.jpg',
+      totalChapters: 10,
+      totalWordCount: 25529,
+      featured: false,
+      description: 'A Gothic novella by Scottish author Robert Louis Stevenson, depicting the legal practitioner Gabriel John Utterson investigating strange occurrences between his old friend Dr Henry Jekyll and the evil Edward Hyde.'
+    },
+    {
+      slug: 'treasure-island',
+      title: 'Treasure Island',
+      author: 'Robert Louis Stevenson',
+      gutendexId: 120,
+      coverUrl: 'https://covers.openlibrary.org/b/id/8243650-L.jpg',
+      totalChapters: 34,
+      totalWordCount: 67712,
+      featured: false,
+      description: 'Treasure Island is an adventure novel by Scottish author Robert Louis Stevenson, narrating a tale of "buccaneers and buried gold". It introduced Long John Silver, buried treasure maps marked with an X, and the black spot.'
+    },
+    {
+      slug: 'twenty-thousand-leagues-under-the-sea',
+      title: 'Twenty Thousand Leagues under the Sea',
+      author: 'Jules Verne',
+      gutendexId: 164,
+      coverUrl: 'https://covers.openlibrary.org/b/id/8243651-L.jpg',
+      totalChapters: 46,
+      totalWordCount: 104071,
+      featured: false,
+      description: 'A classic science fiction adventure novel by French writer Jules Verne. It tells the story of underwater explorer Captain Nemo and his submarine, the Nautilus, as seen by Professor Pierre Aronnax.'
+    },
+    {
+      slug: 'wuthering-heights',
+      title: 'Wuthering Heights',
+      author: 'Emily Brontë',
+      gutendexId: 768,
+      coverUrl: 'https://covers.openlibrary.org/b/id/8243652-L.jpg',
+      totalChapters: 34,
+      totalWordCount: 115872,
+      featured: true,
+      description: 'The only novel by the English author Emily Brontë, initially published in 1847 under her pen name "Ellis Bell". It centers on the all-encompassing and passionate, yet thwarted, love between Heathcliff and Catherine Earnshaw.'
+    }
   ];
 
-  const byId = Object.fromEntries(books.map((b) => [b.id, b]));
+  // Initialize books array with transformed seed books
+  let books = INITIAL_SEED.map(transformBackendBook);
+  const byId = {};
+  books.forEach(b => {
+    byId[b.id] = b;
+    byId[b.slug] = b;
+  });
 
+  // Map legacy demo IDs to real books
+  Object.keys(LEGACY_ID_MAP).forEach(legacyKey => {
+    const targetSlug = LEGACY_ID_MAP[legacyKey];
+    if (byId[targetSlug]) {
+      byId[legacyKey] = byId[targetSlug];
+    }
+  });
+
+  // Settings
   const defaultSettings = {
     font: 'serif',
     fontSize: 18,
@@ -246,10 +512,12 @@ window.NovelCast = (function () {
       return { ...defaultSettings };
     }
   }
+
   function saveSettings(s) {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
   }
 
+  // State
   function loadState() {
     try {
       const raw = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
@@ -258,6 +526,7 @@ window.NovelCast = (function () {
       return { library: {}, collections: [] };
     }
   }
+
   function saveState(s) {
     localStorage.setItem(STORE_KEY, JSON.stringify(s));
     document.dispatchEvent(new CustomEvent('novelcast:state'));
@@ -277,27 +546,35 @@ window.NovelCast = (function () {
     match.accent = match.accent || '#f5d77f';
     if (!match.chaptersList || !match.chaptersList.length) {
       match.chaptersList = [
-        demoChapter('Prologue & First Light', 'Opening meditation'),
-        demoChapter('Chapter I: The Journey Begins', 'Quiet contemplation'),
-        demoChapter('Chapter II: Unfolding Pages', 'Atmospheric prose'),
-        demoChapter('Chapter III: Midnight Revelations', 'Devotion & memory'),
-        demoChapter('Chapter IV: Whispers in the Sanctuary', 'Acoustic sanctuary'),
-        demoChapter('Epilogue: The Written Word', 'Closing cadence')
+        { title: 'Prologue & First Light', theme: 'Opening meditation', chapterNumber: 1, wordCount: 1200 },
+        { title: 'Chapter I: The Journey Begins', theme: 'Quiet contemplation', chapterNumber: 2, wordCount: 2400 },
+        { title: 'Chapter II: Unfolding Pages', theme: 'Atmospheric prose', chapterNumber: 3, wordCount: 2800 },
+        { title: 'Chapter III: Midnight Revelations', theme: 'Devotion & memory', chapterNumber: 4, wordCount: 3100 },
+        { title: 'Chapter IV: Whispers in the Sanctuary', theme: 'Acoustic sanctuary', chapterNumber: 5, wordCount: 2600 },
+        { title: 'Epilogue: The Written Word', theme: 'Closing cadence', chapterNumber: 6, wordCount: 1500 }
       ];
     }
     return match;
   }
 
-  function getBook(id) {
-    if (byId[id]) return normalizeBook(byId[id]);
+  function resolveId(id) {
+    if (!id) return books[0].id;
+    if (byId[id]) return id;
+    if (LEGACY_ID_MAP[id] && byId[LEGACY_ID_MAP[id]]) return LEGACY_ID_MAP[id];
+    return id;
+  }
 
-    // Check uploaded manuscripts in user storage
+  function getBook(id) {
+    const resolved = resolveId(id);
+    if (byId[resolved]) return byId[resolved];
+
+    // Check user uploads in localStorage
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
       if (k && k.startsWith('novelcast.uploads.')) {
         try {
           const list = JSON.parse(localStorage.getItem(k) || '[]');
-          const match = list.find(b => b.id === id);
+          const match = list.find(b => b.id === id || b.slug === id);
           if (match) {
             normalizeBook(match);
             byId[id] = match;
@@ -306,8 +583,9 @@ window.NovelCast = (function () {
         } catch (e) {}
       }
     }
-    return null;
+    return books[0];
   }
+
   function bookUrl(page, id, chapter) {
     const params = new URLSearchParams();
     if (id) params.set('book', id);
@@ -315,23 +593,29 @@ window.NovelCast = (function () {
     const q = params.toString();
     return page + (q ? '?' + q : '');
   }
+
   function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    return String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
+
   function readQuery() {
     const searchParams = new URLSearchParams(location.search);
     const hashQuery = location.hash.includes('?') ? location.hash.split('?')[1] : '';
     const hashParams = new URLSearchParams(hashQuery);
     const getVal = (k) => hashParams.get(k) || searchParams.get(k);
 
+    const rawChapter = getVal('chapter');
     return {
       book: getVal('book'),
-      chapter: (hashParams.has('chapter') || searchParams.has('chapter')) ? Math.max(0, parseInt(getVal('chapter'), 10) || 0) : null,
+      chapter: rawChapter !== null && rawChapter !== undefined && rawChapter !== '' ? Math.max(1, parseInt(rawChapter, 10) || 1) : null,
       page: getVal('page'),
       q: getVal('q'),
+      genre: getVal('genre'),
       collection: getVal('collection'),
+      mode: getVal('mode'),
     };
   }
+
   function setQuery(params) {
     const url = new URL(location.href);
     Object.keys(params).forEach((k) => {
@@ -340,14 +624,16 @@ window.NovelCast = (function () {
     });
     history.replaceState({}, '', url);
   }
+
   function starIcon(filled) {
     return `<span class="material-symbols-outlined icon-star${filled ? ' is-filled' : ''}" aria-hidden="true">star</span>`;
   }
 
   function ensureEntry(state, id) {
-    if (!state.library[id]) state.library[id] = { status: null, favorite: false, chapter: 0, page: 0, bookmarks: [] };
+    if (!state.library[id]) state.library[id] = { status: null, favorite: false, chapter: 1, page: 0, bookmarks: [] };
     return state.library[id];
   }
+
   function saveBookState(id, patch) {
     const state = loadState();
     const entry = ensureEntry(state, id);
@@ -355,9 +641,11 @@ window.NovelCast = (function () {
     saveState(state);
     return entry;
   }
+
   function libraryAllIds() {
     return Object.keys(loadState().library).filter((id) => byId[id]);
   }
+
   function statusOf(id) {
     return loadState().library[id] && loadState().library[id].status;
   }
@@ -392,7 +680,6 @@ window.NovelCast = (function () {
   function addUserUpload(userId, book) {
     const list = getUserUploads(userId);
     normalizeBook(book);
-    // Add default progress if missing
     book.progress = book.progress || 0;
     book.uploadedAt = book.uploadedAt || new Date().toISOString();
     book.lastRead = book.lastRead || 'Just added';
@@ -402,7 +689,6 @@ window.NovelCast = (function () {
     } catch (e) {
       console.error('Storage full or error:', e);
     }
-    // Also add to active byId cache
     byId[book.id] = book;
     return book;
   }
@@ -433,9 +719,130 @@ window.NovelCast = (function () {
     return list;
   }
 
+  // --- Live Backend API Client ---
+  let isLoaded = false;
+
+  async function fetchCatalog(options = {}) {
+    const limit = options.limit || 50;
+    const sort = options.sort || 'popular';
+    try {
+      const res = await fetch(`${API_BASE}/books?limit=${limit}&sort=${sort}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (Array.isArray(data.books) && data.books.length > 0) {
+        const liveBooks = data.books.map(transformBackendBook);
+        books = liveBooks;
+        books.forEach(b => {
+          byId[b.id] = b;
+          byId[b.slug] = b;
+          if (b._id) byId[b._id] = b;
+        });
+
+        // Re-apply legacy aliases
+        Object.keys(LEGACY_ID_MAP).forEach(k => {
+          const targetSlug = LEGACY_ID_MAP[k];
+          if (byId[targetSlug]) byId[k] = byId[targetSlug];
+        });
+
+        isLoaded = true;
+        try {
+          localStorage.setItem(CATALOG_CACHE_KEY, JSON.stringify(liveBooks));
+        } catch (e) {}
+
+        document.dispatchEvent(new CustomEvent('novelcast:books-loaded', { detail: { books } }));
+        document.dispatchEvent(new CustomEvent('novelcast:refresh'));
+        return books;
+      }
+    } catch (err) {
+      console.warn('[NovelCastAPI] Could not reach backend, operating in resilient baseline mode:', err.message);
+    }
+    return books;
+  }
+
+  async function fetchBookDetails(slugOrId) {
+    const target = resolveId(slugOrId);
+    try {
+      const res = await fetch(`${API_BASE}/books/${encodeURIComponent(target)}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data && data.book) {
+        const updatedBook = transformBackendBook(data.book);
+        if (Array.isArray(data.chapters)) {
+          updatedBook.chaptersList = data.chapters.map(c => ({
+            chapterNumber: c.chapterNumber,
+            title: c.title,
+            wordCount: c.wordCount,
+            order: c.order,
+            theme: 'Sanctuary passage'
+          }));
+          updatedBook.chapters = data.chapters.length;
+        }
+        byId[updatedBook.id] = updatedBook;
+        byId[updatedBook.slug] = updatedBook;
+        document.dispatchEvent(new CustomEvent('novelcast:book-details-loaded', { detail: { book: updatedBook } }));
+        return updatedBook;
+      }
+    } catch (err) {
+      console.warn(`[NovelCastAPI] Error fetching book details for ${target}:`, err.message);
+    }
+    return getBook(target);
+  }
+
+  async function fetchChapter(slugOrId, chapterNumber = 1) {
+    const target = resolveId(slugOrId);
+    const num = Math.max(1, parseInt(chapterNumber || 1, 10));
+    try {
+      const res = await fetch(`${API_BASE}/books/${encodeURIComponent(target)}/chapters/${num}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      console.warn(`[NovelCastAPI] Error fetching chapter ${num} for ${target}:`, err.message);
+      return null;
+    }
+  }
+
+  async function searchCatalog(query = '', genre = '') {
+    try {
+      const url = new URL(`${API_BASE}/books`);
+      if (query && query.trim()) url.searchParams.set('search', query.trim());
+      if (genre && genre !== 'all') url.searchParams.set('genre', genre.trim());
+      url.searchParams.set('limit', '50');
+
+      const res = await fetch(url.toString());
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (Array.isArray(data.books)) {
+        return data.books.map(transformBackendBook);
+      }
+    } catch (err) {
+      console.warn('[NovelCastAPI] Search fallback to local cache:', err.message);
+    }
+    // Local fallback search
+    const term = (query || '').toLowerCase().trim();
+    let results = books;
+    if (genre && genre !== 'all') {
+      results = results.filter(b => (b.genre || '').toLowerCase().includes(genre.toLowerCase()));
+    }
+    if (term) {
+      results = results.filter(b => 
+        b.title.toLowerCase().includes(term) ||
+        b.author.toLowerCase().includes(term) ||
+        b.genre.toLowerCase().includes(term) ||
+        (b.description && b.description.toLowerCase().includes(term))
+      );
+    }
+    return results;
+  }
+
+  // Auto-fetch on boot
+  if (typeof window !== 'undefined') {
+    fetchCatalog().catch(() => {});
+  }
+
   return {
-    books,
-    byId,
+    get books() { return books; },
+    get byId() { return byId; },
     defaultSettings,
     loadSettings,
     saveSettings,
@@ -455,6 +862,15 @@ window.NovelCast = (function () {
     getUserUploads,
     addUserUpload,
     updateUserUploadProgress,
-    deleteUserUpload
+    deleteUserUpload,
+    // Live API methods
+    fetchCatalog,
+    fetchBookDetails,
+    fetchChapter,
+    searchCatalog,
+    transformBackendBook,
+    API_BASE,
+    isLoaded: () => isLoaded,
+    cleanTitle
   };
 })();

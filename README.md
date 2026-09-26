@@ -2,7 +2,7 @@
 
 **NovalCast** is a web development project — a modern platform for discovering, streaming, and reading audiobooks and e-books. Built as a fully static front-end prototype using HTML, Tailwind CSS, and custom CSS 3D transforms, it explores an editorial, book-luxury visual style across the full product journey: landing → catalog → book details → library → immersive reading.
 
-> 🚧 **Status:** Prototype / coursework stage — pages are static demos, not yet wired to a backend.
+> 🚀 **Status:** Live Catalog Integration — The SPA is connected to the backend API (`http://localhost:4000/api`) backed by MongoDB Atlas, serving 20 public-domain literary classics across 8 genres with 634 chapters and 1.78M words.
 
 ---
 
@@ -42,7 +42,7 @@ NovalCast-Web_DEV/
 │       ├── auth.js      # Supabase authentication service
 │       ├── data.js      # Catalog dataset & book normalizer
 │       └── router.js    # Client-side hash router
-├── backend/             # Roadmap for TTS voice streaming & account sync
+├── backend/             # Node/Express catalog API — Gutendex ingestion into MongoDB Atlas
 ├── Referance/           # High-fidelity Figma ASTs & Google Stitch reference screens
 ├── scripts/             # Build and asset extraction tooling
 ├── tests/               # Playwright automated test suite
@@ -81,6 +81,8 @@ NovalCast-Web_DEV/
 - [x] Reader dual modes (Classic Book double-page & Continuous Scroll PDF layout)
 - [x] Reading progress tracking (% complete, reading pace & time left)
 - [x] Interactive 3D hardcover book parade & ambient visual effects
+- [x] Backend catalog API — 20 public-domain classics across 8 genres ingested from Gutendex/Gutenberg into MongoDB Atlas, served over REST
+- [x] Wiring the SPA to the catalog API (Home, Search, Book Details, Dual-Mode Reader, 3D Landing Parade)
 - [ ] Real-time audio playback & TTS voice streaming (Fish Audio integration)
 - [ ] Reader state persistence for user notes & highlights
 - [ ] Responsive polish for mobile readers

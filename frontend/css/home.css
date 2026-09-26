@@ -1,5 +1,6 @@
 body {
-  background-color: #080a0e;
+  background: linear-gradient(135deg, #222B3A 0%, #151A24 50%, #0B0E14 100%);
+  background-attachment: fixed;
   font-family: 'Plus Jakarta Sans', sans-serif;
   user-select: none;
   -webkit-font-smoothing: antialiased;
@@ -11,11 +12,11 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0d1117;
+  background: #0E1217;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #252d3d;
+  background: #222B3A;
   border-radius: 9999px;
 }
 
@@ -48,5 +49,5 @@ body {
 }
 
 .gold-glow {
-  text-shadow: 0 0 16px rgba(243, 209, 130, 0.4);
+  text-shadow: 0 0 16px rgba(241, 214, 158, 0.4);
 }

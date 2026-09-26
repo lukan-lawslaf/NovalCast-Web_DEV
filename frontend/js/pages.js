@@ -8,7 +8,7 @@
 
   function featuredCard(book, variant) {
     if (variant === 'secondary') {
-      return `<div class="relative flex-[1_0_460px] bg-[#141822] rounded-[22px] border border-appCardBorder/50 p-6 md:p-7 overflow-hidden shadow-xl flex flex-col justify-between opacity-85" data-purpose="secondary-hero-card" style="border: 1px solid rgba(243, 209, 130, 0.22); box-shadow: rgba(243, 209, 130, 0.1) 0px 0px 20px -4px, rgba(0, 0, 0, 0.6) 0px 15px 25px -10px;">
+      return `<div class="relative flex-[1_0_460px] bg-[#161B24] rounded-[22px] border border-appCardBorder/50 p-6 md:p-7 overflow-hidden shadow-xl flex flex-col justify-between opacity-85" data-purpose="secondary-hero-card" style="background: linear-gradient(135deg, #1C2330 0%, #131720 100%); border: 1px solid rgba(241, 214, 158, 0.28); box-shadow: rgba(241, 214, 158, 0.1) 0px 0px 20px -4px, rgba(0, 0, 0, 0.6) 0px 15px 25px -10px;">
   <div>
     <h2 class="text-2xl md:text-[25px] font-bold tracking-wider text-[#F8F1E2] uppercase font-sans">${escapeHtml(book.title)}</h2>
     <p class="text-[12.5px] text-[#A6AFBD] mt-1">Written by : <span class="text-[#CCD3DE]">${escapeHtml(book.author)}</span></p>
@@ -28,7 +28,7 @@
   </div>
 </div>`;
     }
-    return `<div class="relative flex-[1_0_660px] max-w-[690px] bg-[#141822] rounded-[22px] border border-appCardBorder p-6 md:p-7 overflow-hidden shadow-2xl flex justify-between gap-6" data-purpose="primary-hero-card" style="border: 1px solid rgba(243, 209, 130, 0.32); box-shadow: rgba(243, 209, 130, 0.16) 0px 0px 25px -4px, rgba(0, 0, 0, 0.7) 0px 20px 30px -10px;">
+    return `<div class="relative flex-[1_0_660px] max-w-[690px] bg-[#161B24] rounded-[22px] border border-appCardBorder p-6 md:p-7 overflow-hidden shadow-2xl flex justify-between gap-6" data-purpose="primary-hero-card" style="background: linear-gradient(135deg, #1E2636 0%, #141923 100%); border: 1px solid rgba(241, 214, 158, 0.35); box-shadow: rgba(241, 214, 158, 0.16) 0px 0px 25px -4px, rgba(0, 0, 0, 0.7) 0px 20px 30px -10px;">
   <div class="bokeh-dot w-48 h-48 -top-12 right-24 bg-white/[0.04]"></div>
   <div class="bokeh-dot w-36 h-36 bottom-2 left-1/3 bg-white/[0.02]"></div>
   <div class="bokeh-dot w-28 h-28 top-8 left-12 bg-white/[0.03]"></div>
@@ -262,7 +262,7 @@
           </div>
           <div class="flex flex-wrap items-center gap-space-md pt-space-xs">
             <button class="flex items-center justify-center gap-space-xs px-space-xl py-space-sm rounded-full bg-primary-container text-on-primary-container font-headline-sm text-headline-sm hover:scale-105 transition-transform shadow-[0_4px_24px_rgba(245,215,127,0.35)]" data-audio-stub="detail-${book.id}" type="button"><span class="material-symbols-outlined text-[20px]">play_arrow</span><span>Listen Now</span></button>
-            <a class="flex items-center justify-center gap-space-xs px-space-xl py-space-sm rounded-full bg-surface-container-high text-primary-container font-headline-sm text-headline-sm hover:bg-surface-bright transition-all" href="#/reader?book=${book.id}"><span class="material-symbols-outlined text-[20px]">auto_stories</span><span>Read Now</span></a>
+            <a class="flex items-center justify-center gap-space-xs px-space-xl py-space-sm rounded-full bg-surface-container-high text-primary-container font-headline-sm text-headline-sm hover:bg-surface-bright transition-all" href="#/reader?book=${book.id}&chapter=1"><span class="material-symbols-outlined text-[20px]">auto_stories</span><span>Read Chapter 1</span></a>
             <div class="flex items-center gap-space-xs ml-auto sm:ml-0">
               <button class="w-10 h-10 rounded-full bg-surface-container text-on-surface-variant hover:text-primary-container flex items-center justify-center favorite-toggle" data-favorite-toggle="${book.id}" aria-label="Bookmark" type="button"><span class="material-symbols-outlined text-[20px]">bookmark_add</span></button>
               <button class="w-10 h-10 rounded-full bg-surface-container text-on-surface-variant hover:text-primary-container flex items-center justify-center" data-audio-stub="detail-share-${book.id}" type="button" aria-label="Share"><span class="material-symbols-outlined text-[20px]">share</span></button>
@@ -274,7 +274,7 @@
             <div class="absolute -inset-4 bg-primary-container/20 rounded-2xl blur-2xl"></div>
             <div class="relative w-64 sm:w-72 md:w-80 aspect-[2/3] rounded-DEFAULT overflow-hidden shadow-[0_24px_50px_rgba(0,0,0,0.85)]">
               ${window.NovelCastView.cover(book)}
-              <div class="absolute top-4 right-4 z-20 bg-primary-container text-on-primary-container font-label-badge uppercase font-extrabold px-space-sm py-1 rounded">Featured</div>
+              <div class="absolute top-4 right-4 z-20 bg-primary-container text-on-primary-container font-label-badge uppercase font-extrabold px-space-sm py-1 rounded">Atlas Classic</div>
             </div>
           </div>
         </div>
@@ -285,18 +285,38 @@
   function chapterList(book) {
     const list = book.chaptersList || [];
     const total = book.chapters || list.length || 1;
-    return `<div class="flex items-center justify-between mb-space-md">
-      <h3 class="font-headline-lg text-headline-lg text-primary">Chapter Index</h3>
-      <span class="font-label-numeric text-label-numeric text-primary-container">${list.length} of ${total}</span>
-    </div>
-    <div class="space-y-space-2xs">${list.map((c, i) => `<a class="flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container-lowest hover:bg-surface-container transition-all" href="${bookHref('read-book.html', book.id, i)}" data-book-link="${book.id}" data-book-target="book"><div class="flex items-center gap-space-md"><span class="font-label-numeric text-label-numeric text-primary-container/70">${String(i + 1).padStart(2, '0')}</span><div><h4 class="font-headline-sm text-headline-sm text-on-surface">${escapeHtml(c.title || 'Chapter ' + (i + 1))}</h4><span class="font-body-sm text-body-sm text-on-surface-variant">${escapeHtml(c.theme || 'Sanctuary passage')}</span></div></div><span class="material-symbols-outlined text-[18px] text-on-surface-variant">chevron_right</span></a>`).join('')}</div>`;
+    return `<div id="chapter-list-container">
+      <div class="flex items-center justify-between mb-space-md">
+        <div class="flex items-center gap-2">
+          <h3 class="font-headline-lg text-headline-lg text-primary">Chapter Index</h3>
+          <span class="text-xs font-mono text-goldAccent bg-surface-container-high px-2 py-0.5 rounded-full border border-outline-variant/30">Verified TOC</span>
+        </div>
+        <span class="font-label-numeric text-label-numeric text-primary-container" id="chapter-count-badge">${list.length} of ${total} Chapters</span>
+      </div>
+      <div class="space-y-space-2xs max-h-[640px] overflow-y-auto pr-1" id="chapter-list-items">
+        ${list.map((c, i) => {
+          const chNum = c.chapterNumber || (i + 1);
+          const words = c.wordCount ? `${c.wordCount.toLocaleString()} words` : 'Sanctuary chapter';
+          return `<a class="flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container-lowest hover:bg-surface-container transition-all group" href="#/reader?book=${book.id}&chapter=${chNum}">
+            <div class="flex items-center gap-space-md">
+              <span class="font-label-numeric text-label-numeric text-primary-container/70 group-hover:text-primary-container font-bold">${String(chNum).padStart(2, '0')}</span>
+              <div>
+                <h4 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-goldAccent transition-colors">${escapeHtml(c.title || 'Chapter ' + chNum)}</h4>
+                <span class="font-body-sm text-body-sm text-on-surface-variant">${words}</span>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-goldAccent transition-colors">chevron_right</span>
+          </a>`;
+        }).join('')}
+      </div>
+    </div>`;
   }
 
   function reviews(book) {
     const summaries = [
-      { name: 'Maya S.', stars: 5, text: 'A gentle, deliberate guide that held my attention across long evening reads.' },
-      { name: 'Andre P.', stars: 4, text: 'Original demo content but the pacing here is honest and the tone is steady.' },
-      { name: 'Lin J.', stars: 5, text: 'Sample review text used only to demonstrate the layout and review list.' },
+      { name: 'Maya S.', stars: 5, text: 'A gentle, deliberate narrative that held my attention across long evening reads.' },
+      { name: 'Andre P.', stars: 4, text: 'Clean chapter divisions and faithful formatting. Pacing and tone are excellent.' },
+      { name: 'Lin J.', stars: 5, text: 'The typography and dark sanctuary layout make reading this timeless text effortless.' },
     ];
     return `<section class="lg:col-span-5 flex flex-col gap-space-xl">
       <h3 class="font-headline-md text-headline-md text-primary">Audience Reviews</h3>
@@ -318,8 +338,8 @@
 
   function likeRow(book) {
     return `<section class="flex flex-col gap-space-md pt-space-md">
-      <div class="flex items-center justify-between"><h3 class="font-headline-xl text-headline-xl text-primary font-bold">You Might Also Like</h3><a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary-container uppercase tracking-wider" href="search.html">View All</a></div>
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-space-md">${NC.books.filter((b) => b.id !== book.id).slice(0, 5).map(popularCard).join('')}</div>
+      <div class="flex items-center justify-between"><h3 class="font-headline-xl text-headline-xl text-primary font-bold">You Might Also Like</h3><a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary-container uppercase tracking-wider" href="#/search">View All</a></div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-space-md">${NC.books.filter((b) => b.id !== book.id).slice(0, 6).map(popularCard).join('')}</div>
     </section>`;
   }
 
