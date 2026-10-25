@@ -161,7 +161,7 @@ window.NovelCastViews.library = {
                     <div class="relative w-full aspect-[1/1.42] rounded-xl overflow-hidden book-shadow book-spine bg-[#1B212E] border border-white/5 transition-transform duration-200 group-hover:-translate-y-1">
                       <!-- Top Rating & Format Badge -->
                       <div class="absolute top-2 left-2 z-20 flex items-center gap-1 bg-[#1A212E]/90 backdrop-blur-md px-1.5 py-0.5 rounded-full border border-white/10 text-[10px] font-semibold text-white">
-                        <span class="text-goldAccent text-[9px]">★</span> ${(book.rating || 4.8).toFixed(1)}
+                        <span class="text-goldAccent text-[9px]">★</span> ${book.rating ? book.rating.toFixed(1) : 'New'}
                       </div>
 
                       <!-- Delete Book Button -->

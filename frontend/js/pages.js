@@ -37,7 +37,7 @@
       <div class="flex items-center gap-3">
         <h2 class="text-2xl md:text-[26px] font-bold tracking-wider text-[#F8F1E2] uppercase font-sans">${escapeHtml(book.title)}</h2>
         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#202735] border border-[#2B3547] text-[11px] font-semibold text-[#E5E9F0]">
-          <span class="material-symbols-outlined text-goldAccent fill-goldAccent text-[13px]">star</span>${book.rating.toFixed(1)}
+          <span class="material-symbols-outlined text-goldAccent fill-goldAccent text-[13px]">star</span>${book.rating ? book.rating.toFixed(1) : 'New'}
         </span>
       </div>
       <p class="text-[12.5px] text-[#A6AFBD] mt-1 font-normal">Written by : <span class="text-[#CCD3DE]">${escapeHtml(book.author)}</span></p>
@@ -75,7 +75,7 @@
   <a href="#/book?book=${book.id}" class="block">
     <div class="relative w-full aspect-[1/1.42] rounded-xl overflow-hidden book-shadow book-spine bg-[#1B212E] border border-white/5 transition-transform duration-200 group-hover:-translate-y-1">
       <div class="absolute top-2 left-2 z-20 flex items-center gap-1 bg-[#1A212E]/90 backdrop-blur-md px-1.5 py-0.5 rounded-full border border-white/10 text-[10px] font-semibold text-white">
-        <span class="text-goldAccent text-[9px]">★</span> ${book.rating.toFixed(1)}
+        <span class="text-goldAccent text-[9px]">★</span> ${book.rating ? book.rating.toFixed(1) : 'New'}
       </div>
       <div class="absolute inset-0">${window.NovelCastView.cover(book)}</div>
       <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none"></div>
@@ -106,7 +106,7 @@
             <h3 class="font-headline-xl text-headline-xl text-primary font-bold tracking-wide">${escapeHtml(book.title)}</h3>
             <div class="flex items-center gap-1 bg-surface-container-lowest/80 px-space-xs py-0.5 rounded-full text-primary-container">
               <span class="material-symbols-outlined text-[14px]">star</span>
-              <span class="font-label-numeric text-label-numeric">${book.rating.toFixed(1)}</span>
+              <span class="font-label-numeric text-label-numeric">${book.rating ? book.rating.toFixed(1) : 'New'}</span>
             </div>
           </div>
           <p class="font-body-sm text-body-sm text-on-surface-variant">Written by : ${escapeHtml(book.author)}</p>
@@ -144,7 +144,7 @@
       <div class="relative w-full aspect-[2/3] rounded-DEFAULT overflow-hidden bg-surface-container-low shadow-xl mb-space-sm transform transition-all duration-300 group-hover:-translate-y-1.5">
         <div class="absolute top-2.5 left-2.5 z-10 flex items-center gap-1 bg-surface-container-lowest/85 backdrop-blur-md px-2 py-0.5 rounded-full">
           <span class="material-symbols-outlined text-primary-container text-[14px]">star</span>
-          <span class="font-label-numeric text-label-numeric text-primary">${book.rating.toFixed(1)}</span>
+          <span class="font-label-numeric text-label-numeric text-primary">${book.rating ? book.rating.toFixed(1) : 'New'}</span>
         </div>
         <div class="absolute inset-0">${window.NovelCastView.cover(book)}</div>
         <div class="absolute inset-0 bg-surface-container-lowest/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -180,7 +180,7 @@
               <h1 class="font-headline-xl text-headline-xl text-primary font-bold tracking-wide">${escapeHtml(book.title)}</h1>
               <div class="flex items-center gap-1 bg-surface-container-lowest/80 px-space-sm py-0.5 rounded-full">
                 <span class="material-symbols-outlined text-primary-container text-[16px]">star</span>
-                <span class="font-label-numeric text-label-numeric text-primary font-bold">${book.rating.toFixed(1)}</span>
+                <span class="font-label-numeric text-label-numeric text-primary font-bold">${book.rating ? book.rating.toFixed(1) : 'New'}</span>
               </div>
               <span class="px-space-sm py-0.5 rounded-full bg-primary-container text-on-primary-container font-label-badge text-label-badge shadow-[0_0_12px_rgba(245,215,127,0.3)]">Trending #${NC.books.indexOf(book) + 1}</span>
             </div>
@@ -242,8 +242,8 @@
             <h1 class="font-display-lg text-display-lg text-primary tracking-wide uppercase font-extrabold">${escapeHtml(book.title)}</h1>
             <div class="flex items-center gap-1 px-space-sm py-1 rounded-full bg-surface-container-highest">
               <span class="material-symbols-outlined text-primary-container text-[16px]">star</span>
-              <span class="font-label-numeric text-label-numeric text-primary-container font-semibold">${(book.rating || 4.8).toFixed(1)}</span>
-              <span class="font-body-sm text-body-sm text-on-surface-variant">(${(book.reviews || 84).toLocaleString()})</span>
+              <span class="font-label-numeric text-label-numeric text-primary-container font-semibold" id="book-hero-rating">${book.rating ? book.rating.toFixed(1) : 'New'}</span>
+              <span class="font-body-sm text-body-sm text-on-surface-variant" id="book-hero-rating-count">(${(book.reviews || 0).toLocaleString()})</span>
             </div>
             <span class="px-space-md py-0.5 rounded-full bg-primary-container text-on-primary-container font-label-caps text-label-caps font-bold uppercase">${book.trending ? 'Trending #1' : 'Featured'}</span>
           </div>
@@ -313,27 +313,7 @@
   }
 
   function reviews(book) {
-    const summaries = [
-      { name: 'Maya S.', stars: 5, text: 'A gentle, deliberate narrative that held my attention across long evening reads.' },
-      { name: 'Andre P.', stars: 4, text: 'Clean chapter divisions and faithful formatting. Pacing and tone are excellent.' },
-      { name: 'Lin J.', stars: 5, text: 'The typography and dark sanctuary layout make reading this timeless text effortless.' },
-    ];
-    return `<section class="lg:col-span-5 flex flex-col gap-space-xl">
-      <h3 class="font-headline-md text-headline-md text-primary">Audience Reviews</h3>
-      <div class="bg-surface-container-low rounded-lg p-space-lg">
-        <div class="flex items-end gap-space-md">
-          <span class="font-headline-lg text-headline-lg text-primary">${(book.rating || 4.8).toFixed(1)}</span>
-          <div class="flex flex-col"><span class="font-label-numeric text-primary-container">${window.NovelCastView.stars(book.rating || 4.8)}</span><span class="font-body-sm text-on-surface-variant">${(book.reviews || 84).toLocaleString()} ratings</span></div>
-        </div>
-        <div class="mt-space-md grid grid-cols-2 gap-space-xs">
-          <div class="flex items-center gap-2"><span class="text-primary-container font-label-numeric">5★</span><div class="flex-1 h-2 rounded-full bg-surface-container-highest overflow-hidden"><div class="h-full bg-primary-container" style="width: 84%"></div></div><span class="font-label-numeric text-on-surface-variant">84%</span></div>
-          <div class="flex items-center gap-2"><span class="text-primary-container font-label-numeric">4★</span><div class="flex-1 h-2 rounded-full bg-surface-container-highest overflow-hidden"><div class="h-full bg-primary-container" style="width: 11%"></div></div><span class="font-label-numeric text-on-surface-variant">11%</span></div>
-          <div class="flex items-center gap-2"><span class="text-primary-container font-label-numeric">3★</span><div class="flex-1 h-2 rounded-full bg-surface-container-highest overflow-hidden"><div class="h-full bg-primary-container" style="width: 3%"></div></div><span class="font-label-numeric text-on-surface-variant">3%</span></div>
-          <div class="flex items-center gap-2"><span class="text-primary-container font-label-numeric">2★</span><div class="flex-1 h-2 rounded-full bg-surface-container-highest overflow-hidden"><div class="h-full bg-primary-container" style="width: 2%"></div></div><span class="font-label-numeric text-on-surface-variant">2%</span></div>
-        </div>
-        <ul class="mt-space-md space-y-space-sm">${summaries.map((r) => `<li class="flex flex-col gap-space-2xs border-t border-outline-variant/30 pt-space-sm"><div class="flex items-center justify-between"><span class="font-headline-sm text-headline-sm text-primary">${escapeHtml(r.name)}</span><span class="font-label-numeric text-primary-container">${window.NovelCastView.stars(r.stars)}</span></div><p class="font-body-sm text-body-sm text-on-surface-variant">${escapeHtml(r.text)}</p></li>`).join('')}</ul>
-      </div>
-    </section>`;
+    return '<section id="book-ratings" class="reader-ratings"><h3>Reader ratings</h3><div data-rating-content aria-busy="false"><p class="text-on-surface-variant">Loading reader ratings…</p></div></section>';
   }
 
   function likeRow(book) {

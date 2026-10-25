@@ -1,4 +1,5 @@
 (function () {
+  let activeView = null;
   const routes = {
     'home': window.NovelCastViews.home,
     'search': window.NovelCastViews.search,
@@ -72,6 +73,10 @@
       }
     }
 
+    // Release route listeners and animations before replacing the DOM.
+    if (activeView && typeof activeView.destroy === 'function') activeView.destroy();
+    activeView = view;
+    document.body.dataset.route = path;
     // Render view HTML
     container.innerHTML = view.render();
 

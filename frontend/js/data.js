@@ -11,8 +11,6 @@ window.NovelCast = (function () {
       genre: 'Classic Romance',
       narrator: 'Clara Ravenswood (Sanctuary Voice)',
       accent: '#D4AF37',
-      rating: 4.9,
-      reviews: 18420,
       listens: '198,164',
       trending: true,
     },
@@ -20,8 +18,6 @@ window.NovelCast = (function () {
       genre: 'Adventure & Sea',
       narrator: 'Jonathan Vance (Maritime Voice)',
       accent: '#2A4D69',
-      rating: 4.8,
-      reviews: 14200,
       listens: '89,450',
       trending: true,
     },
@@ -29,8 +25,6 @@ window.NovelCast = (function () {
       genre: 'Classic Detective',
       narrator: 'Arthur Pendelton (Oxford Chamber)',
       accent: '#7A6248',
-      rating: 4.9,
-      reviews: 21300,
       listens: '142,300',
       trending: true,
     },
@@ -38,8 +32,6 @@ window.NovelCast = (function () {
       genre: 'Romance & Drama',
       narrator: 'Eleanor Vance (Atmospheric Whisper)',
       accent: '#8F4F58',
-      rating: 4.8,
-      reviews: 11500,
       listens: '76,200',
       trending: true,
     },
@@ -47,8 +39,6 @@ window.NovelCast = (function () {
       genre: 'Gothic Horror',
       narrator: 'Victor Thorne (Nocturnal Gothic)',
       accent: '#27423A',
-      rating: 4.8,
-      reviews: 16800,
       listens: '124,500',
       trending: true,
     },
@@ -56,8 +46,6 @@ window.NovelCast = (function () {
       genre: 'Literary & Historical',
       narrator: 'Oliver Sterling (London Chamber)',
       accent: '#8B263E',
-      rating: 4.7,
-      reviews: 9800,
       listens: '65,400',
       trending: false,
     },
@@ -65,8 +53,6 @@ window.NovelCast = (function () {
       genre: 'Science Fiction',
       narrator: 'David Kensington (Astrophysical)',
       accent: '#9C3D1E',
-      rating: 4.8,
-      reviews: 13400,
       listens: '92,100',
       trending: true,
     },
@@ -74,8 +60,6 @@ window.NovelCast = (function () {
       genre: 'Children & Fantasy',
       narrator: 'Alice Montgomery (Whimsical Reverie)',
       accent: '#4A6984',
-      rating: 4.9,
-      reviews: 19500,
       listens: '158,000',
       trending: true,
     },
@@ -83,8 +67,6 @@ window.NovelCast = (function () {
       genre: 'Adventure & Travel',
       narrator: 'Pierre Laurent (Continental Explorer)',
       accent: '#C69B46',
-      rating: 4.7,
-      reviews: 8900,
       listens: '58,200',
       trending: false,
     },
@@ -92,8 +74,6 @@ window.NovelCast = (function () {
       genre: 'Gothic Horror',
       narrator: 'Julian Cross (Midnight Gothic)',
       accent: '#4A1525',
-      rating: 4.9,
-      reviews: 22100,
       listens: '165,300',
       trending: true,
     },
@@ -101,8 +81,6 @@ window.NovelCast = (function () {
       genre: 'Psychological Fiction',
       narrator: 'Maximilian Weber (Prague Nocturne)',
       accent: '#3F4E4F',
-      rating: 4.7,
-      reviews: 12200,
       listens: '84,100',
       trending: false,
     },
@@ -110,8 +88,6 @@ window.NovelCast = (function () {
       genre: 'Classic Literature',
       narrator: 'Julian Sterling (Jazz Age Velvet)',
       accent: '#D4AF37',
-      rating: 4.8,
-      reviews: 17600,
       listens: '135,200',
       trending: true,
     },
@@ -119,8 +95,6 @@ window.NovelCast = (function () {
       genre: 'Mystery & Suspense',
       narrator: 'Arthur Pendelton (Devonshire Moor)',
       accent: '#2C3E50',
-      rating: 4.8,
-      reviews: 10400,
       listens: '71,900',
       trending: true,
     },
@@ -128,8 +102,6 @@ window.NovelCast = (function () {
       genre: 'Gothic & Decadence',
       narrator: 'Sebastian Wilde (Decadent Salon)',
       accent: '#583D72',
-      rating: 4.8,
-      reviews: 15300,
       listens: '112,800',
       trending: true,
     },
@@ -137,8 +109,6 @@ window.NovelCast = (function () {
       genre: 'Science Fiction',
       narrator: 'David Kensington (Chronometric)',
       accent: '#466365',
-      rating: 4.6,
-      reviews: 7800,
       listens: '52,400',
       trending: false,
     },
@@ -146,8 +116,6 @@ window.NovelCast = (function () {
       genre: 'Mystery & Macabre',
       narrator: 'Vincent Raven (Binaural Macabre)',
       accent: '#1E232A',
-      rating: 4.9,
-      reviews: 14700,
       listens: '98,300',
       trending: false,
     },
@@ -155,8 +123,6 @@ window.NovelCast = (function () {
       genre: 'Gothic & Psychological',
       narrator: 'Edward Hyde (Dual Tone)',
       accent: '#382039',
-      rating: 4.7,
-      reviews: 9100,
       listens: '63,500',
       trending: false,
     },
@@ -164,8 +130,6 @@ window.NovelCast = (function () {
       genre: 'Adventure & Sea',
       narrator: 'Duncan Ross (Highland Mariner)',
       accent: '#634832',
-      rating: 4.7,
-      reviews: 8400,
       listens: '54,100',
       trending: false,
     },
@@ -173,8 +137,6 @@ window.NovelCast = (function () {
       genre: 'Science Fiction & Sea',
       narrator: 'Captain Nemo (Abyssal Resonance)',
       accent: '#1B4965',
-      rating: 4.8,
-      reviews: 11200,
       listens: '78,400',
       trending: false,
     },
@@ -182,8 +144,6 @@ window.NovelCast = (function () {
       genre: 'Romance & Drama',
       narrator: 'Imogen Cross (Yorkshire Moor)',
       accent: '#533E2D',
-      rating: 4.7,
-      reviews: 10800,
       listens: '73,600',
       trending: false,
     }
@@ -208,6 +168,8 @@ window.NovelCast = (function () {
   }
 
   // Transform backend MongoDB book object into canonical NovelCast book object
+  let communityRatings = Object.create(null);
+
   function transformBackendBook(b) {
     if (!b) return null;
     const slug = b.slug || cleanTitle(b.title).toLowerCase().replace(/[^a-z0-9]+/g, '-');
@@ -224,8 +186,8 @@ window.NovelCast = (function () {
     const duration = `${hours} hr${hours > 1 ? 's' : ''} ${mins} mins`;
 
     const listens = meta.listens || (b.downloadCount ? b.downloadCount.toLocaleString() : '48,200');
-    const rating = meta.rating || (4.6 + (((b.gutendexId || 50) % 4) * 0.1));
-    const reviews = meta.reviews || Math.round((b.downloadCount || 10000) / 10);
+    const rating = communityRatings[slug] ? communityRatings[slug].average : 0;
+    const reviews = communityRatings[slug] ? communityRatings[slug].count : 0;
 
     return {
       id: slug,
@@ -534,8 +496,8 @@ window.NovelCast = (function () {
 
   function normalizeBook(match) {
     if (!match) return null;
-    match.rating = typeof match.rating === 'number' ? match.rating : 4.8;
-    match.reviews = typeof match.reviews === 'number' ? match.reviews : 84;
+    match.rating = typeof match.rating === 'number' ? match.rating : 0;
+    match.reviews = typeof match.reviews === 'number' ? match.reviews : 0;
     match.listens = match.listens || '1,280';
     match.duration = match.duration || '3 hrs 15 mins';
     match.chapters = typeof match.chapters === 'number' ? match.chapters : 12;
@@ -726,9 +688,13 @@ window.NovelCast = (function () {
     const limit = options.limit || 50;
     const sort = options.sort || 'popular';
     try {
+      const ratingsRequest = fetch(`${API_BASE}/ratings`, { signal: AbortSignal.timeout(3000) })
+        .then(response => response.ok ? response.json() : null).catch(() => null);
       const res = await fetch(`${API_BASE}/books?limit=${limit}&sort=${sort}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
+      const payload = await ratingsRequest;
+      if (payload) communityRatings = Object.fromEntries(payload.ratings.map(row => [row.slug, row]));
       if (Array.isArray(data.books) && data.books.length > 0) {
         const liveBooks = data.books.map(transformBackendBook);
         books = liveBooks;
@@ -767,6 +733,8 @@ window.NovelCast = (function () {
       const data = await res.json();
       if (data && data.book) {
         const updatedBook = transformBackendBook(data.book);
+        const previous = byId[updatedBook.id];
+        if (previous) { updatedBook.rating = previous.rating; updatedBook.reviews = previous.reviews; }
         if (Array.isArray(data.chapters)) {
           updatedBook.chaptersList = data.chapters.map(c => ({
             chapterNumber: c.chapterNumber,
@@ -866,6 +834,13 @@ window.NovelCast = (function () {
     // Live API methods
     fetchCatalog,
     fetchBookDetails,
+    setBookRating(id, summary) {
+      const book = byId[resolveId(id)];
+      if (!book) return;
+      communityRatings[book.slug || book.id] = { average: summary.average || 0, count: summary.count };
+      book.rating = summary.average || 0;
+      book.reviews = summary.count;
+    },
     fetchChapter,
     searchCatalog,
     transformBackendBook,

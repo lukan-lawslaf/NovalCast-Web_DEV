@@ -106,7 +106,7 @@ window.NovelCastViews.search = {
                     <h1 class="font-headline-xl text-headline-xl text-primary font-bold tracking-wide">${NC.escapeHtml(featured.title)}</h1>
                     <div class="flex items-center gap-1 bg-surface-container-lowest/80 px-space-sm py-0.5 rounded-full shadow-inner">
                       <span class="material-symbols-outlined text-primary-container text-[16px]">star</span>
-                      <span class="font-label-numeric text-label-numeric text-primary font-bold">${featured.rating.toFixed(1)}</span>
+                      <span class="font-label-numeric text-label-numeric text-primary font-bold">${featured.rating ? featured.rating.toFixed(1) : 'New'}</span>
                     </div>
                     <span class="px-space-sm py-0.5 rounded-full bg-primary-container text-on-primary-container font-label-badge text-label-badge shadow-[0_0_12px_rgba(245,215,127,0.3)]">Curated Masterpiece</span>
                   </div>
@@ -195,6 +195,9 @@ window.NovelCastViews.search = {
     `;
   },
   init: function () {
+    let searchVersion = 0;
+    let disposed = false;
+    this.destroy = () => { disposed = true; searchVersion++; clearTimeout(searchDebounceTimer); };
     const NC = window.NovelCast;
     const NCPage = window.NCPage;
     const input = document.getElementById('search-input');
@@ -209,6 +212,8 @@ window.NovelCastViews.search = {
     let searchDebounceTimer = null;
 
     async function performSearch(q, filterType = currentFilter) {
+      if (disposed) return;
+      const version = ++searchVersion;
       const term = (q || '').trim();
       currentFilter = filterType;
 
@@ -244,7 +249,7 @@ window.NovelCastViews.search = {
       // 2. Asynchronously query backend search for full-text MongoDB match
       try {
         const backendResults = await NC.searchCatalog(term, filterType === 'all' ? '' : filterType);
-        if (backendResults && backendResults.length > 0) {
+        if (!disposed && version === searchVersion && backendResults) {
           renderResults(backendResults, term);
         }
       } catch (e) {

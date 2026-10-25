@@ -31,11 +31,14 @@ window.NovelCastViews.bookDetails = {
     `;
   },
   init: function () {
+    const controller = new AbortController();
+    this.destroy = () => { controller.abort(); if (this.unmountRatings) this.unmountRatings(); };
     const NC = window.NovelCast;
     const NCPage = window.NCPage;
     const query = NC.readQuery();
     const bookId = query.book || 'pride-and-prejudice';
     const book = NC.getBook(bookId) || NC.books[0];
+    this.unmountRatings = window.NovelCastRatings.mount(document.getElementById('book-ratings'), book);
 
     if (window.NovelCastApp && window.NovelCastApp.bindInteractiveElements) {
       window.NovelCastApp.bindInteractiveElements();
@@ -45,6 +48,7 @@ window.NovelCastViews.bookDetails = {
     const targetSlug = book.slug || book.id;
     if (NC.fetchBookDetails) {
       NC.fetchBookDetails(targetSlug).then(updatedBook => {
+        if (controller.signal.aborted) return;
         if (!updatedBook || !updatedBook.chaptersList) return;
         const chaptersWrapper = document.getElementById('book-chapters-wrapper');
         if (chaptersWrapper) {

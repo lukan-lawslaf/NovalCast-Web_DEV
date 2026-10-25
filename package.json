@@ -16,6 +16,8 @@
     "screenshots": "node scripts/screenshots.js",
     "test": "node tests/test-reader-book-pdf.js",
     "test:auth": "node tests/test-email-confirmation-login.js",
+    "test:ratings": "node --test tests/test-ratings-api.js tests/test-ratings-ui.js",
+    "test:auth:reliability": "node --test tests/test-auth-reliability.js",
     "test:all": "node tests/test-reader-book-pdf.js && node tests/test-email-confirmation-login.js && node tests/test-env-and-logo.js"
   },
   "keywords": [

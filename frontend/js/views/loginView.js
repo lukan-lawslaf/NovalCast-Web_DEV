@@ -3,7 +3,7 @@ window.NovelCastViews = window.NovelCastViews || {};
 window.NovelCastViews.login = {
   render: function () {
     const auth = window.NovelCastAuth;
-    const user = auth ? auth.getUser() : null;
+    const user = auth && auth.isAuthenticated() ? auth.getUser() : null;
 
     if (user) {
       return `
@@ -113,7 +113,7 @@ window.NovelCastViews.login = {
             </div>
 
             <!-- Alert / Error Display -->
-            <div id="auth-alert" class="hidden mb-4 p-3 rounded-xl bg-red-950/60 border border-red-800/50 text-red-300 text-xs text-center leading-relaxed"></div>
+            <div id="auth-alert" role="alert" aria-live="polite" class="hidden mb-4 p-3 rounded-xl bg-red-950/60 border border-red-800/50 text-red-300 text-xs text-center leading-relaxed"></div>
 
             <!-- Confirmation Dispatch Notice (Hidden by default; shown upon sign up requiring email verification) -->
             <div id="confirmation-notice" class="hidden text-center py-3 space-y-4">
@@ -235,8 +235,11 @@ window.NovelCastViews.login = {
   },
 
   init: function () {
+    let disposed = false;
+    let submitting = false;
+    this.destroy = () => { disposed = true; };
     const auth = window.NovelCastAuth;
-    const user = auth ? auth.getUser() : null;
+    const user = auth && auth.isAuthenticated() ? auth.getUser() : null;
 
     if (user) {
       const signoutBtn = document.getElementById('btn-auth-signout');
@@ -364,7 +367,7 @@ window.NovelCastViews.login = {
             await auth.resetPasswordForEmail(email);
             window.NovelCast.toast('Recovery instructions dispatched to ' + email);
           } else {
-            window.NovelCast.toast('Recovery cipher sent to ' + email);
+            showAlert('Password recovery is currently unavailable. Please contact support.');
           }
         } catch (e) {
           showAlert(e.message || 'Could not send recovery cipher');
@@ -373,9 +376,9 @@ window.NovelCastViews.login = {
     }
 
     function showAlert(content) {
-      if (!alertBox) return;
+      if (!alertBox || disposed) return;
       if (typeof content === 'string') {
-        alertBox.innerHTML = `<div>${content}</div>`;
+        alertBox.textContent = content;
       } else {
         alertBox.innerHTML = '';
         alertBox.appendChild(content);
@@ -390,6 +393,8 @@ window.NovelCastViews.login = {
     if (form) {
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (submitting || disposed) return;
+        submitting = true;
         hideAlert();
 
         const email = document.getElementById('sanctuary-id').value.trim();
@@ -399,12 +404,15 @@ window.NovelCastViews.login = {
         lastEmailAttempted = email;
 
         submitBtn.disabled = true;
+        tabSignIn.disabled = true;
+        tabSignUp.disabled = true;
         if (spinner) spinner.classList.remove('hidden');
 
         try {
           if (isSignUp) {
             // Sign up via Supabase
             const data = await auth.signUp(email, password, { data: { full_name: fullname } });
+            if (disposed) return;
             
             // Check if confirmation email was dispatched (session is null)
             if (!data.session) {
@@ -426,6 +434,7 @@ window.NovelCastViews.login = {
           } else {
             // Sign in via Supabase
             await auth.signIn(email, password);
+            if (disposed) return;
             window.NovelCast.toast('Welcome back to the Sanctuary');
 
             const params = new URLSearchParams(location.hash.split('?')[1] || '');
@@ -433,15 +442,17 @@ window.NovelCastViews.login = {
             window.NovelCastRouter.navigate(redirect);
           }
         } catch (err) {
+          if (disposed) return;
           if (err.code === 'email_not_confirmed') {
             const container = document.createElement('div');
             container.className = 'space-y-2';
             container.innerHTML = `
-              <p>${err.message}</p>
+              <p></p>
               <button id="btn-alert-resend" type="button" class="underline text-gold-300 hover:text-white font-medium text-[11px] cursor-pointer">
                 Resend Confirmation Email
               </button>
             `;
+            container.querySelector('p').textContent = err.message;
             showAlert(container);
             const alertResendBtn = document.getElementById('btn-alert-resend');
             if (alertResendBtn) {
@@ -458,7 +469,10 @@ window.NovelCastViews.login = {
             showAlert(err.message || 'Authentication cipher invalid. Please check your credentials.');
           }
         } finally {
+          submitting = false;
           submitBtn.disabled = false;
+          tabSignIn.disabled = false;
+          tabSignUp.disabled = false;
           if (spinner) spinner.classList.add('hidden');
         }
       });

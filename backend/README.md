@@ -224,6 +224,20 @@ backend/
 
 ## Troubleshooting
 
+### Reader ratings
+
+Ratings live in the Atlas `ratings` collection, separate from books and chapters.
+`GET /api/ratings` returns catalog averages, and `GET /api/books/:id/ratings`
+returns a book's distribution. An optional bearer token includes the caller's vote.
+`PUT /api/books/:id/ratings` accepts `{ "score": 1 }` through `{ "score": 5 }`.
+It verifies the session with the existing Supabase Auth project before writing;
+the account ID is never accepted from the request body. A unique compound index
+allows one editable vote per account and book. No demo votes enter the averages.
+Configure `SUPABASE_URL` and `SUPABASE_ANON_KEY` (legacy `Supabase_url` and
+`Supabase_api` also work). An unavailable Auth project returns 503; votes are
+never reported as saved on failure. Run `node --test tests/test-ratings-api.js`
+from the repository root for the isolated HTTP integration test.
+
 **`querySrv ECONNREFUSED _mongodb._tcp...`** — the local DNS resolver refuses
 SRV queries. The service retries automatically with public resolvers (see
 `MONGODB_DNS_SERVERS` above).

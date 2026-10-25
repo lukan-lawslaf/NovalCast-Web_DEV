@@ -97,3 +97,125 @@
 .bg-spotlight {
   background: radial-gradient(circle at 50% 42%, #14171d 0%, #080a0e 45%, #000000 85%);
 }
+
+/* Keep the original landing composition while giving each volume a solid body.
+   Filters and opacity on the 3D wrapper flatten its covers and page edges. */
+.landing-original .parade-stage {
+  perspective: none;
+}
+
+.landing-original-row {
+  --arc-rise: clamp(110px, 21.5vw, 400px);
+  flex: 0 0 auto;
+  transform-style: flat;
+}
+
+.landing-original .book-3d-wrapper {
+  --book-depth: 22px;
+  --arc-position: 0;
+  top: calc((.55 - var(--arc-position)) * var(--arc-rise));
+  transform: rotateY(-54deg) rotateX(4deg);
+  filter: none;
+  opacity: 1;
+  transition: transform .45s cubic-bezier(.2,.8,.25,1);
+}
+
+/* A U-shaped row: the center pair sits lowest, and each neighboring pair
+   rises toward the edges. Position stays intact during hover. */
+.landing-original-row > .book-3d-wrapper:nth-child(1),
+.landing-original-row > .book-3d-wrapper:nth-child(10) { --arc-position: 1; }
+.landing-original-row > .book-3d-wrapper:nth-child(2),
+.landing-original-row > .book-3d-wrapper:nth-child(9) { --arc-position: .68; }
+.landing-original-row > .book-3d-wrapper:nth-child(3),
+.landing-original-row > .book-3d-wrapper:nth-child(8) { --arc-position: .32; }
+.landing-original-row > .book-3d-wrapper:nth-child(4),
+.landing-original-row > .book-3d-wrapper:nth-child(7) { --arc-position: .10; }
+.landing-original-row > .book-3d-wrapper:nth-child(5),
+.landing-original-row > .book-3d-wrapper:nth-child(6) { --arc-position: 0; }
+
+@media (min-width: 1280px) {
+  .landing-original .landing-original-row > .book-3d-wrapper + .book-3d-wrapper {
+    margin-left: -20px;
+  }
+}
+
+.landing-original .book-3d-wrapper > div:last-child {
+  transform: translateZ(calc(var(--book-depth) / 2));
+  backface-visibility: hidden;
+  border-radius: 2px 4px 4px 2px;
+  box-shadow: inset 2px 0 3px #ffffff30, inset -1px 0 2px #0007,
+    -12px 22px 28px #0008;
+}
+
+.landing-original .book-3d-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 2px 4px 4px 2px;
+  background: linear-gradient(100deg, #302c27, #151515 12%, #242321);
+  border: 2px solid #655c444f;
+  transform: translateZ(calc(var(--book-depth) / -2));
+  box-shadow: -14px 20px 24px #0009;
+}
+
+.landing-original .book-3d-wrapper::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--book-depth);
+  height: 100%;
+  transform-origin: left center;
+  transform: rotateY(90deg) translateX(calc(var(--book-depth) / -2));
+  background: linear-gradient(90deg, #151515, #494337 25%, #28251f 65%, #100f0d);
+  border-top: 2px solid #b29b6955;
+  border-bottom: 2px solid #b29b6955;
+}
+
+.landing-original .book-edge-right {
+  top: 5px;
+  left: 100%;
+  right: auto;
+  width: calc(var(--book-depth) - 8px);
+  height: calc(100% - 10px);
+  transform-origin: left center;
+  transform: rotateY(90deg) translateX(calc((var(--book-depth) - 8px) / -2));
+  background: repeating-linear-gradient(to bottom, #e8dfca 0 1px, #c9bda2 1px 1.5px);
+  box-shadow: inset 4px 0 7px #58432944, inset -3px 0 5px #58432955;
+  border: 1px solid #b9aa8b;
+}
+
+.landing-original .book-edge-top {
+  top: 4px;
+  left: 4px;
+  width: calc(100% - 8px);
+  height: calc(var(--book-depth) - 8px);
+  transform: rotateX(90deg) translateY(calc((var(--book-depth) - 8px) / -2));
+  background: repeating-linear-gradient(to bottom, #f4ecd7 0 1px, #c9bda2 1px 2px);
+  box-shadow: inset 0 0 8px #51412b44;
+}
+
+.landing-original .book-3d-wrapper:hover,
+.landing-original .book-3d-wrapper:focus-visible {
+  transform: rotateY(-50deg) rotateX(4deg) translateY(-16px) translateZ(28px);
+  filter: none;
+}
+
+.landing-original .book-3d-wrapper:focus-visible {
+  outline: 2px solid #e0c070;
+  outline-offset: 8px;
+}
+
+.landing-original .book-featured {
+  --book-depth: 26px;
+  transform: rotateY(-54deg) rotateX(4deg);
+}
+
+@media (max-width: 600px) {
+  .landing-original .book-3d-wrapper { --book-depth: 18px; }
+  .landing-original .book-featured { --book-depth: 22px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-original .book-3d-wrapper { transition: none; }
+}

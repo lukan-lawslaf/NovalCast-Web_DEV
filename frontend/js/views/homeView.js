@@ -71,7 +71,7 @@ window.NovelCastViews.home = {
                 <p class="text-[12px] text-[#8E97A6] truncate">${NC.escapeHtml(b.author)}</p>
                 <div class="flex items-center gap-3 mt-2 text-[11px] text-[#7E8798]">
                   <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">schedule</span>${NC.escapeHtml(b.duration)}</span>
-                  <span class="flex items-center gap-1 text-goldAccent font-medium">★ ${b.rating.toFixed(1)}</span>
+                  <span class="flex items-center gap-1 text-goldAccent font-medium">★ ${b.rating ? b.rating.toFixed(1) : 'New'}</span>
                 </div>
               </div>
               <a href="#/book?book=${b.id}" class="w-9 h-9 rounded-full bg-goldAccent text-[#121620] flex items-center justify-center shrink-0 shadow-md hover:scale-110 transition-transform">
@@ -103,6 +103,8 @@ window.NovelCastViews.home = {
     `;
   },
   init: function () {
+    const controller = new AbortController();
+    this.destroy = () => controller.abort();
     if (window.NovelCastApp && window.NovelCastApp.bindInteractiveElements) {
       window.NovelCastApp.bindInteractiveElements();
     }
@@ -111,7 +113,7 @@ window.NovelCastViews.home = {
     const onRefresh = () => {
       const container = document.getElementById('app-view');
       const hash = location.hash.replace(/^#\/?/, '').split('?')[0];
-      if (container && (hash === 'home' || !hash)) {
+      if (container && hash === 'home') {
         container.innerHTML = window.NovelCastViews.home.render();
         if (window.NovelCastApp && window.NovelCastApp.bindInteractiveElements) {
           window.NovelCastApp.bindInteractiveElements();
@@ -119,6 +121,6 @@ window.NovelCastViews.home = {
       }
     };
 
-    document.addEventListener('novelcast:books-loaded', onRefresh, { once: true });
+    document.addEventListener('novelcast:books-loaded', onRefresh, { once: true, signal: controller.signal });
   }
 };

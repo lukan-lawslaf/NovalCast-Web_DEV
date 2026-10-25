@@ -15,6 +15,45 @@
   let client = null;
   const LOCAL_USER_KEY = 'novelcast.auth.user.v1';
 
+  function authError(error) {
+    const message = error && error.message || '';
+    if (error && (error.status === 0 || error.status >= 500) ||
+        /networkerror|failed to fetch|fetch failed|load failed|timed?\s*out|aborted/i.test(message)) {
+      return Object.assign(new Error('The sign-in service is currently unreachable. Please try again later.'), { code: 'auth_unavailable' });
+    }
+    if (error && error.status === 429) return new Error('Too many attempts. Please wait a moment before trying again.');
+    return error instanceof Error ? error : Object.assign(new Error(message || 'Unable to complete authentication.'), { code: error && error.code });
+  }
+
+  async function authFetch(url, options = {}) {
+    const controller = new AbortController();
+    const originalSignal = options.signal;
+    const onAbort = () => controller.abort();
+    if (originalSignal) {
+      if (originalSignal.aborted) controller.abort();
+      else originalSignal.addEventListener('abort', onAbort, { once: true });
+    }
+    const timer = setTimeout(() => controller.abort(), 12000);
+    try {
+      return await fetch(url, { ...options, signal: controller.signal });
+    } finally {
+      clearTimeout(timer);
+      if (originalSignal) originalSignal.removeEventListener('abort', onAbort);
+    }
+  }
+
+  async function authRequest(method, payload) {
+    try {
+      const sb = getClient();
+      if (!sb) throw new Error('Sign-in is unavailable because authentication is not configured or has not loaded. Please reload the page.');
+      const result = await sb.auth[method](payload);
+      if (result.error) throw result.error;
+      return result.data;
+    } catch (error) {
+      throw authError(error);
+    }
+  }
+
   // Local fallback storage for fast synchronous state check
   function getStoredUser() {
     try {
@@ -34,7 +73,12 @@
         return null;
       }
       if (window.supabase && typeof window.supabase.createClient === 'function') {
-        client = window.supabase.createClient(url, key);
+        try {
+          client = window.supabase.createClient(url, key, { global: { fetch: authFetch } });
+        } catch {
+          console.warn('[NovelCast Auth] Invalid authentication configuration.');
+          return null;
+        }
       } else {
         console.warn('[NovelCast Auth] Supabase library not loaded on window.');
       }
@@ -82,9 +126,10 @@
 
       try {
         const { data: { session }, error } = await sb.auth.getSession();
+        if (error) throw error;
         if (session && session.user) {
           setStoredUser(session.user);
-        } else if (!session && !currentUser) {
+        } else if (!session) {
           setStoredUser(null);
         }
 
@@ -104,6 +149,14 @@
         console.warn('[NovelCast Auth] Error checking session:', err);
       }
       return currentUser;
+    },
+
+    getAccessToken: async function () {
+      const sb = getClient();
+      if (!sb) return null;
+      const { data, error } = await sb.auth.getSession();
+      if (error) throw error;
+      return data.session ? data.session.access_token : null;
     },
 
     getUser: function () {
@@ -129,9 +182,7 @@
     },
 
     signUp: async function (email, password, options = {}) {
-      const sb = getClient();
-      if (!sb) throw new Error('Supabase client unavailable');
-      const { data, error } = await sb.auth.signUp({
+      const data = await authRequest('signUp', {
         email: email.trim(),
         password: password,
         options: {
@@ -139,7 +190,6 @@
           emailRedirectTo: window.location.origin + window.location.pathname + '#/login?confirmed=true'
         }
       });
-      if (error) throw error;
 
       // Only authenticate immediately if an active session is returned (i.e. if email confirmation is turned off)
       // When email confirmation is required, data.session is null and data.user.identities exists
@@ -153,14 +203,10 @@
     },
 
     signIn: async function (email, password) {
-      const sb = getClient();
-      if (!sb) throw new Error('Supabase client unavailable');
-      const { data, error } = await sb.auth.signInWithPassword({
-        email: email.trim(),
-        password: password
-      });
-
-      if (error) {
+      let data;
+      try {
+        data = await authRequest('signInWithPassword', { email: email.trim(), password });
+      } catch (error) {
         const msg = (error.message || '').toLowerCase();
         if (msg.includes('not confirmed') || msg.includes('email not confirmed')) {
           const unconfirmedErr = new Error('Your email address has not been confirmed yet. Please verify your inbox and click the confirmation link sent by Supabase before signing in.');
@@ -173,21 +219,20 @@
 
       if (data.session && data.user) {
         setStoredUser(data.user);
+      } else {
+        throw new Error('Sign-in did not complete. Please try again.');
       }
       return data;
     },
 
     resendConfirmation: async function (email) {
-      const sb = getClient();
-      if (!sb) throw new Error('Supabase client unavailable');
-      const { data, error } = await sb.auth.resend({
+      const data = await authRequest('resend', {
         type: 'signup',
         email: email.trim(),
         options: {
           emailRedirectTo: window.location.origin + window.location.pathname + '#/login?confirmed=true'
         }
       });
-      if (error) throw error;
       return data;
     },
 

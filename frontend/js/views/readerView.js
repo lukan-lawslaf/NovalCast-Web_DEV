@@ -14,7 +14,7 @@ window.NovelCastViews.reader = {
 
     return `
       <!-- Reader Container -->
-      <div class="max-w-7xl mx-auto pb-16">
+      <div class="reader-shell max-w-7xl mx-auto pb-16">
         <!-- Top Reader Control Bar -->
         <div class="w-full mb-4 px-4 py-3 bg-[#11151E] border border-[#222B3A] rounded-2xl flex flex-wrap items-center justify-between gap-4 shadow-lg">
           <div class="flex items-center gap-3">
@@ -31,9 +31,9 @@ window.NovelCastViews.reader = {
           <div class="flex items-center gap-3 sm:gap-4 text-[12px]">
             <div class="flex items-center gap-2 bg-[#181E2B] px-3 py-1.5 rounded-full border border-[#263143]">
               <span class="text-[#7A8699] text-[11px] font-semibold uppercase tracking-wider">Size</span>
-              <button id="font-decrease" class="text-white hover:text-goldAccent px-1 text-sm font-bold cursor-pointer" type="button">-</button>
+              <button aria-label="Decrease text size" id="font-decrease" class="text-white hover:text-goldAccent px-1 text-sm font-bold cursor-pointer" type="button">-</button>
               <span id="font-size-label" class="text-goldAccent font-mono text-xs">17px</span>
-              <button id="font-increase" class="text-white hover:text-goldAccent px-1 text-sm font-bold cursor-pointer" type="button">+</button>
+              <button aria-label="Increase text size" id="font-increase" class="text-white hover:text-goldAccent px-1 text-sm font-bold cursor-pointer" type="button">+</button>
             </div>
 
             <!-- Book vs PDF Mode Switcher -->
@@ -55,24 +55,7 @@ window.NovelCastViews.reader = {
           </div>
         </div>
 
-        <!-- Aural Sync Floating Ribbon -->
-        <div class="w-full mb-4 px-4 py-2.5 bg-gradient-to-r from-[#171D28] via-[#1A212E] to-[#171D28] rounded-xl flex items-center justify-between gap-4 shadow-md border border-goldAccent/20">
-          <div class="flex items-center gap-2.5 min-w-0">
-            <span class="flex h-2.5 w-2.5 relative">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-goldAccent opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-goldAccent"></span>
-            </span>
-            <span class="text-[11px] font-bold text-goldAccent uppercase tracking-wider">Aural Sync</span>
-            <span class="text-[#4E5B70]">•</span>
-            <p class="text-[12px] text-[#A6B2C3] truncate">
-              Narrated by <strong class="text-white">${NC.escapeHtml(book.narrator || 'AI Sanctuary Voice')}</strong> &bull; Synchronized chapter playback
-            </p>
-          </div>
-          <button class="text-goldAccent hover:text-white text-[12px] font-medium flex items-center gap-1 shrink-0 cursor-pointer" onclick="window.NovelCastApp.toggleAudio('book-${book.id}')" type="button">
-            <span class="material-symbols-outlined text-[16px]">play_circle</span>
-            <span>Play Track</span>
-          </button>
-        </div>        <!-- Real Skeuomorphic Book Spread (Book Mode) -->
+        <!-- Real Skeuomorphic Book Spread (Book Mode) -->
         <div class="relative w-full flex justify-center items-center py-2" id="reader-book-container">
           <div class="relative w-full rounded-[22px] p-2 sm:p-3 bg-[#130f0c] shadow-[0_35px_90px_rgba(0,0,0,0.95),0_15px_35px_rgba(0,0,0,0.85)] border border-[#2b221a]">
             <!-- Red Ribbon Bookmark -->
@@ -157,7 +140,7 @@ window.NovelCastViews.reader = {
               <span class="material-symbols-outlined text-[17px]">fast_rewind</span>
             </button>
             <span class="material-symbols-outlined text-[15px] text-goldAccent">auto_stories</span>
-            <span id="reader-nav-indicator" class="font-medium text-white">Chapter ${chapterNum}</span>
+            <span id="reader-nav-indicator" role="status" aria-live="polite" class="font-medium text-white">Chapter ${chapterNum}</span>
             <button id="reader-jump-next-ch" class="hover:text-goldAccent flex items-center transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed p-1" title="Skip to Next Chapter" type="button">
               <span class="material-symbols-outlined text-[17px]">fast_forward</span>
             </button>
@@ -267,6 +250,12 @@ window.NovelCastViews.reader = {
     `;
   },
   init: function () {
+    const controller = new AbortController();
+    let resizeTimer;
+    let cancelTurn = () => {};
+    this.destroy = () => { controller.abort(); clearTimeout(resizeTimer); cancelTurn(); if (observer) observer.disconnect(); };
+    let observer;
+
     const NC = window.NovelCast;
     const query = NC.readQuery();
     const bookId = query.book || 'pride-and-prejudice';
@@ -301,6 +290,9 @@ window.NovelCastViews.reader = {
     const pdfStatusBar = document.getElementById('reader-pdf-status-bar');
 
     function setMode(mode) {
+      cancelTurn();
+      btnBook.setAttribute('aria-pressed', String(mode !== 'pdf'));
+      btnPdf.setAttribute('aria-pressed', String(mode === 'pdf'));
       if (mode === 'pdf') {
         if (btnPdf) {
           btnPdf.classList.add('bg-[#110D0A]', 'text-[#E0D5C1]', 'shadow');
@@ -329,6 +321,7 @@ window.NovelCastViews.reader = {
         if (pdfContainer) pdfContainer.classList.add('hidden');
         if (pdfStatusBar) pdfStatusBar.classList.add('hidden');
         try { localStorage.setItem('novelcast.reader.mode', 'book'); } catch (e) {}
+        if (rePaginate) requestAnimationFrame(() => { if (!controller.signal.aborted) rePaginate(); });
       }
     }
 
@@ -365,7 +358,7 @@ window.NovelCastViews.reader = {
     // Helper to format paragraph text with em markdown tags
     function formatPara(text) {
       if (!text) return '';
-      return text
+      return NC.escapeHtml(text)
         .replace(/_([^_]+)_/g, '<em>$1</em>')
         .replace(/\[Illustration(?::[^\]]*)?\]/gi, '')
         .trim();
@@ -384,6 +377,7 @@ window.NovelCastViews.reader = {
         width: ${targetWidth}px;
         font-size: ${fontSize}px;
         line-height: 1.75;
+        overflow-wrap: anywhere;
         box-sizing: border-box;
         padding: 0;
         margin: 0;
@@ -399,13 +393,13 @@ window.NovelCastViews.reader = {
       let pageIdx = 0;
 
       const getMaxHeight = (idx) => {
-        if (idx === 0) return Math.max(260, targetHeight - headingHeight);
+        if (idx === 0) return Math.max(40, targetHeight - headingHeight);
         return targetHeight;
       };
 
       function wrapPara(text, isFirst) {
         const formatted = formatPara(text);
-        if (isFirst && formatted.length > 3) {
+        if (isFirst && /^[A-Za-z]/.test(formatted)) {
           const firstLetter = formatted[0];
           const rest = formatted.slice(1);
           return `<p class="text-justify"><span class="float-left text-[44px] leading-[0.8] pr-2.5 pt-1 font-serif italic text-[#8f2824]">${NC.escapeHtml(firstLetter)}</span>${rest}</p>`;
@@ -413,56 +407,37 @@ window.NovelCastViews.reader = {
         return `<p class="text-justify">${formatted}</p>`;
       }
 
-      const queue = [...rawParagraphs];
-
-      while (queue.length > 0) {
-        const currentP = queue.shift();
-        const isFirstInCh = (pageIdx === 0 && currentPageItems.length === 0);
-        const htmlToAdd = wrapPara(currentP, isFirstInCh);
-
-        sandbox.innerHTML = [...currentPageItems, htmlToAdd].join('');
-        const currentMax = getMaxHeight(pageIdx);
-
-        if (sandbox.scrollHeight <= currentMax) {
-          currentPageItems.push(htmlToAdd);
-        } else {
-          if (currentPageItems.length > 0) {
-            pages.push([...currentPageItems]);
+      for (const paragraph of rawParagraphs) {
+        let remaining = paragraph;
+        while (remaining) {
+          const first = pageIdx === 0 && currentPageItems.length === 0;
+          const html = wrapPara(remaining, first);
+          sandbox.innerHTML = [...currentPageItems, html].join('');
+          const maxHeight = getMaxHeight(pageIdx) - 8;
+          if (sandbox.scrollHeight <= maxHeight) {
+            currentPageItems.push(html);
+            break;
+          }
+          // Binary search also splits paragraphs with no sentence punctuation.
+          const words = remaining.split(/\s+/);
+          let low = 1, high = words.length, fit = 0;
+          while (low <= high) {
+            const mid = Math.floor((low + high) / 2);
+            sandbox.innerHTML = [...currentPageItems, wrapPara(words.slice(0, mid).join(' '), first)].join('');
+            if (sandbox.scrollHeight <= maxHeight) { fit = mid; low = mid + 1; }
+            else high = mid - 1;
+          }
+          if (!fit && currentPageItems.length) {
+            pages.push(currentPageItems);
             currentPageItems = [];
             pageIdx++;
-            queue.unshift(currentP);
-          } else {
-            // Single paragraph exceeds the whole page: split by sentences
-            const sentences = currentP.split(/(?<=[.?!])\s+/);
-            if (sentences.length > 1) {
-              let sentenceChunk = [];
-              let sIdx = 0;
-              while (sIdx < sentences.length) {
-                const testText = [...sentenceChunk, sentences[sIdx]].join(' ');
-                sandbox.innerHTML = wrapPara(testText, isFirstInCh && sentenceChunk.length === 0);
-                if (sandbox.scrollHeight <= currentMax || sentenceChunk.length === 0) {
-                  sentenceChunk.push(sentences[sIdx]);
-                  sIdx++;
-                } else {
-                  break;
-                }
-              }
-              currentPageItems.push(wrapPara(sentenceChunk.join(' '), isFirstInCh));
-              pages.push([...currentPageItems]);
-              currentPageItems = [];
-              pageIdx++;
-
-              const remaining = sentences.slice(sIdx).join(' ');
-              if (remaining && remaining.trim()) {
-                queue.unshift(remaining.trim());
-              }
-            } else {
-              currentPageItems.push(htmlToAdd);
-              pages.push([...currentPageItems]);
-              currentPageItems = [];
-              pageIdx++;
-            }
+            continue;
           }
+          fit = Math.max(1, fit);
+          pages.push([...currentPageItems, wrapPara(words.slice(0, fit).join(' '), first)]);
+          currentPageItems = [];
+          pageIdx++;
+          remaining = words.slice(fit).join(' ');
         }
       }
 
@@ -479,12 +454,13 @@ window.NovelCastViews.reader = {
 
     function buildSpreads(pages) {
       const spreads = [];
-      for (let i = 0; i < pages.length; i += 2) {
+      const step = window.matchMedia('(min-width: 1024px)').matches ? 2 : 1;
+      for (let i = 0; i < pages.length; i += step) {
         spreads.push({
           left: pages[i] || [],
-          right: pages[i + 1] || null,
+          right: step === 2 ? pages[i + 1] || null : null,
           leftPageNum: i + 1,
-          rightPageNum: i + 2 <= pages.length ? i + 2 : null
+          rightPageNum: step === 2 && i + 2 <= pages.length ? i + 2 : null
         });
       }
       if (spreads.length === 0) {
@@ -496,24 +472,8 @@ window.NovelCastViews.reader = {
     // --- FETCH LIVE CHAPTER FROM MONGO ATLAS BACKEND ---
     const targetSlug = book.slug || book.id;
     NC.fetchChapter(targetSlug, chapterNum).then(data => {
-      if (!data || !data.chapter) {
-        console.warn('[readerView] No chapter data returned, generating fallback sanctuary passage');
-        const fallbackTitle = (book.chaptersList && book.chaptersList[chapterNum - 1] && book.chaptersList[chapterNum - 1].title) || `Chapter ${chapterNum}`;
-        const fallbackContent = `${book.title}\n\nBy ${book.author}\n\n${book.description}\n\nYou will rejoice to hear that no disaster has accompanied the commencement of an enterprise which you have regarded with such evil forebodings. I arrived here yesterday, and my first task is to assure my dear sister of my welfare and increasing confidence in the success of my undertaking.\n\nI am already far north of London, and as I walk in the streets of Petersburgh, I feel a cold northern breeze play upon my cheeks, which braces my nerves and fills me with delight. Do you understand this feeling? This breeze, which has travelled from the regions towards which I am advancing, gives me a foretaste of those icy climes.\n\nInspirited by this wind of promise, my daydreams become more fervent and vivid. I try in vain to be persuaded that the pole is the seat of frost and desolation; it ever presents itself to my imagination as the region of beauty and delight. There, Margaret, the sun is for ever visible, its broad disk just skirting the horizon and diffusing a perpetual splendour.`;
-        data = {
-          book: { title: book.title, author: book.author, totalChapters: book.chapters || 12 },
-          chapter: {
-            chapterNumber: chapterNum,
-            title: fallbackTitle,
-            content: fallbackContent,
-            wordCount: 1200
-          },
-          navigation: {
-            previous: chapterNum > 1 ? chapterNum - 1 : null,
-            next: chapterNum < (book.chapters || 12) ? chapterNum + 1 : null
-          }
-        };
-      }
+      if (controller.signal.aborted) return;
+      if (!data || !data.chapter) throw new Error('Chapter is temporarily unavailable.');
 
       const chapter = data.chapter;
       const nav = data.navigation || {};
@@ -564,8 +524,8 @@ window.NovelCastViews.reader = {
 
       // --- PAGINATE FOR BOOK MODE DOUBLE SPREAD ---
       const leftContentEl = document.getElementById('book-left-page-content');
-      const targetHeight = Math.max(420, leftContentEl ? leftContentEl.clientHeight : 500);
-      const targetWidth = Math.max(300, leftContentEl ? leftContentEl.clientWidth : 460);
+      const targetHeight = Math.max(100, leftContentEl ? leftContentEl.clientHeight : 500);
+      const targetWidth = Math.max(120, leftContentEl ? leftContentEl.clientWidth : 460);
 
       let pages = paginateChapter(rawParagraphs, title, targetWidth, targetHeight, currentFontSize);
       let spreads = buildSpreads(pages);
@@ -577,98 +537,149 @@ window.NovelCastViews.reader = {
         location.hash = `#/reader?book=${targetSlug}&chapter=${targetCh}&mode=${currentMode}`;
       };
 
+      let turning = false;
       function renderSpread(idx, animate = true) {
+        if (controller.signal.aborted || (animate && turning)) return;
+        const forward = idx > currentSpread;
+        const desktop = window.matchMedia('(min-width: 1024px)').matches;
+        const source = document.getElementById(desktop && forward ? 'book-right-article' : 'book-left-article');
+        const oldPage = animate && source ? source.cloneNode(true) : null;
+        const oldRight = animate && desktop ? document.getElementById('book-right-article').cloneNode(true) : null;
+        const oldLeft = animate && desktop ? document.getElementById('book-left-article').cloneNode(true) : null;
         if (!spreads.length) return;
+        cancelTurn();
         currentSpread = Math.max(0, Math.min(idx, spreads.length - 1));
         const spread = spreads[currentSpread];
         const totalSpreads = spreads.length;
         const totalPages = pages.length;
 
-        const spreadContentEl = document.getElementById('book-spread-content');
-        if (animate && spreadContentEl) {
-          spreadContentEl.style.opacity = '0.35';
+        const leftContent = document.getElementById('book-left-page-content');
+        const rightParas = document.getElementById('book-right-paragraphs');
+        const leftPageNumEl = document.getElementById('book-left-page-num');
+        const rightPageNumEl = document.getElementById('book-right-page-num');
+        const rightFooterChEl = document.getElementById('book-right-footer-ch');
+        const navIndicatorEl = document.getElementById('reader-nav-indicator');
+        const prevBtn = document.getElementById('reader-prev-btn');
+        const nextBtn = document.getElementById('reader-next-btn');
+        const prevLabel = document.getElementById('reader-prev-label');
+        const nextLabel = document.getElementById('reader-next-label');
+
+        // Left Page Content
+        let leftHtml = '';
+        if (currentSpread === 0) {
+          leftHtml += `<h1 class="text-[24px] md:text-[28px] font-serif italic text-[#1a1714] leading-tight mb-4" id="book-chapter-heading">${NC.escapeHtml(title)}</h1>`;
+        }
+        leftHtml += spread.left.join('');
+        if (leftContent) leftContent.innerHTML = leftHtml;
+
+        // Right Page Content
+        let rightHtml = '';
+        if (spread.right && spread.right.length > 0) {
+          rightHtml = spread.right.join('');
+        } else {
+          rightHtml = `
+            <div class="h-full flex flex-col items-center justify-center text-neutral-400 py-20 space-y-3 opacity-60">
+              <span class="material-symbols-outlined text-[36px] text-amber-800/60">local_florist</span>
+              <p class="font-serif italic text-sm text-[#857b6a]">End of Chapter ${chNumber}</p>
+            </div>
+          `;
+        }
+        if (rightParas) rightParas.innerHTML = rightHtml;
+
+        // Page Numbering in Footers
+        if (leftPageNumEl) leftPageNumEl.textContent = `Page ${spread.leftPageNum} of ${totalPages}`;
+        if (rightPageNumEl) {
+          rightPageNumEl.textContent = spread.rightPageNum ? `Page ${spread.rightPageNum} of ${totalPages}` : '';
+        }
+        if (rightFooterChEl) {
+          rightFooterChEl.textContent = `Spread ${currentSpread + 1} of ${totalSpreads}`;
         }
 
-        setTimeout(() => {
-          const leftContent = document.getElementById('book-left-page-content');
-          const rightParas = document.getElementById('book-right-paragraphs');
-          const leftPageNumEl = document.getElementById('book-left-page-num');
-          const rightPageNumEl = document.getElementById('book-right-page-num');
-          const rightFooterChEl = document.getElementById('book-right-footer-ch');
-          const navIndicatorEl = document.getElementById('reader-nav-indicator');
-          const prevBtn = document.getElementById('reader-prev-btn');
-          const nextBtn = document.getElementById('reader-next-btn');
-          const prevLabel = document.getElementById('reader-prev-label');
-          const nextLabel = document.getElementById('reader-next-label');
+        // Indicator
+        if (navIndicatorEl) {
+          const spreadPagesStr = spread.rightPageNum
+            ? `Pages ${spread.leftPageNum}–${spread.rightPageNum}`
+            : `Page ${spread.leftPageNum}`;
+          navIndicatorEl.innerHTML = `Ch. ${chNumber} &bull; ${spreadPagesStr} of ${totalPages}`;
+        }
 
-          // Left Page Content
-          let leftHtml = '';
-          if (currentSpread === 0) {
-            leftHtml += `<h1 class="text-[24px] md:text-[28px] font-serif italic text-[#1a1714] leading-tight mb-4" id="book-chapter-heading">${NC.escapeHtml(title)}</h1>`;
-          }
-          leftHtml += spread.left.join('');
-          if (leftContent) leftContent.innerHTML = leftHtml;
-
-          // Right Page Content
-          let rightHtml = '';
-          if (spread.right && spread.right.length > 0) {
-            rightHtml = spread.right.join('');
+        // In-Chapter Navigation: Previous/Next flips spreads; flips to adjacent chapter at start/end
+        if (prevBtn && prevLabel) {
+          if (currentSpread > 0) {
+            prevBtn.disabled = false;
+            prevLabel.textContent = `Previous Page`;
+            prevBtn.onclick = () => renderSpread(currentSpread - 1);
           } else {
-            rightHtml = `
-              <div class="h-full flex flex-col items-center justify-center text-neutral-400 py-20 space-y-3 opacity-60">
-                <span class="material-symbols-outlined text-[36px] text-amber-800/60">local_florist</span>
-                <p class="font-serif italic text-sm text-[#857b6a]">End of Chapter ${chNumber}</p>
-              </div>
-            `;
+            prevBtn.disabled = !nav.previous;
+            prevLabel.textContent = `Previous Chapter`;
+            prevBtn.onclick = () => goTo(nav.previous);
           }
-          if (rightParas) rightParas.innerHTML = rightHtml;
+        }
 
-          // Page Numbering in Footers
-          if (leftPageNumEl) leftPageNumEl.textContent = `Page ${spread.leftPageNum} of ${totalPages}`;
-          if (rightPageNumEl) {
-            rightPageNumEl.textContent = spread.rightPageNum ? `Page ${spread.rightPageNum} of ${totalPages}` : '';
+        if (nextBtn && nextLabel) {
+          if (currentSpread < totalSpreads - 1) {
+            nextBtn.disabled = false;
+            nextLabel.textContent = `Next Page`;
+            nextBtn.onclick = () => renderSpread(currentSpread + 1);
+          } else {
+            nextBtn.disabled = !nav.next;
+            nextLabel.textContent = `Next Chapter`;
+            nextBtn.onclick = () => goTo(nav.next);
           }
-          if (rightFooterChEl) {
-            rightFooterChEl.textContent = `Spread ${currentSpread + 1} of ${totalSpreads}`;
-          }
+        }
 
-          // Indicator
-          if (navIndicatorEl) {
-            const spreadPagesStr = spread.rightPageNum
-              ? `Pages ${spread.leftPageNum}–${spread.rightPageNum}`
-              : `Page ${spread.leftPageNum}`;
-            navIndicatorEl.innerHTML = `Ch. ${chNumber} &bull; ${spreadPagesStr} of ${totalPages}`;
-          }
 
-          // In-Chapter Navigation: Previous/Next flips spreads; flips to adjacent chapter at start/end
-          if (prevBtn && prevLabel) {
-            if (currentSpread > 0) {
-              prevBtn.disabled = false;
-              prevLabel.textContent = `Previous Page`;
-              prevBtn.onclick = () => renderSpread(currentSpread - 1);
-            } else {
-              prevBtn.disabled = !nav.previous;
-              prevLabel.textContent = `Previous Chapter`;
-              prevBtn.onclick = () => goTo(nav.previous);
-            }
-          }
+        const spreadEl = document.getElementById('book-spread');
+        if (!animate || !oldPage || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        turning = true;
+        spreadEl.setAttribute('aria-busy', 'true');
+        const leaf = document.createElement('div');
+        leaf.className = 'reader-turn-leaf' + (forward ? ' turn-forward' : ' turn-backward') + (desktop ? '' : ' turn-single');
+        const cleanClone = (clone, className) => {
+          clone.removeAttribute('id');
+          clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+          clone.classList.add(className);
+          clone.setAttribute('aria-hidden', 'true');
+          return clone;
+        };
+        leaf.appendChild(cleanClone(oldPage, 'turn-face-front'));
+        let stationary;
+        const receivingPage = desktop ? cleanClone(document.getElementById(forward ? 'book-left-article' : 'book-right-article').cloneNode(true), 'turn-face-front') : null;
+        if (desktop) {
+          stationary = cleanClone(forward ? oldLeft : oldRight, 'turn-stationary');
+          // Keep the old receiving page beneath the travelling sheet.
+          stationary.style.left = forward ? '0' : '50%';
+          spreadEl.appendChild(stationary);
+        }
+        spreadEl.appendChild(leaf);
+        const angle = forward ? -90 : 90;
+        let animation;
+        cancelTurn = () => {
+          if (animation) animation.cancel();
+          leaf.remove();
+          if (stationary) stationary.remove();
+          turning = false;
+          spreadEl.removeAttribute('aria-busy');
+        };
+        // Two half turns keep both sides readable across browser compositors.
+        // Switch the paper face only when it is edge-on at the spine.
+        animation = leaf.animate([
+          { transform: 'rotateY(0deg)', opacity: 1 },
+          { transform: 'rotateY(' + angle + 'deg)', opacity: desktop ? 1 : 0 }
+        ], { duration: desktop ? 300 : 450, easing: 'cubic-bezier(.42,0,1,1)', fill: 'forwards' });
+        animation.finished.then(() => {
+          if (!desktop || controller.signal.aborted) return;
+          leaf.replaceChildren(receivingPage);
+          leaf.style.left = forward ? '0' : '50%';
+          leaf.style.transformOrigin = forward ? 'right center' : 'left center';
+          animation.cancel();
+          animation = leaf.animate([
+            { transform: 'rotateY(' + -angle + 'deg)' },
+            { transform: 'rotateY(0deg)' }
+          ], { duration: 380, easing: 'cubic-bezier(0,0,.2,1)', fill: 'forwards' });
+          return animation.finished;
+        }).then(() => cancelTurn()).catch(() => {});
 
-          if (nextBtn && nextLabel) {
-            if (currentSpread < totalSpreads - 1) {
-              nextBtn.disabled = false;
-              nextLabel.textContent = `Next Page`;
-              nextBtn.onclick = () => renderSpread(currentSpread + 1);
-            } else {
-              nextBtn.disabled = !nav.next;
-              nextLabel.textContent = `Next Chapter`;
-              nextBtn.onclick = () => goTo(nav.next);
-            }
-          }
-
-          if (animate && spreadContentEl) {
-            spreadContentEl.style.opacity = '1';
-          }
-        }, animate ? 100 : 0);
       }
 
       // Initial Spread Render
@@ -676,13 +687,21 @@ window.NovelCastViews.reader = {
 
       // Re-paginate on font size change or window resize
       rePaginate = () => {
+        const position = currentSpread / spreads.length;
         const currentContainer = document.getElementById('book-left-page-content');
-        const h = Math.max(420, currentContainer ? currentContainer.clientHeight : 500);
-        const w = Math.max(300, currentContainer ? currentContainer.clientWidth : 460);
+        const h = Math.max(100, currentContainer ? currentContainer.clientHeight : 500);
+        const w = Math.max(120, currentContainer ? currentContainer.clientWidth : 460);
         pages = paginateChapter(rawParagraphs, title, w, h, currentFontSize);
         spreads = buildSpreads(pages);
-        renderSpread(Math.min(currentSpread, spreads.length - 1), false);
+        renderSpread(Math.min(Math.floor(position * spreads.length), spreads.length - 1), false);
       };
+
+      observer = new ResizeObserver(() => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => { if (!controller.signal.aborted) rePaginate(); }, 150);
+      });
+      observer.observe(document.getElementById('book-spread'));
+      document.fonts.ready.then(() => { if (!controller.signal.aborted) rePaginate(); });
 
       // Skip Chapter Jump Buttons
       const jumpPrevCh = document.getElementById('reader-jump-prev-ch');
@@ -701,7 +720,12 @@ window.NovelCastViews.reader = {
       const rightArticle = document.getElementById('book-right-article');
       if (leftArticle) {
         leftArticle.onclick = (e) => {
-          if (e.target.closest('a') || e.target.closest('button')) return;
+          if (e.target.closest('a, button, input') || window.getSelection().toString()) return;
+          if (!window.matchMedia('(min-width: 1024px)').matches && e.clientX > leftArticle.getBoundingClientRect().left + leftArticle.clientWidth / 2) {
+            if (currentSpread < spreads.length - 1) renderSpread(currentSpread + 1);
+            else if (nav.next) goTo(nav.next);
+            return;
+          }
           if (currentSpread > 0) {
             renderSpread(currentSpread - 1);
           } else if (nav.previous) {
@@ -722,16 +746,19 @@ window.NovelCastViews.reader = {
 
       // Keyboard Arrow Navigation
       const onKeyDown = (e) => {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        if (controller.signal.aborted || e.target.closest('input, textarea, select, [contenteditable]')) return;
+        if (localStorage.getItem('novelcast.reader.mode') === 'pdf') return;
         const prevBtnEl = document.getElementById('reader-prev-btn');
         const nextBtnEl = document.getElementById('reader-next-btn');
         if (e.key === 'ArrowRight') {
+          e.preventDefault();
           if (nextBtnEl && !nextBtnEl.disabled) nextBtnEl.click();
         } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
           if (prevBtnEl && !prevBtnEl.disabled) prevBtnEl.click();
         }
       };
-      window.addEventListener('keydown', onKeyDown);
+      window.addEventListener('keydown', onKeyDown, { signal: controller.signal });
 
       // --- POPULATE PDF MODE VERTICAL SCROLL CANVAS ---
       const pdfContainer = document.getElementById('pdf-paragraphs-container');
@@ -762,6 +789,7 @@ window.NovelCastViews.reader = {
         pdfNextBtn.onclick = () => goTo(nav.next);
       }
     }).catch(err => {
+      if (controller.signal.aborted) return;
       console.error('[readerView] Error loading chapter:', err);
       const leftContent = document.getElementById('book-left-page-content');
       if (leftContent) {
@@ -769,10 +797,12 @@ window.NovelCastViews.reader = {
           <div class="py-12 text-center text-red-900">
             <span class="material-symbols-outlined text-[36px] text-red-800 mb-2 block">menu_book</span>
             <p class="font-bold">Could not load chapter ${chapterNum}</p>
-            <p class="text-xs mt-1 text-neutral-600">Please verify backend server status on port 4000.</p>
+            <p class="text-xs mt-1 text-neutral-600">Please check your connection and try again.</p><button type="button" class="reader-retry" onclick="location.reload()">Retry chapter</button>
           </div>
         `;
       }
+      const pdfError = document.getElementById('pdf-paragraphs-container');
+      if (pdfError && leftContent) pdfError.innerHTML = leftContent.innerHTML;
     });
   }
 };

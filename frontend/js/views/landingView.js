@@ -4,7 +4,7 @@ window.NovelCastViews.landing = {
   render: function () {
     return `
       <!-- NovelCast Focused Cinematic Landing Page (Reference: test.html / animated_hero) -->
-      <div class="relative w-full min-h-screen flex flex-col justify-between bg-[#05070A] overflow-hidden select-none">
+      <div class="landing-original relative w-full min-h-screen flex flex-col justify-between bg-[#05070A] overflow-hidden select-none">
         
         <!-- Ambient Animated ASCII Art Background (21st.dev) -->
         <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
@@ -72,10 +72,10 @@ window.NovelCastViews.landing = {
 
           <!-- Parade Stage Container -->
           <div class="parade-stage w-full flex items-end justify-center relative z-20 pt-16 md:pt-24 pb-8 overflow-visible">
-            <div class="flex items-end -space-x-16 md:-space-x-22 lg:-space-x-26 pl-16 pr-8 sm:px-0">
+            <div class="landing-original-row flex items-end -space-x-16 md:-space-x-22 lg:-space-x-26 pl-16 pr-8 sm:px-0">
               
               <!-- Book 1: Paris Poetry -> The Picture of Dorian Gray -->
-              <div class="book-3d-wrapper opacity-50 hover:opacity-100 cursor-pointer" onclick="window.NovelCastRouter.navigate('book', { book: 'the-picture-of-dorian-gray' })" title="The Picture of Dorian Gray">
+              <div class="book-3d-wrapper cursor-pointer" role="link" tabindex="0" onclick="window.NovelCastRouter.navigate('book', { book: 'the-picture-of-dorian-gray' })" title="The Picture of Dorian Gray">
                 <div class="book-edge-right"></div>
                 <div class="book-edge-top"></div>
                 <div class="relative w-full h-full rounded-r-[2px] bg-gradient-to-br from-[#df939a] via-[#ce7a85] to-[#9b4a55] text-[#3d1217] p-4 flex flex-col justify-between shadow-2xl overflow-hidden">
@@ -90,7 +90,7 @@ window.NovelCastViews.landing = {
               </div>
 
               <!-- Book 2: The Grand Arcade -> 20,000 Leagues Under the Sea -->
-              <div class="book-3d-wrapper opacity-75 hover:opacity-100 cursor-pointer" onclick="window.NovelCastRouter.navigate('book', { book: 'twenty-thousand-leagues-under-the-sea' })" title="Twenty Thousand Leagues Under the Sea">
+              <div class="book-3d-wrapper cursor-pointer" role="link" tabindex="0" onclick="window.NovelCastRouter.navigate('book', { book: 'twenty-thousand-leagues-under-the-sea' })" title="Twenty Thousand Leagues Under the Sea">
                 <div class="book-edge-right"></div>
                 <div class="book-edge-top"></div>
                 <div class="relative w-full h-full rounded-r-[2px] bg-[#0c1322] border-l-[3px] border-amber-500/40 p-3.5 flex flex-col justify-between shadow-2xl overflow-hidden">
@@ -111,7 +111,7 @@ window.NovelCastViews.landing = {
               </div>
 
               <!-- Book 3: The Light Story -> The Time Machine -->
-              <div class="book-3d-wrapper opacity-90 hover:opacity-100 cursor-pointer" onclick="window.NovelCastRouter.navigate('book', { book: 'the-time-machine' })" title="The Time Machine">
+              <div class="book-3d-wrapper cursor-pointer" role="link" tabindex="0" onclick="window.NovelCastRouter.navigate('book', { book: 'the-time-machine' })" title="The Time Machine">
                 <div class="book-edge-right"></div>
                 <div class="book-edge-top"></div>
                 <div class="relative w-full h-full rounded-r-[2px] bg-[#0f172a] border-l-[3px] border-blue-900 p-4 flex flex-col justify-between shadow-2xl overflow-hidden">
@@ -132,7 +132,7 @@ window.NovelCastViews.landing = {
               </div>
 
               <!-- Book 4: Around the World in Eighty Days -->
-              <div class="book-3d-wrapper cursor-pointer" onclick="window.NovelCastRouter.navigate('book', { book: 'around-the-world-in-eighty-days' })" title="Around the World in Eighty Days">
+              <div class="book-3d-wrapper cursor-pointer" role="link" tabindex="0" onclick="window.NovelCastRouter.navigate('book', { book: 'around-the-world-in-eighty-days' })" title="Around the World in Eighty Days">
                 <div class="book-edge-right"></div>
                 <div class="book-edge-top"></div>
                 <div class="relative w-full h-full rounded-r-[2px] bg-[#f5f1e8] text-neutral-900 border-l-[3px] border-neutral-400 p-4 flex flex-col justify-between shadow-2xl overflow-hidden">
@@ -155,9 +155,9 @@ window.NovelCastViews.landing = {
               </div>
 
               <!-- Book 5: Featured Centerpiece (Pride and Prejudice) -->
-              <div class="book-3d-wrapper book-featured cursor-pointer" onclick="window.NovelCastRouter.navigate('book', { book: 'pride-and-prejudice' })" title="Pride and Prejudice">
-                <div class="book-edge-right !w-[42px]"></div>
-                <div class="book-edge-top !h-[42px]"></div>
+              <div class="book-3d-wrapper book-featured cursor-pointer" role="link" tabindex="0" onclick="window.NovelCastRouter.navigate('book', { book: 'pride-and-prejudice' })" title="Pride and Prejudice">
+                <div class="book-edge-right"></div>
+                <div class="book-edge-top"></div>
                 <div class="relative w-full h-full rounded-r-[2px] bg-gradient-to-b from-[#FFFDF2] via-[#FDF5D8] to-[#FCEABB] text-[#802D15] p-4 flex flex-col justify-between border-l-[4px] border-[#D4AF37] shadow-2xl overflow-hidden">
                   <div class="cover-crease"></div>
                   <div class="cover-sheen"></div>
@@ -192,7 +192,7 @@ window.NovelCastViews.landing = {
               </div>
 
               <!-- Book 6: Dracula -->
-              <div class="book-3d-wrapper opacity-95 hover:opacity-100 cursor-pointer" onclick="window.NovelCastRouter.navigate('book', { book: 'dracula' })" title="Dracula">
+              <div class="book-3d-wrapper cursor-pointer" role="link" tabindex="0" onclick="window.NovelCastRouter.navigate('book', { book: 'dracula' })" title="Dracula">
                 <div class="book-edge-right"></div>
                 <div class="book-edge-top"></div>
                 <div class="relative w-full h-full rounded-r-[2px] bg-gradient-to-b from-[#181920] via-[#0d0e12] to-black border-l-[3px] border-neutral-700 p-4 flex flex-col justify-between text-neutral-200 shadow-2xl overflow-hidden">
@@ -209,7 +209,7 @@ window.NovelCastViews.landing = {
               </div>
 
               <!-- Book 7: Frankenstein -->
-              <div class="book-3d-wrapper opacity-95 hover:opacity-100 cursor-pointer" onclick="window.NovelCastRouter.navigate('book', { book: 'frankenstein' })" title="Frankenstein">
+              <div class="book-3d-wrapper cursor-pointer" role="link" tabindex="0" onclick="window.NovelCastRouter.navigate('book', { book: 'frankenstein' })" title="Frankenstein">
                 <div class="book-edge-right"></div>
                 <div class="book-edge-top"></div>
                 <div class="relative w-full h-full rounded-r-[2px] bg-[#1a2d24] text-white border-l-[3px] border-emerald-900 p-4 flex flex-col justify-between shadow-2xl overflow-hidden">
@@ -228,7 +228,7 @@ window.NovelCastViews.landing = {
               </div>
 
               <!-- Book 8: Treasure Island -->
-              <div class="book-3d-wrapper opacity-90 hover:opacity-100 cursor-pointer" onclick="window.NovelCastRouter.navigate('book', { book: 'treasure-island' })" title="Treasure Island">
+              <div class="book-3d-wrapper cursor-pointer" role="link" tabindex="0" onclick="window.NovelCastRouter.navigate('book', { book: 'treasure-island' })" title="Treasure Island">
                 <div class="book-edge-right"></div>
                 <div class="book-edge-top"></div>
                 <div class="relative w-full h-full rounded-r-[2px] bg-[#0c1524] border-l-[3px] border-amber-600/80 p-3.5 flex flex-col justify-between shadow-2xl overflow-hidden">
@@ -248,7 +248,7 @@ window.NovelCastViews.landing = {
               </div>
 
               <!-- Book 9: Moby Dick -->
-              <div class="book-3d-wrapper opacity-85 hover:opacity-100 cursor-pointer" onclick="window.NovelCastRouter.navigate('book', { book: 'moby-dick' })" title="Moby Dick">
+              <div class="book-3d-wrapper cursor-pointer" role="link" tabindex="0" onclick="window.NovelCastRouter.navigate('book', { book: 'moby-dick' })" title="Moby Dick">
                 <div class="book-edge-right"></div>
                 <div class="book-edge-top"></div>
                 <div class="relative w-full h-full rounded-r-[2px] bg-[#eeeae0] text-black border-l-[3px] border-neutral-400 p-4 flex flex-col justify-between shadow-2xl overflow-hidden">
@@ -265,7 +265,7 @@ window.NovelCastViews.landing = {
               </div>
 
               <!-- Book 10: The Hound of the Baskervilles -->
-              <div class="book-3d-wrapper opacity-65 hover:opacity-100 cursor-pointer" onclick="window.NovelCastRouter.navigate('book', { book: 'the-hound-of-the-baskervilles' })" title="The Hound of the Baskervilles">
+              <div class="book-3d-wrapper cursor-pointer" role="link" tabindex="0" onclick="window.NovelCastRouter.navigate('book', { book: 'the-hound-of-the-baskervilles' })" title="The Hound of the Baskervilles">
                 <div class="book-edge-right"></div>
                 <div class="book-edge-top"></div>
                 <div class="relative w-full h-full rounded-r-[2px] bg-[#070b14] border-l-[3px] border-teal-900 p-4 flex flex-col justify-between text-neutral-300 shadow-2xl overflow-hidden">
@@ -296,22 +296,22 @@ window.NovelCastViews.landing = {
       bgVideo.play().catch(() => {});
     }
 
-    // 3D Tilt interactive effect for all books at the exact same level
-    const wrappers = document.querySelectorAll('.book-3d-wrapper');
-    wrappers.forEach(wrap => {
-      wrap.addEventListener('mousemove', (e) => {
+    const controller = new AbortController();
+    this.destroy = () => { controller.abort(); if (bgVideo) bgVideo.pause(); };
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (bgVideo && reducedMotion) bgVideo.pause();
+    document.querySelectorAll('.book-3d-wrapper').forEach(wrap => {
+      wrap.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); wrap.click(); }
+      }, { signal: controller.signal });
+      if (reducedMotion) return;
+      wrap.addEventListener('pointermove', event => {
+        if (event.pointerType === 'touch') return;
         const rect = wrap.getBoundingClientRect();
-        const x = e.clientX - rect.left - rect.width / 2;
-        const y = e.clientY - rect.top - rect.height / 2;
-        const isFeatured = wrap.classList.contains('book-featured');
-        // Kept at identical vertical level (-18px) for all books, with forward depth
-        const baseTransY = -18;
-        const baseTransZ = isFeatured ? 42 : 32;
-        wrap.style.transform = `rotateY(-54deg) rotateX(4deg) translateY(${baseTransY}px) translateZ(${baseTransZ}px) rotateY(${x / 20}deg) rotateX(${-y / 20}deg)`;
-      });
-      wrap.addEventListener('mouseleave', () => {
-        wrap.style.transform = '';
-      });
+        const tilt = Math.max(-3, Math.min(3, (event.clientX - rect.left - rect.width / 2) / 22));
+        wrap.style.transform = 'rotateY(' + (-54 + tilt) + 'deg) rotateX(4deg) translateY(-16px) translateZ(28px)';
+      }, { signal: controller.signal });
+      wrap.addEventListener('pointerleave', () => { wrap.style.transform = ''; }, { signal: controller.signal });
     });
   }
 };
