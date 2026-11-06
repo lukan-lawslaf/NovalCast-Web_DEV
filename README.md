@@ -14,6 +14,7 @@
 - **My Library & Manuscript Uploads (`#/library`)** — personal collection with drag-and-drop file upload zone (EPUB, PDF, TXT, MD) and reading progress tracking
 - **Bespoke Reader (`#/reader`)** — dual modes: Classic Book double-page spread and distraction-free Continuous Scroll PDF layout with real-time reading pace (WPM)
 - **Sanctuary Access (`#/login`)** — luxury editorial authentication modal with Supabase email verification
+- **Listen Now** — Fish Audio narration of the original chapter text, using only `s2.1-pro-free`. A library voice matched to the book's title, synopsis, and subjects is saved in Atlas and reused for every passage and future session. Plays one short passage while preparing only the next; pause, close, and book switching cancel pending work.
 
 ## 🛠️ Tech Stack
 
@@ -59,17 +60,22 @@ NovalCast-Web_DEV/
 
 2. **Run locally**
 
-   Serve using npm or any static server (recommended, so assets and fonts load cleanly):
+   Install the root and backend dependencies with `npm ci` and
+   `npm --prefix backend ci`. Configure the local environment as described in
+   [backend/README.md](backend/README.md), including `Fish_Audio` (or
+   `FISH_AUDIO_API_KEY`) for narration. Keep that key on the server.
+
+   Start the frontend and backend in separate terminals:
    ```bash
-   # Using npm
-   npm start
-   # or
+   # Terminal 1: frontend
    npm run dev
 
-   # or Python
-   python -m http.server 3000
+   # Terminal 2: API and narration proxy
+   npm --prefix backend run dev
    ```
-   Then visit `http://localhost:3000`.
+   Then visit `http://127.0.0.1:3000`. The API defaults to port 4000.
+   Run `npm run test:audio` for isolated narration API and playback tests;
+   these tests use fake provider responses and do not generate real speech.
 
 > **Note:** The application uses client-side hash routing (`#/landing`, `#/home`, `#/book`, `#/reader`, `#/library`, `#/login`, `#/search`).
 
@@ -83,7 +89,7 @@ NovalCast-Web_DEV/
 - [x] Interactive 3D hardcover book parade & ambient visual effects
 - [x] Backend catalog API — 20 public-domain classics across 8 genres ingested from Gutendex/Gutenberg into MongoDB Atlas, served over REST
 - [x] Wiring the SPA to the catalog API (Home, Search, Book Details, Dual-Mode Reader, 3D Landing Parade)
-- [ ] Real-time audio playback & TTS voice streaming (Fish Audio integration)
+- [x] On-demand audio playback with Fish Audio's free model and one-passage lookahead
 - [ ] Reader state persistence for user notes & highlights
 - [ ] Responsive polish for mobile readers
 

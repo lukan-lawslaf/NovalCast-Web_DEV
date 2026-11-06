@@ -31,7 +31,7 @@ window.NovelCastViews.home = {
       </section>
 
       <!-- Popular Books Section -->
-      <section class="mt-10 mb-6">
+      <section class="home-catalog mt-10 mb-6">
         <div class="flex items-center justify-between mb-5">
           <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-goldAccent text-[22px]">star</span>

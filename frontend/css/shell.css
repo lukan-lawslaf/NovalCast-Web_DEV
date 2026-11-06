@@ -1,0 +1,104 @@
+.nc-main-nav {
+  display: grid;
+  gap: 14px;
+  margin-block-start: 12px;
+  color: #a6afbf;
+}
+
+.nc-nav-link,
+.nc-profile-button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid transparent;
+  border-radius: 13px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.nc-nav-link:hover,
+.nc-nav-link[aria-current="page"] {
+  color: #f1d69e;
+  background: #181d26;
+  border-color: #d7b47e40;
+}
+
+.nc-nav-link svg {
+  width: 18px;
+  height: 18px;
+}
+
+.nc-header-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: .75rem;
+}
+
+.nc-header-notifications {
+  display: grid;
+  place-items: center;
+  width: var(--nc-icon-button-size);
+  height: var(--nc-icon-button-size);
+  border: 1px solid #232b39;
+  border-radius: 50%;
+  background: #161b24;
+  color: #b0bac8;
+}
+
+.nc-header-notifications:hover {
+  color: #fff;
+  border-color: #354054;
+}
+
+.nc-profile-button {
+  width: var(--nc-icon-button-size);
+  height: var(--nc-icon-button-size);
+  border-radius: 50%;
+  border-color: #374050;
+  background: #161b24;
+  color: #e4d1a9;
+  overflow: hidden;
+  font-size: .75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.nc-header-notifications svg,
+.nc-profile-button svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.nc-profile-button img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.nc-profile-button [hidden] { display: none; }
+
+.nc-account-theme {
+  position: absolute;
+  inset-block-start: 1rem;
+  inset-inline-end: 1rem;
+  z-index: 1;
+}
+
+.nc-profile-button:hover { border-color: currentColor; }
+
+.nc-nav-link:focus-visible,
+.nc-header-notifications:focus-visible,
+.nc-profile-button:focus-visible {
+  outline: 2px solid #d7b47e;
+  outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+  #app-sidebar { width: 52px; }
+  #app-header > a { gap: .375rem; }
+  #app-header > a span { font-size: 1rem; }
+  .nc-header-actions { gap: .375rem; }
+}

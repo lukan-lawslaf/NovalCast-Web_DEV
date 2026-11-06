@@ -6,7 +6,7 @@ window.NovelCastViews.search = {
     const NCPage = window.NCPage;
     const query = NC.readQuery();
     const initialQ = query.q || '';
-    const initialGenre = query.genre || '';
+    const initialGenre = query.genre === 'all' ? '' : (query.genre || '');
     const featured = NC.books.find(b => b.trending) || NC.books[0];
 
     const genreCards = [
@@ -35,7 +35,8 @@ window.NovelCastViews.search = {
               id="search-input" 
               placeholder="Search by title, author, genre, or keyword..." 
               type="text"
-              value="${NC.escapeHtml(initialQ || initialGenre)}"
+              aria-label="Search the catalog"
+              value="${NC.escapeHtml(initialQ)}"
             />
             <div class="flex items-center gap-space-xs text-on-surface-variant">
               <button id="search-clear" class="flex items-center justify-center w-8 h-8 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-colors ${hasInitialSearch ? '' : 'hidden'}" title="Clear search" type="button">
@@ -52,7 +53,7 @@ window.NovelCastViews.search = {
         <!-- Filter Pills Carousel -->
         <div class="flex items-center gap-space-xs overflow-x-auto no-scrollbar py-space-2xs w-full max-w-5xl mx-auto px-space-2xs" id="search-chips">
           <button class="filter-chip px-space-md py-space-xs rounded-full ${(!initialGenre || initialGenre === 'all') ? 'bg-primary-container text-on-primary-container shadow-[0_0_18px_rgba(245,215,127,0.3)]' : 'bg-surface-container-low text-on-surface-variant'} font-headline-sm text-headline-sm transition-all flex items-center gap-space-2xs whitespace-nowrap shrink-0" data-filter="all" type="button">
-            <span>All 20 Classics</span>
+            <span>All Classics</span>
             <span class="text-[11px] font-label-numeric">✦</span>
           </button>
           <button class="filter-chip px-space-md py-space-xs rounded-full ${initialGenre === 'Gothic' ? 'bg-primary-container text-on-primary-container' : 'bg-surface-container-low text-on-surface-variant'} hover:text-primary hover:bg-surface-container-high font-headline-sm text-headline-sm transition-all whitespace-nowrap shrink-0" data-filter="Gothic" type="button">
@@ -78,9 +79,8 @@ window.NovelCastViews.search = {
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-primary-container text-[20px]">filter_list</span>
-            <h3 class="text-[18px] font-bold text-[#F1D69E]" id="results-count">Results</h3>
+            <h3 class="text-[18px] font-bold text-[#F1D69E]" id="results-count" aria-live="polite">Results</h3>
           </div>
-          <span class="text-xs font-mono text-[#8C98AC]" id="search-origin-badge">MongoDB Atlas Search</span>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5" id="search-results-grid"></div>
       </section>
@@ -111,7 +111,7 @@ window.NovelCastViews.search = {
                     <span class="px-space-sm py-0.5 rounded-full bg-primary-container text-on-primary-container font-label-badge text-label-badge shadow-[0_0_12px_rgba(245,215,127,0.3)]">Curated Masterpiece</span>
                   </div>
                   <p class="font-body-md text-body-md text-secondary mb-space-sm">
-                    Written by : <span class="text-on-surface font-medium">${NC.escapeHtml(featured.author)}</span> • Narrated by <span class="text-primary-container">${NC.escapeHtml(featured.narrator)}</span>
+                    Written by : <span class="text-on-surface font-medium">${NC.escapeHtml(featured.author)}</span>
                   </p>
                   <div class="flex items-center gap-space-lg mb-space-md text-on-surface-variant font-label-numeric text-label-numeric flex-wrap">
                     <div class="flex items-center gap-space-2xs">
@@ -211,11 +211,25 @@ window.NovelCastViews.search = {
     let currentFilter = 'all';
     let searchDebounceTimer = null;
 
+    function selectFilter(filter) {
+      currentFilter = filter || 'all';
+      chips.forEach(chip => {
+        const active = chip.dataset.filter === currentFilter;
+        chip.classList.toggle('bg-primary-container', active);
+        chip.classList.toggle('text-on-primary-container', active);
+        chip.classList.toggle('shadow-[0_0_18px_rgba(245,215,127,0.3)]', active);
+        chip.classList.toggle('bg-surface-container-low', !active);
+        chip.classList.toggle('text-on-surface-variant', !active);
+        chip.setAttribute('aria-pressed', String(active));
+      });
+    }
+
     async function performSearch(q, filterType = currentFilter) {
       if (disposed) return;
+      clearTimeout(searchDebounceTimer);
       const version = ++searchVersion;
       const term = (q || '').trim();
-      currentFilter = filterType;
+      selectFilter(filterType);
 
       if (!term && (filterType === 'all' || !filterType)) {
         if (resultsSection) resultsSection.classList.add('hidden');
@@ -250,7 +264,9 @@ window.NovelCastViews.search = {
       try {
         const backendResults = await NC.searchCatalog(term, filterType === 'all' ? '' : filterType);
         if (!disposed && version === searchVersion && backendResults) {
-          renderResults(backendResults, term);
+          // Curated genres can be broader than the provider's raw subject labels.
+          const results = new Map([...matched, ...backendResults].map(book => [book.id, book]));
+          renderResults([...results.values()], term);
         }
       } catch (e) {
         // Fallback already rendered
@@ -265,7 +281,7 @@ window.NovelCastViews.search = {
         : `
           <div class="col-span-full py-16 text-center text-[#7F8B9C]">
             <span class="material-symbols-outlined text-[48px] text-[#4A5568] mb-2 block">search_off</span>
-            <p class="text-base font-medium text-white">No titles found for "${NC.escapeHtml(term)}"</p>
+            <p class="text-base font-medium text-white">${term ? `No titles found for “${NC.escapeHtml(term)}”` : 'No titles found in this genre'}</p>
             <p class="text-xs mt-1">Try searching for "Moby Dick", "Dracula", "Gothic", or "Verne"</p>
           </div>
         `;
@@ -277,47 +293,30 @@ window.NovelCastViews.search = {
 
     if (input) {
       input.addEventListener('input', () => {
+        searchVersion++;
         clearTimeout(searchDebounceTimer);
         searchDebounceTimer = setTimeout(() => {
           performSearch(input.value);
         }, 180);
       });
-      // Handle initial search from URL
+      input.addEventListener('keydown', event => {
+        if (event.key === 'Escape') clearBtn?.click();
+      });
       const query = NC.readQuery();
-      const initialTerm = query.q || query.genre || '';
-      if (initialTerm) {
-        performSearch(initialTerm, query.genre || 'all');
-      }
+      performSearch(query.q || '', query.genre || 'all');
     }
 
     if (clearBtn) {
       clearBtn.addEventListener('click', () => {
         if (input) input.value = '';
-        currentFilter = 'all';
-        chips.forEach(c => {
-          c.classList.remove('bg-primary-container', 'text-on-primary-container');
-          c.classList.add('bg-surface-container-low', 'text-on-surface-variant');
-        });
-        const allChip = document.querySelector('#search-chips [data-filter="all"]');
-        if (allChip) {
-          allChip.classList.add('bg-primary-container', 'text-on-primary-container');
-          allChip.classList.remove('bg-surface-container-low', 'text-on-surface-variant');
-        }
-        performSearch('');
+        performSearch('', 'all');
         if (input) input.focus();
       });
     }
 
     chips.forEach(btn => {
       btn.addEventListener('click', () => {
-        chips.forEach(c => {
-          c.classList.remove('bg-primary-container', 'text-on-primary-container', 'shadow-[0_0_18px_rgba(245,215,127,0.3)]');
-          c.classList.add('bg-surface-container-low', 'text-on-surface-variant');
-        });
-        btn.classList.add('bg-primary-container', 'text-on-primary-container', 'shadow-[0_0_18px_rgba(245,215,127,0.3)]');
-        btn.classList.remove('bg-surface-container-low', 'text-on-surface-variant');
-        if (input) input.value = '';
-        performSearch('', btn.dataset.filter);
+        performSearch(input?.value || '', btn.dataset.filter);
       });
     });
 
@@ -325,8 +324,7 @@ window.NovelCastViews.search = {
       card.addEventListener('click', () => {
         const genre = card.dataset.genreSearch;
         if (input) {
-          input.value = genre;
-          performSearch(genre, genre);
+          performSearch('', genre);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       });

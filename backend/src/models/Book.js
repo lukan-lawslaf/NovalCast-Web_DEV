@@ -12,6 +12,17 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
+const NarrationVoiceSchema = new Schema(
+  {
+    referenceId: { type: String, required: true, trim: true, maxlength: 160 },
+    name: { type: String, required: true, trim: true, maxlength: 160 },
+    reason: { type: String, required: true, trim: true, maxlength: 700 },
+    profile: { type: String, required: true, trim: true, maxlength: 40 },
+    selectedAt: { type: Date, required: true },
+  },
+  { _id: false }
+);
+
 const BookSchema = new Schema(
   {
     slug: {
@@ -38,6 +49,8 @@ const BookSchema = new Schema(
     totalWordCount: { type: Number, default: 0, min: 0 },
     downloadCount: { type: Number, default: 0, min: 0 },
     featured: { type: Boolean, default: false, index: true },
+    // Selected once on first listen and reused across passages and sessions.
+    narrationVoice: { type: NarrationVoiceSchema, default: undefined },
   },
   {
     timestamps: true,

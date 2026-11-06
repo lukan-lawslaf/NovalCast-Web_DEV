@@ -1,0 +1,13 @@
+#global-audio-player[hidden], #player-retry-btn[hidden] { display: none; }
+.nc-audio-player { position: fixed; bottom: max(20px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); z-index: 100; width: min(680px, calc(100% - 24px)); display: flex; align-items: center; gap: 16px; padding: 16px 18px; background: #141924; color: #f8f1e2; border: 1px solid #f1d69e66; border-radius: 18px; box-shadow: 0 12px 40px #000b; }
+.nc-audio-copy { flex: 1; min-width: 0; }
+.nc-audio-copy h4 { margin: 0 0 4px; font: 600 17px/1.3 Georgia, serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nc-audio-copy p { margin: 2px 0 0; font-size: 12px; line-height: 1.4; color: #b8c0ce; overflow-wrap: anywhere; }
+.nc-audio-meta { display: flex; flex-wrap: wrap; column-gap: 12px; }
+.nc-audio-meta #player-voice { color: #d7c49f; }
+.nc-audio-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.nc-audio-actions button { min-height: 44px; min-width: 44px; padding: 8px 12px; border: 1px solid #f1d69e55; border-radius: 24px; font-family: inherit; font-size: 12px; font-weight: 600; line-height: 1.2; color: #f1d69e; background: transparent; cursor: pointer; }
+.nc-audio-actions #player-play-btn { background: #f1d69e; color: #121620; }
+.nc-audio-actions button:disabled { opacity: .5; cursor: default; }
+.nc-audio-actions button:focus-visible { outline: 2px solid #f1d69e; outline-offset: 3px; }
+@media (max-width: 480px) { .nc-audio-player { flex-wrap: wrap; gap: 10px; padding: 12px 14px; } .nc-audio-copy { flex-basis: calc(100% - 54px); } .nc-audio-actions { width: 100%; justify-content: flex-end; } }

@@ -42,7 +42,7 @@ window.NovelCastViews.library = {
             <div>
               <div class="flex items-center gap-2.5">
                 <h1 class="text-2xl md:text-3xl font-bold text-white font-sans tracking-wide">My Library & Manuscripts</h1>
-                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-mono bg-goldAccent/15 text-goldAccent border border-goldAccent/30">Synced</span>
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-mono bg-goldAccent/15 text-goldAccent border border-goldAccent/30">On this device</span>
               </div>
               <p class="text-[13px] text-[#8C98AC] mt-0.5">
                 Private collection of <span class="text-white font-medium">${NC.escapeHtml(user.email || 'Member')}</span>
@@ -156,18 +156,14 @@ window.NovelCastViews.library = {
             <!-- Uploaded Books Grid (Matching Standard NovelCast Cards) -->
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
               ${userUploads.map(book => `
-                <div class="flex flex-col group cursor-pointer relative" data-book-link="${book.id}" data-book-target="details">
-                  <a href="#/book?book=${book.id}" class="block">
+                <div class="flex flex-col group relative">
+                  <div class="relative">
+                  <a href="#/book?book=${encodeURIComponent(book.id)}" class="block">
                     <div class="relative w-full aspect-[1/1.42] rounded-xl overflow-hidden book-shadow book-spine bg-[#1B212E] border border-white/5 transition-transform duration-200 group-hover:-translate-y-1">
                       <!-- Top Rating & Format Badge -->
                       <div class="absolute top-2 left-2 z-20 flex items-center gap-1 bg-[#1A212E]/90 backdrop-blur-md px-1.5 py-0.5 rounded-full border border-white/10 text-[10px] font-semibold text-white">
-                        <span class="text-goldAccent text-[9px]">★</span> ${book.rating ? book.rating.toFixed(1) : 'New'}
+                        <span class="text-goldAccent text-[9px]">★</span> ${Number.isFinite(book.rating) && book.rating > 0 ? book.rating.toFixed(1) : 'New'}
                       </div>
-
-                      <!-- Delete Book Button -->
-                      <button class="btn-delete-book absolute top-2 right-2 z-30 w-6 h-6 rounded-full bg-[#1A212E]/90 backdrop-blur-md border border-white/10 text-[#8E9BAC] hover:text-red-400 flex items-center justify-center transition-colors shadow" data-book-id="${book.id}" title="Remove Book" onclick="event.preventDefault(); event.stopPropagation();">
-                        <span class="material-symbols-outlined text-[13px]">delete</span>
-                      </button>
 
                       <!-- Book Cover Artwork -->
                       <div class="absolute inset-0">${window.NovelCastView.cover(book)}</div>
@@ -181,22 +177,26 @@ window.NovelCastViews.library = {
                       <!-- Progress Indicator Bar -->
                       ${typeof book.progress === 'number' && book.progress > 0 ? `
                         <div class="absolute bottom-0 left-0 right-0 h-1 bg-black/70 z-20">
-                          <div class="h-full bg-goldAccent shadow-[0_0_8px_#f5d77f]" style="width: ${book.progress}%"></div>
+                          <div class="h-full bg-goldAccent shadow-[0_0_8px_#f5d77f]" style="width: ${Math.min(100, book.progress)}%"></div>
                         </div>
                       ` : ''}
                     </div>
                   </a>
+                    <button type="button" class="btn-delete-book absolute top-2 right-2 z-30 w-6 h-6 rounded-full bg-[#1A212E]/90 backdrop-blur-md border border-white/10 text-[#8E9BAC] hover:text-red-400 flex items-center justify-center transition-colors shadow" data-book-id="${NC.escapeHtml(book.id)}" aria-label="Remove book" title="Remove book">
+                      <span class="material-symbols-outlined text-[13px]">delete</span>
+                    </button>
+                  </div>
 
                   <!-- Book Metadata Underneath -->
                   <div class="mt-2.5 flex flex-col">
-                    <a href="#/book?book=${book.id}" class="text-[12px] font-medium text-[#D6DCE7] group-hover:text-goldAccent transition-colors truncate">
+                    <a href="#/book?book=${encodeURIComponent(book.id)}" class="text-[12px] font-medium text-[#D6DCE7] group-hover:text-goldAccent transition-colors truncate">
                       ${NC.escapeHtml(book.title)}
                     </a>
                     <div class="flex items-center justify-between text-[11px] text-[#768092] mt-0.5">
                       <span class="flex items-center gap-1 font-mono text-[10px] text-goldAccent/90">
-                        ${book.progress ? `${book.progress}% read` : (book.format || 'EPUB')}
+                        ${Number.isFinite(book.progress) && book.progress > 0 ? `${Math.min(100, book.progress)}% read` : NC.escapeHtml(book.format || 'EPUB')}
                       </span>
-                      <button class="favorite-toggle text-[#768092] hover:text-goldAccent transition-colors" data-favorite-toggle="${book.id}" aria-label="Bookmark" type="button">
+                      <button class="favorite-toggle text-[#768092] hover:text-goldAccent transition-colors" data-favorite-toggle="${NC.escapeHtml(book.id)}" aria-label="Bookmark" type="button">
                         <span class="material-symbols-outlined text-[16px]">bookmark_add</span>
                       </button>
                     </div>
@@ -217,12 +217,25 @@ window.NovelCastViews.library = {
 
     if (!user) return;
     const userId = user.id || user.email;
-
-    // Initialize React Bits PixelCard
+    const container = document.getElementById('app-view');
     const pixelCardEl = document.getElementById('pixel-upload-card');
-    if (pixelCardEl && window.PixelCard) {
-      window.PixelCard.init(pixelCardEl, { variant: 'gold' });
-    }
+    const pixelCard = pixelCardEl && window.PixelCard?.init(pixelCardEl, { variant: 'gold' });
+    let uploadTimer;
+    let refreshTimer;
+
+    this.destroy = () => {
+      clearInterval(uploadTimer);
+      clearTimeout(refreshTimer);
+      pixelCard?.destroy();
+    };
+
+    const refresh = () => {
+      if (!container || document.body.dataset.route !== 'library') return;
+      this.destroy();
+      container.innerHTML = this.render();
+      this.init();
+      window.NovelCastApp?.bindInteractiveElements(container);
+    };
 
     // Sign out button
     const signoutBtn = document.getElementById('btn-lib-signout');
@@ -286,10 +299,14 @@ window.NovelCastViews.library = {
     }
 
     function handleFile(file) {
-      if (!file) return;
+      if (!file || uploadTimer || refreshTimer) return;
 
       const title = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
       const ext = (file.name.split('.').pop() || 'epub').toUpperCase();
+      if (!/^(EPUB|PDF|TXT|MD|TEXT)$/.test(ext)) {
+        NC.toast('Choose an EPUB, PDF, TXT, or Markdown file.');
+        return;
+      }
       const sizeStr = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
 
       if (progressBox) {
@@ -300,15 +317,16 @@ window.NovelCastViews.library = {
       }
 
       let pct = 0;
-      const timer = setInterval(() => {
+      uploadTimer = setInterval(() => {
         pct += 25;
         if (pct >= 100) {
-          clearInterval(timer);
+          clearInterval(uploadTimer);
+          uploadTimer = null;
           if (progressBar) progressBar.style.width = '100%';
           if (statusTextEl) statusTextEl.textContent = '100%';
 
           const newBook = {
-            id: 'upload-' + Date.now(),
+            id: 'upload-' + (window.crypto.randomUUID?.() || Date.now()),
             title: title.charAt(0).toUpperCase() + title.slice(1),
             author: user.email ? user.email.split('@')[0] : 'Author',
             format: ext,
@@ -320,18 +338,14 @@ window.NovelCastViews.library = {
             lastRead: 'Just uploaded'
           };
 
-          NC.addUserUpload(userId, newBook);
+          if (!NC.addUserUpload(userId, newBook)) {
+            if (progressBox) progressBox.classList.add('hidden');
+            NC.toast('The book could not be saved on this device.');
+            return;
+          }
           NC.toast(`"${newBook.title}" added to your library`);
 
-          setTimeout(() => {
-            if (progressBox) progressBox.classList.add('hidden');
-            // Re-render library view
-            const container = document.getElementById('app-view');
-            if (container) {
-              container.innerHTML = window.NovelCastViews.library.render();
-              window.NovelCastViews.library.init();
-            }
-          }, 600);
+          refreshTimer = setTimeout(refresh, 600);
         } else {
           if (progressBar) progressBar.style.width = pct + '%';
           if (statusTextEl) statusTextEl.textContent = pct + '%';
@@ -349,12 +363,7 @@ window.NovelCastViews.library = {
         const next = current >= 100 ? 0 : Math.min(100, current + 20);
         NC.updateUserUploadProgress(userId, bookId, next, `Read to ${next}%`);
         NC.toast(`Progress updated: ${next}%`);
-        // Re-render
-        const container = document.getElementById('app-view');
-        if (container) {
-          container.innerHTML = window.NovelCastViews.library.render();
-          window.NovelCastViews.library.init();
-        }
+        refresh();
       });
     });
 
@@ -366,12 +375,7 @@ window.NovelCastViews.library = {
         const bookId = btn.dataset.bookId;
         NC.deleteUserUpload(userId, bookId);
         NC.toast('Book removed from library');
-        // Re-render
-        const container = document.getElementById('app-view');
-        if (container) {
-          container.innerHTML = window.NovelCastViews.library.render();
-          window.NovelCastViews.library.init();
-        }
+        refresh();
       });
     });
   }

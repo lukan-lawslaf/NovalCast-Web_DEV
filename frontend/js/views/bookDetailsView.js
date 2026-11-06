@@ -6,7 +6,8 @@ window.NovelCastViews.bookDetails = {
     const NCPage = window.NCPage;
     const query = NC.readQuery();
     const bookId = query.book || 'pride-and-prejudice';
-    const book = NC.getBook(bookId) || NC.books[0];
+    const book = NC.getExactBook(bookId);
+    if (!book) return '<p class="p-6" role="status" id="book-route-status">Finding this book…</p>';
 
     return `
       <!-- Book Details Hero -->
@@ -37,7 +38,21 @@ window.NovelCastViews.bookDetails = {
     const NCPage = window.NCPage;
     const query = NC.readQuery();
     const bookId = query.book || 'pride-and-prejudice';
-    const book = NC.getBook(bookId) || NC.books[0];
+    const book = NC.getExactBook(bookId);
+    if (!book) {
+      const status = document.getElementById('book-route-status');
+      NC.fetchBookDetails(bookId).then(() => {
+        if (controller.signal.aborted || !status?.isConnected) return;
+        if (!NC.getExactBook(bookId)) {
+          status.textContent = 'This book is unavailable. Browse the catalog to choose another.';
+          return;
+        }
+        const container = document.getElementById('app-view');
+        container.innerHTML = this.render();
+        this.init();
+      });
+      return;
+    }
     this.unmountRatings = window.NovelCastRatings.mount(document.getElementById('book-ratings'), book);
 
     if (window.NovelCastApp && window.NovelCastApp.bindInteractiveElements) {

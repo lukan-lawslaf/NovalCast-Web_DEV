@@ -172,9 +172,10 @@ window.NovelCast = (function () {
 
   function transformBackendBook(b) {
     if (!b) return null;
-    const slug = b.slug || cleanTitle(b.title).toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const meta = BOOK_METADATA_PRESETS[slug] || {};
     const title = cleanTitle(b.title);
+    const slug = typeof b.slug === 'string' && /^[a-z0-9][a-z0-9_-]{0,199}$/i.test(b.slug)
+      ? b.slug : title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const meta = Object.hasOwn(BOOK_METADATA_PRESETS, slug) ? BOOK_METADATA_PRESETS[slug] : {};
     const rawGenre = (b.subjects && b.subjects[0]) || 'Classic';
     const genre = meta.genre || (rawGenre.includes('Fiction') ? 'Classic Fiction' : rawGenre.split('--')[0].trim());
     const narrator = meta.narrator || 'AI Atelier Sanctuary Voice';
@@ -188,6 +189,9 @@ window.NovelCast = (function () {
     const listens = meta.listens || (b.downloadCount ? b.downloadCount.toLocaleString() : '48,200');
     const rating = communityRatings[slug] ? communityRatings[slug].average : 0;
     const reviews = communityRatings[slug] ? communityRatings[slug].count : 0;
+    const coverUrl = b.coverUrl || (Number.isSafeInteger(b.gutendexId) && b.gutendexId > 0
+      ? `https://www.gutenberg.org/cache/epub/${b.gutendexId}/pg${b.gutendexId}.cover.medium.jpg`
+      : '');
 
     return {
       id: slug,
@@ -205,8 +209,8 @@ window.NovelCast = (function () {
       listens: listens,
       duration: duration,
       chapters: b.totalChapters || 12,
-      cover: b.coverUrl || '',
-      coverUrl: b.coverUrl || '',
+      cover: coverUrl,
+      coverUrl,
       accent: accent,
       description: b.description || `A literary sanctuary edition by ${b.author || 'the author'}, curated for nocturnal contemplation with synchronized chapter reading, typography controls, and atmospheric audio playback.`,
       shortDescription: b.description ? (b.description.slice(0, 130) + '...') : `${title} by ${b.author}.`,
@@ -224,7 +228,6 @@ window.NovelCast = (function () {
       title: 'Pride and Prejudice',
       author: 'Jane Austen',
       gutendexId: 1342,
-      coverUrl: 'https://covers.openlibrary.org/b/id/14348537-L.jpg',
       totalChapters: 62,
       totalWordCount: 127156,
       featured: true,
@@ -235,7 +238,6 @@ window.NovelCast = (function () {
       title: 'Moby Dick; Or, The Whale',
       author: 'Herman Melville',
       gutendexId: 2701,
-      coverUrl: 'https://covers.openlibrary.org/b/id/10544254-L.jpg',
       totalChapters: 149,
       totalWordCount: 207673,
       featured: true,
@@ -246,7 +248,6 @@ window.NovelCast = (function () {
       title: 'The Adventures of Sherlock Holmes',
       author: 'Arthur Conan Doyle',
       gutendexId: 1661,
-      coverUrl: 'https://covers.openlibrary.org/b/id/6717853-L.jpg',
       totalChapters: 12,
       totalWordCount: 104346,
       featured: true,
@@ -257,7 +258,6 @@ window.NovelCast = (function () {
       title: 'Jane Eyre: An Autobiography',
       author: 'Charlotte Brontë',
       gutendexId: 1260,
-      coverUrl: 'https://covers.openlibrary.org/b/id/1737356-L.jpg',
       totalChapters: 39,
       totalWordCount: 185267,
       featured: true,
@@ -268,7 +268,6 @@ window.NovelCast = (function () {
       title: 'Frankenstein; or, the modern prometheus',
       author: 'Mary Wollstonecraft Shelley',
       gutendexId: 84,
-      coverUrl: 'https://covers.openlibrary.org/b/id/12356249-L.jpg',
       totalChapters: 28,
       totalWordCount: 74919,
       featured: true,
@@ -279,7 +278,6 @@ window.NovelCast = (function () {
       title: 'A Tale of Two Cities',
       author: 'Charles Dickens',
       gutendexId: 98,
-      coverUrl: 'https://covers.openlibrary.org/b/id/8243641-L.jpg',
       totalChapters: 45,
       totalWordCount: 135433,
       featured: true,
@@ -290,7 +288,6 @@ window.NovelCast = (function () {
       title: 'The war of the worlds',
       author: 'H. G. (Herbert George) Wells',
       gutendexId: 36,
-      coverUrl: 'https://covers.openlibrary.org/b/id/10544259-L.jpg',
       totalChapters: 27,
       totalWordCount: 59755,
       featured: true,
@@ -301,7 +298,6 @@ window.NovelCast = (function () {
       title: 'Alice in Wonderland',
       author: 'Lewis Carroll',
       gutendexId: 11,
-      coverUrl: 'https://covers.openlibrary.org/b/id/10544256-L.jpg',
       totalChapters: 12,
       totalWordCount: 26371,
       featured: true,
@@ -312,7 +308,6 @@ window.NovelCast = (function () {
       title: 'Around the World in Eighty Days',
       author: 'Jules Verne',
       gutendexId: 103,
-      coverUrl: 'https://covers.openlibrary.org/b/id/8315181-L.jpg',
       totalChapters: 36,
       totalWordCount: 61185,
       featured: true,
@@ -323,7 +318,6 @@ window.NovelCast = (function () {
       title: 'Dracula',
       author: 'Bram Stoker',
       gutendexId: 345,
-      coverUrl: 'https://covers.openlibrary.org/b/id/8243642-L.jpg',
       totalChapters: 27,
       totalWordCount: 160907,
       featured: true,
@@ -334,7 +328,6 @@ window.NovelCast = (function () {
       title: 'Metamorphosis',
       author: 'Franz Kafka',
       gutendexId: 5200,
-      coverUrl: 'https://covers.openlibrary.org/b/id/10544265-L.jpg',
       totalChapters: 3,
       totalWordCount: 21932,
       featured: false,
@@ -345,7 +338,6 @@ window.NovelCast = (function () {
       title: 'The Great Gatsby',
       author: 'F. Scott Fitzgerald',
       gutendexId: 64317,
-      coverUrl: 'https://covers.openlibrary.org/b/id/8243644-L.jpg',
       totalChapters: 10,
       totalWordCount: 48130,
       featured: true,
@@ -356,7 +348,6 @@ window.NovelCast = (function () {
       title: 'The Hound of the Baskervilles',
       author: 'Arthur Conan Doyle',
       gutendexId: 2852,
-      coverUrl: 'https://covers.openlibrary.org/b/id/8243645-L.jpg',
       totalChapters: 15,
       totalWordCount: 59043,
       featured: true,
@@ -367,7 +358,6 @@ window.NovelCast = (function () {
       title: 'The Picture of Dorian Gray',
       author: 'Oscar Wilde',
       gutendexId: 174,
-      coverUrl: 'https://covers.openlibrary.org/b/id/8243646-L.jpg',
       totalChapters: 20,
       totalWordCount: 78505,
       featured: true,
@@ -378,7 +368,6 @@ window.NovelCast = (function () {
       title: 'The Time Machine',
       author: 'H. G. Wells',
       gutendexId: 35,
-      coverUrl: 'https://covers.openlibrary.org/b/id/8243647-L.jpg',
       totalChapters: 16,
       totalWordCount: 32311,
       featured: false,
@@ -389,7 +378,6 @@ window.NovelCast = (function () {
       title: 'The Works of Edgar Allan Poe — Volume 1',
       author: 'Edgar Allan Poe',
       gutendexId: 2147,
-      coverUrl: 'https://covers.openlibrary.org/b/id/8243648-L.jpg',
       totalChapters: 9,
       totalWordCount: 90277,
       featured: false,
@@ -400,7 +388,6 @@ window.NovelCast = (function () {
       title: 'The Strange Case of Dr. Jekyll and Mr. Hyde',
       author: 'Robert Louis Stevenson',
       gutendexId: 43,
-      coverUrl: 'https://covers.openlibrary.org/b/id/8243649-L.jpg',
       totalChapters: 10,
       totalWordCount: 25529,
       featured: false,
@@ -411,7 +398,6 @@ window.NovelCast = (function () {
       title: 'Treasure Island',
       author: 'Robert Louis Stevenson',
       gutendexId: 120,
-      coverUrl: 'https://covers.openlibrary.org/b/id/8243650-L.jpg',
       totalChapters: 34,
       totalWordCount: 67712,
       featured: false,
@@ -422,7 +408,6 @@ window.NovelCast = (function () {
       title: 'Twenty Thousand Leagues under the Sea',
       author: 'Jules Verne',
       gutendexId: 164,
-      coverUrl: 'https://covers.openlibrary.org/b/id/8243651-L.jpg',
       totalChapters: 46,
       totalWordCount: 104071,
       featured: false,
@@ -433,7 +418,6 @@ window.NovelCast = (function () {
       title: 'Wuthering Heights',
       author: 'Emily Brontë',
       gutendexId: 768,
-      coverUrl: 'https://covers.openlibrary.org/b/id/8243652-L.jpg',
       totalChapters: 34,
       totalWordCount: 115872,
       featured: true,
@@ -443,7 +427,7 @@ window.NovelCast = (function () {
 
   // Initialize books array with transformed seed books
   let books = INITIAL_SEED.map(transformBackendBook);
-  const byId = {};
+  const byId = Object.create(null);
   books.forEach(b => {
     byId[b.id] = b;
     byId[b.slug] = b;
@@ -481,11 +465,17 @@ window.NovelCast = (function () {
 
   // State
   function loadState() {
+    const library = Object.create(null);
     try {
       const raw = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
-      return Object.assign({ library: {}, collections: [] }, raw);
+      if (raw?.library && typeof raw.library === 'object' && !Array.isArray(raw.library)) {
+        for (const [id, entry] of Object.entries(raw.library)) {
+          if (entry && typeof entry === 'object' && !Array.isArray(entry)) library[id] = entry;
+        }
+      }
+      return { ...raw, library, collections: Array.isArray(raw?.collections) ? raw.collections : [] };
     } catch (e) {
-      return { library: {}, collections: [] };
+      return { library, collections: [] };
     }
   }
 
@@ -526,26 +516,19 @@ window.NovelCast = (function () {
     return id;
   }
 
-  function getBook(id) {
+  function getExactBook(id) {
     const resolved = resolveId(id);
     if (byId[resolved]) return byId[resolved];
+    const auth = window.NovelCastAuth;
+    const user = auth?.isAuthenticated() ? auth.getUser() : null;
+    const owner = user?.id || user?.email;
+    if (!owner) return null;
+    const match = getUserUploads(owner).find(book => book.id === id || book.slug === id);
+    return match ? normalizeBook(match) : null;
+  }
 
-    // Check user uploads in localStorage
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (k && k.startsWith('novelcast.uploads.')) {
-        try {
-          const list = JSON.parse(localStorage.getItem(k) || '[]');
-          const match = list.find(b => b.id === id || b.slug === id);
-          if (match) {
-            normalizeBook(match);
-            byId[id] = match;
-            return match;
-          }
-        } catch (e) {}
-      }
-    }
-    return books[0];
+  function getBook(id) {
+    return getExactBook(id) || books[0];
   }
 
   function bookUrl(page, id, chapter) {
@@ -633,7 +616,8 @@ window.NovelCast = (function () {
   function getUserUploads(userId) {
     try {
       const raw = localStorage.getItem(getUserUploadsKey(userId));
-      return raw ? JSON.parse(raw) : [];
+      const books = raw ? JSON.parse(raw) : [];
+      return Array.isArray(books) ? books.filter(book => book && typeof book.id === 'string') : [];
     } catch (e) {
       return [];
     }
@@ -650,8 +634,8 @@ window.NovelCast = (function () {
       localStorage.setItem(getUserUploadsKey(userId), JSON.stringify(list));
     } catch (e) {
       console.error('Storage full or error:', e);
+      return null;
     }
-    byId[book.id] = book;
     return book;
   }
 
@@ -664,9 +648,6 @@ window.NovelCast = (function () {
       try {
         localStorage.setItem(getUserUploadsKey(userId), JSON.stringify(list));
       } catch (e) {}
-      if (byId[bookId]) {
-        byId[bookId].progress = item.progress;
-      }
     }
     return item;
   }
@@ -677,7 +658,6 @@ window.NovelCast = (function () {
     try {
       localStorage.setItem(getUserUploadsKey(userId), JSON.stringify(list));
     } catch (e) {}
-    delete byId[bookId];
     return list;
   }
 
@@ -694,7 +674,9 @@ window.NovelCast = (function () {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       const payload = await ratingsRequest;
-      if (payload) communityRatings = Object.fromEntries(payload.ratings.map(row => [row.slug, row]));
+      if (Array.isArray(payload?.ratings)) {
+        communityRatings = Object.fromEntries(payload.ratings.filter(row => typeof row?.slug === 'string').map(row => [row.slug, row]));
+      }
       if (Array.isArray(data.books) && data.books.length > 0) {
         const liveBooks = data.books.map(transformBackendBook);
         books = liveBooks;
@@ -727,11 +709,14 @@ window.NovelCast = (function () {
 
   async function fetchBookDetails(slugOrId) {
     const target = resolveId(slugOrId);
+    if (String(target).startsWith('upload-')) return getExactBook(target);
     try {
       const res = await fetch(`${API_BASE}/books/${encodeURIComponent(target)}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (data && data.book) {
+        const identifiers = [data.book.slug, data.book._id, data.book.gutendexId].filter(value => value != null);
+        if (!identifiers.some(value => String(value).toLowerCase() === String(target).toLowerCase())) return null;
         const updatedBook = transformBackendBook(data.book);
         const previous = byId[updatedBook.id];
         if (previous) { updatedBook.rating = previous.rating; updatedBook.reviews = previous.reviews; }
@@ -747,25 +732,30 @@ window.NovelCast = (function () {
         }
         byId[updatedBook.id] = updatedBook;
         byId[updatedBook.slug] = updatedBook;
+        byId[target] = updatedBook;
         document.dispatchEvent(new CustomEvent('novelcast:book-details-loaded', { detail: { book: updatedBook } }));
         return updatedBook;
       }
     } catch (err) {
       console.warn(`[NovelCastAPI] Error fetching book details for ${target}:`, err.message);
     }
-    return getBook(target);
+    return getExactBook(target);
   }
 
-  async function fetchChapter(slugOrId, chapterNumber = 1) {
+  async function fetchChapter(slugOrId, chapterNumber = 1, { signal } = {}) {
     const target = resolveId(slugOrId);
     const num = Math.max(1, parseInt(chapterNumber || 1, 10));
+    if (String(target).startsWith('upload-')) return null;
     try {
-      const res = await fetch(`${API_BASE}/books/${encodeURIComponent(target)}/chapters/${num}`);
+      const res = await fetch(`${API_BASE}/books/${encodeURIComponent(target)}/chapters/${num}`, { signal });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
+      const expected = getExactBook(target);
+      if (!expected || data.book?.slug !== expected.slug || data.chapter?.chapterNumber !== num ||
+          data.chapter.isPreview || typeof data.chapter.content !== 'string') return null;
       return data;
     } catch (err) {
-      console.warn(`[NovelCastAPI] Error fetching chapter ${num} for ${target}:`, err.message);
+      if (!signal?.aborted) console.warn(`[NovelCastAPI] Error fetching chapter ${num} for ${target}:`, err.message);
       return null;
     }
   }
@@ -784,23 +774,9 @@ window.NovelCast = (function () {
         return data.books.map(transformBackendBook);
       }
     } catch (err) {
-      console.warn('[NovelCastAPI] Search fallback to local cache:', err.message);
+      console.warn('[NovelCastAPI] Search fallback to the local shelf:', err.message);
     }
-    // Local fallback search
-    const term = (query || '').toLowerCase().trim();
-    let results = books;
-    if (genre && genre !== 'all') {
-      results = results.filter(b => (b.genre || '').toLowerCase().includes(genre.toLowerCase()));
-    }
-    if (term) {
-      results = results.filter(b => 
-        b.title.toLowerCase().includes(term) ||
-        b.author.toLowerCase().includes(term) ||
-        b.genre.toLowerCase().includes(term) ||
-        (b.description && b.description.toLowerCase().includes(term))
-      );
-    }
-    return results;
+    return null;
   }
 
   // Auto-fetch on boot
@@ -817,6 +793,7 @@ window.NovelCast = (function () {
     loadState,
     saveState,
     getBook,
+    getExactBook,
     bookUrl,
     readQuery,
     setQuery,

@@ -5,7 +5,8 @@ window.NovelCastViews.reader = {
     const NC = window.NovelCast;
     const query = NC.readQuery();
     const bookId = query.book || 'pride-and-prejudice';
-    const book = NC.getBook(bookId) || NC.books[0];
+    const book = NC.getExactBook(bookId);
+    if (!book) return '<p class="p-6" role="status" id="reader-route-status">Finding this book…</p>';
     const chapterNum = query.chapter ? Math.max(1, parseInt(query.chapter, 10)) : 1;
 
     // Check if book already has chapter in memory
@@ -48,7 +49,7 @@ window.NovelCastViews.reader = {
               </button>
             </div>
 
-            <button onclick="window.NovelCastApp.toggleAudio('book-${book.id}')" class="px-3.5 py-1.5 rounded-full bg-goldAccent text-[#121620] font-bold text-xs shadow hover:bg-[#ffe196] flex items-center gap-1 transition-all cursor-pointer" type="button">
+            <button data-audio-stub="book-${NC.escapeHtml(book.id)}" data-audio-chapter="${chapterNum}" class="px-3.5 py-1.5 rounded-full bg-goldAccent text-[#121620] font-bold text-xs shadow hover:bg-[#ffe196] flex items-center gap-1 transition-all cursor-pointer" type="button">
               <span class="material-symbols-outlined text-[15px]">headphones</span>
               <span>Listen</span>
             </button>
@@ -260,7 +261,22 @@ window.NovelCastViews.reader = {
     const query = NC.readQuery();
     const bookId = query.book || 'pride-and-prejudice';
     const chapterNum = query.chapter ? Math.max(1, parseInt(query.chapter, 10)) : 1;
-    const book = NC.getBook(bookId) || NC.books[0];
+    const book = NC.getExactBook(bookId);
+    if (!book) {
+      const status = document.getElementById('reader-route-status');
+      NC.fetchBookDetails(bookId).then(() => {
+        if (controller.signal.aborted || !status?.isConnected) return;
+        if (!NC.getExactBook(bookId)) {
+          status.textContent = 'This book is unavailable. Browse the catalog to choose another.';
+          return;
+        }
+        const container = document.getElementById('app-view');
+        container.innerHTML = this.render();
+        this.init();
+        window.NovelCastApp?.bindInteractiveElements(container);
+      });
+      return;
+    }
 
     // Font size controls
     let currentFontSize = 17;
@@ -471,7 +487,7 @@ window.NovelCastViews.reader = {
 
     // --- FETCH LIVE CHAPTER FROM MONGO ATLAS BACKEND ---
     const targetSlug = book.slug || book.id;
-    NC.fetchChapter(targetSlug, chapterNum).then(data => {
+    NC.fetchChapter(targetSlug, chapterNum, { signal: controller.signal }).then(data => {
       if (controller.signal.aborted) return;
       if (!data || !data.chapter) throw new Error('Chapter is temporarily unavailable.');
 

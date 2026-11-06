@@ -4,8 +4,8 @@
  * NovelCast backend entry point.
  *
  * Boots Express on PORT (default 4000), connects to MongoDB Atlas, and mounts
- * the catalog + ingestion routes. The server only starts listening once the
- * database connection is established, so /api/health is never a false positive.
+ * the public catalog and optional operator ingestion routes. /api/health
+ * distinguishes the HTTP listener from a usable Atlas connection.
  */
 
 const express = require('express');
@@ -16,6 +16,7 @@ const env = require('./src/config/env');
 const { connectDB, disconnectDB, connectionState } = require('./src/config/db');
 const catalogRoutes = require('./src/routes/catalogRoutes');
 const ingestRoutes = require('./src/routes/ingestRoutes');
+const ttsRoutes = require('./src/routes/ttsRoutes');
 
 const app = express();
 
@@ -23,17 +24,20 @@ app.disable('x-powered-by');
 app.use(
   cors({
     origin: env.CORS_ORIGIN === '*' ? true : env.CORS_ORIGIN.split(',').map((value) => value.trim()),
+    exposedHeaders: ['X-TTS-Model', 'X-TTS-Voice-Id', 'X-TTS-Voice-Name'],
   })
 );
-app.use(express.json({ limit: '1mb' }));
-
 app.use((req, res, next) => {
   const startedAt = Date.now();
   res.on('finish', () => {
-    console.log(`[http] ${req.method} ${req.originalUrl} ${res.statusCode} ${Date.now() - startedAt}ms`);
+    console.log(`[http] ${req.method} ${req.path} ${res.statusCode} ${Date.now() - startedAt}ms`);
   });
   next();
 });
+
+// Ingestion authorizes before parsing and uses a smaller body limit.
+app.use('/api', ingestRoutes);
+app.use(express.json({ limit: '1mb' }));
 
 app.get('/api/health', (req, res) => {
   const state = connectionState();
@@ -49,7 +53,7 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api', catalogRoutes);
 app.use('/api', require('./src/routes/ratingRoutes'));
-app.use('/api', ingestRoutes);
+app.use('/api', ttsRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found', path: req.originalUrl });
@@ -57,12 +61,13 @@ app.use((req, res) => {
 
 // eslint-disable-next-line no-unused-vars -- Express identifies error handlers by arity.
 app.use((error, req, res, next) => {
-  const status = error.status && error.status >= 400 ? error.status : 500;
-  console.error(`[error] ${req.method} ${req.originalUrl}:`, error.message);
-  res.status(status).json({
-    error: status === 500 ? 'Internal server error' : error.message,
-    detail: status === 500 ? error.message : undefined,
-  });
+  if (res.headersSent) return next(error);
+  const status = Number.isInteger(error.status) && error.status >= 400 && error.status <= 599 ? error.status : 500;
+  console.error(`[error] ${req.method} ${req.path}: ${error.name || 'Error'} (${status})`);
+  let message = status >= 500 ? 'Internal server error' : error.message || 'Request failed';
+  if (error.type === 'entity.parse.failed') message = 'Request body must be valid JSON.';
+  if (error.type === 'entity.too.large') message = 'Request body is too large.';
+  res.status(status).json({ error: message });
 });
 
 async function start() {

@@ -1,5 +1,170 @@
 window.NovelCastViews = window.NovelCastViews || {};
 
+let landingDialIndex;
+
+function mountLandingBookDial(shelf, controls, motion, signal, isOpening) {
+  const books = Array.from(shelf.querySelectorAll('.book-3d-wrapper'));
+  const status = controls.querySelector('[data-dial-title]');
+  const wrap = index => ((index % books.length) + books.length) % books.length;
+  const relative = index => wrap(index - position + books.length / 2) - books.length / 2;
+  const compressedSteps = distance => (1 - .88 ** distance) / .12;
+  let position = landingDialIndex ?? Math.max(0, books.findIndex(book => book.classList.contains('book-featured')));
+  let destination = position;
+  let coverWidth;
+  let spineStep;
+  let edge;
+  let frame = 0;
+  let drag;
+  let suppressClick = false;
+
+  function placeBooks() {
+    books.forEach((book, index) => {
+      const distance = relative(index);
+      const gap = Math.abs(distance);
+      const center = Math.max(0, 1 - gap);
+      const face = center * center * (3 - 2 * center);
+      // Reserve room for the front cover at the center, then compress the far spines along the arc.
+      const acrossCenter = Math.min(1, Math.max(-1, distance));
+      const spread = (acrossCenter + Math.sin(Math.PI * acrossCenter) / Math.PI) / 2;
+      const x = Math.sign(distance) * compressedSteps(gap) * spineStep + coverWidth * spread;
+      book.style.visibility = gap >= edge ? 'hidden' : '';
+      book.style.opacity = Math.min(1, Math.max(0, (edge - gap) * 2));
+      book.style.setProperty('--dial-x', `${x}px`);
+      book.style.setProperty('--dial-height', `${(1 - .865 ** gap) ** 1.5 * coverWidth * .3}px`);
+      book.style.setProperty('--dial-scale', Math.max(.3, .865 ** gap));
+      book.style.setProperty('--dial-yaw', `${(90 + Math.max(-8, Math.min(8, distance * 1.7))) * (1 - face)}deg`);
+      book.style.setProperty('--dial-layer', Math.round(30 - gap * 4));
+    });
+  }
+
+  function measure() {
+    const width = shelf.clientWidth;
+    const sideBooks = Math.max(1, Math.min(Math.floor((books.length - 1) / 2), Math.floor(width / 105)));
+    edge = Math.min(books.length / 2, sideBooks + .5);
+    coverWidth = books[0].offsetWidth;
+    spineStep = Math.max(0, width * .44 - coverWidth / 2) / compressedSteps(sideBooks);
+    placeBooks();
+  }
+
+  function select(index, focus) {
+    landingDialIndex = wrap(index);
+    books.forEach((book, i) => {
+      const selected = i === landingDialIndex;
+      book.tabIndex = selected ? 0 : -1;
+      if (selected) book.setAttribute('aria-current', 'true');
+      else book.removeAttribute('aria-current');
+    });
+    const book = books[landingDialIndex];
+    status.textContent = book.getAttribute('aria-label');
+    if (focus) book.focus({ preventScroll: true });
+  }
+
+  function stop() {
+    cancelAnimationFrame(frame);
+    frame = 0;
+    shelf.classList.remove('is-turning');
+  }
+
+  function snap(index, focus = false) {
+    stop();
+    destination = index;
+    select(index, focus);
+    const start = position;
+    if (motion.matches || start === index) {
+      position = index;
+      placeBooks();
+      return;
+    }
+
+    shelf.classList.add('is-turning');
+    const startTime = performance.now();
+    function settle(now) {
+      const progress = motion.matches ? 1 : Math.min(1, (now - startTime) / 550);
+      position = start + (index - start) * (1 - (1 - progress) ** 3);
+      placeBooks();
+      if (progress < 1) frame = requestAnimationFrame(settle);
+      else stop();
+    }
+    frame = requestAnimationFrame(settle);
+  }
+
+  function step(direction, focus) {
+    if (drag?.moving || isOpening()) return;
+    snap((frame ? destination : Math.round(position)) + direction, focus);
+  }
+
+  shelf.dataset.dialReady = '';
+  controls.hidden = false;
+  measure();
+  select(position, false);
+  const resize = new ResizeObserver(measure);
+  resize.observe(shelf);
+  signal.addEventListener('abort', () => { stop(); resize.disconnect(); }, { once: true });
+
+  shelf.addEventListener('dragstart', event => event.preventDefault(), { signal });
+  shelf.addEventListener('pointerdown', event => {
+    if (!event.isPrimary || event.button !== 0 || isOpening()) return;
+    suppressClick = false;
+    drag = { id: event.pointerId, x: event.clientX, y: event.clientY };
+  }, { signal });
+
+  window.addEventListener('pointermove', event => {
+    if (event.pointerId !== drag?.id) return;
+    const dx = event.clientX - drag.x;
+    if (!drag.moving) {
+      if (Math.abs(dx) < 7 || Math.abs(dx) <= Math.abs(event.clientY - drag.y)) return;
+      stop();
+      drag.moving = true;
+      drag.start = position;
+      shelf.setPointerCapture(event.pointerId);
+      shelf.classList.add('is-dragging', 'is-turning');
+    }
+    position = drag.start - dx / (spineStep + coverWidth / 2);
+    if (motion.matches) position = Math.round(position);
+    placeBooks();
+  }, { signal });
+
+  function endDrag(event) {
+    if (event.pointerId !== drag?.id) return;
+    const moved = drag.moving;
+    drag = null;
+    if (!moved) return;
+    suppressClick = true;
+    shelf.classList.remove('is-dragging');
+    snap(Math.round(position), shelf.contains(document.activeElement));
+  }
+
+  window.addEventListener('pointerup', endDrag, { signal });
+  window.addEventListener('pointercancel', endDrag, { signal });
+  shelf.addEventListener('lostpointercapture', endDrag, { signal });
+  shelf.addEventListener('click', event => {
+    if (!suppressClick || event.detail === 0) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }, { capture: true, signal });
+
+  controls.querySelectorAll('[data-dial-step]').forEach(button => {
+    button.addEventListener('click', () => step(Number(button.dataset.dialStep), false), { signal });
+  });
+  shelf.closest('.landing-original').addEventListener('keydown', event => {
+    const onBook = shelf.contains(event.target);
+    if (!onBook && !controls.contains(event.target)) return;
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    step(event.key === 'ArrowRight' ? 1 : -1, onBook);
+  }, { signal });
+
+  return {
+    stop,
+    selectBook(book) {
+      const index = books.indexOf(book);
+      if (index === landingDialIndex && !frame) return false;
+      snap(Math.round(position + relative(index)), true);
+      return true;
+    },
+  };
+}
+
 window.NovelCastViews.landing = {
   render: function () {
     return `
@@ -7,27 +172,21 @@ window.NovelCastViews.landing = {
       <div class="landing-original relative w-full min-h-screen flex flex-col justify-between bg-[#05070A] overflow-hidden select-none">
         
         <!-- Ambient Animated ASCII Art Background (21st.dev) -->
-        <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
+        <div class="landing-ascii absolute inset-0 z-0 pointer-events-none overflow-hidden select-none" aria-hidden="true">
           <video
-            class="w-full h-full object-cover opacity-55 mix-blend-screen scale-105 filter brightness-110 contrast-135 transition-opacity duration-1000"
+            class="landing-ascii-video"
             src="https://assets.21st.dev/ascii-recipes/videos/user_3HdhXqtaGNK6PDvN2DFY8vAT2Sr/aaa3f286-9a3c-491d-ba90-4e016ab73ef1.mp4"
             poster="https://assets.21st.dev/ascii-recipes/thumbnails/user_3HdhXqtaGNK6PDvN2DFY8vAT2Sr/5a8e1637-89e6-4132-8e00-61fbb69fda53.webp"
-            autoplay
             loop
             muted
             playsinline
-            aria-label="1s1s — animated ASCII art background"
-            style="display: block; width: 100%; height: 100%; object-fit: cover;"
           ></video>
-          <!-- Cinematic Vignette & Radial Spotlight Blends -->
-          <div class="absolute inset-0 bg-gradient-to-b from-[#05070A]/70 via-transparent to-[#05070A]/85"></div>
-          <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,transparent_35%,#05070A_85%)]"></div>
         </div>
 
         <!-- Top Editorial Floating Nav -->
-        <header class="relative z-50 w-full px-6 md:px-12 py-5 flex items-center justify-between">
+        <header class="landing-header relative z-50 w-full px-6 md:px-12 py-5 flex items-center justify-between">
           <a class="flex items-center gap-3 group focus:outline-none cursor-pointer" href="#/landing">
-            <img src="logo.svg" alt="NovelCast Logo" class="h-8 w-auto object-contain" />
+            <img src="logo.svg" alt="" class="landing-brand-mark h-8 w-auto object-contain" />
             <span class="font-serif text-xl tracking-tight font-medium text-white group-hover:text-neutral-200 transition-colors">
               NovelCast
             </span>
@@ -40,10 +199,13 @@ window.NovelCastViews.landing = {
             <a class="hover:text-white transition-colors duration-200" href="#/library">Sanctuary</a>
           </nav>
 
-          <div class="flex items-center gap-5 text-[13px]">
+          <div class="landing-header-actions flex items-center text-[13px]">
             <a class="text-neutral-300 hover:text-white font-medium transition-colors hidden sm:inline-block" href="#/search">
               Browse All
             </a>
+            <button class="nc-theme-toggle" data-theme-toggle type="button" aria-label="Light mode" aria-pressed="false">
+              <span class="material-symbols-outlined" data-theme-icon aria-hidden="true">light_mode</span>
+            </button>
             <a class="bg-white text-black font-semibold px-5 py-2 rounded-full text-xs hover:bg-neutral-200 active:scale-95 transition-all shadow-md shadow-white/10 flex items-center gap-1.5" href="#/home">
               <span>Enter Library</span>
               <span class="text-sm leading-none">→</span>
@@ -61,257 +223,96 @@ window.NovelCastViews.landing = {
           </p>
         </div>
 
-        <!-- Giant Watermark Title & 3D Book Parade Stage -->
-        <div class="relative flex-1 flex flex-col justify-center items-center w-full px-0 overflow-visible min-h-[480px]">
-          <!-- Watermark Background Text -->
-          <div class="absolute top-[12%] md:top-[10%] w-full text-center pointer-events-none z-0">
-            <h1 class="font-serif text-[19vw] md:text-[18vw] leading-none tracking-normal font-normal text-white/95 drop-shadow-[0_25px_30px_rgba(0,0,0,0.8)] select-none">
-              NovelCast
-            </h1>
-          </div>
+        <!-- Editorial title and rotary books -->
+        <div class="landing-book-showcase">
+          <h1 class="landing-hero-title font-serif font-normal text-white/95 drop-shadow-[0_25px_30px_rgba(0,0,0,0.8)]">
+            NovelCast
+          </h1>
 
           <!-- Parade Stage Container -->
-          <div class="parade-stage w-full flex items-end justify-center relative z-20 pt-16 md:pt-24 pb-8 overflow-visible">
-            <div class="landing-original-row flex items-end -space-x-16 md:-space-x-22 lg:-space-x-26 pl-16 pr-8 sm:px-0">
+          <div class="parade-stage">
+            <div class="landing-original-row" role="group" aria-label="Book dial" aria-describedby="landing-dial-hint">
               
-              <!-- Book 1: Paris Poetry -> The Picture of Dorian Gray -->
-              <div class="book-3d-wrapper cursor-pointer" role="link" tabindex="0" onclick="window.NovelCastRouter.navigate('book', { book: 'the-picture-of-dorian-gray' })" title="The Picture of Dorian Gray">
-                <div class="book-edge-right"></div>
-                <div class="book-edge-top"></div>
-                <div class="relative w-full h-full rounded-r-[2px] bg-gradient-to-br from-[#df939a] via-[#ce7a85] to-[#9b4a55] text-[#3d1217] p-4 flex flex-col justify-between shadow-2xl overflow-hidden">
-                  <div class="cover-crease"></div>
-                  <div class="cover-sheen"></div>
-                  <span class="text-[8px] uppercase tracking-widest font-semibold opacity-70">Oscar Wilde</span>
-                  <div class="my-auto">
-                    <p class="font-serif italic text-base leading-tight">Dorian<br/>Gray</p>
-                  </div>
-                  <span class="text-[8px] tracking-wider opacity-60">Classic Decadence</span>
-                </div>
-              </div>
-
-              <!-- Book 2: The Grand Arcade -> 20,000 Leagues Under the Sea -->
-              <div class="book-3d-wrapper cursor-pointer" role="link" tabindex="0" onclick="window.NovelCastRouter.navigate('book', { book: 'twenty-thousand-leagues-under-the-sea' })" title="Twenty Thousand Leagues Under the Sea">
-                <div class="book-edge-right"></div>
-                <div class="book-edge-top"></div>
-                <div class="relative w-full h-full rounded-r-[2px] bg-[#0c1322] border-l-[3px] border-amber-500/40 p-3.5 flex flex-col justify-between shadow-2xl overflow-hidden">
-                  <div class="cover-crease"></div>
-                  <div class="cover-sheen"></div>
-                  <div class="h-full w-full border border-amber-500/30 p-2.5 flex flex-col justify-between relative bg-gradient-to-b from-[#111a2e] to-[#080d17]">
-                    <div class="flex justify-between items-center text-[7px] text-amber-300/80 font-mono tracking-widest">
-                      <span>JULES VERNE</span>
-                      <span>1870</span>
-                    </div>
-                    <div class="text-center my-auto">
-                      <div class="w-7 h-7 mx-auto mb-2 border border-amber-400/50 rounded-full flex items-center justify-center text-[10px] text-amber-300">🌊</div>
-                      <h4 class="font-serif text-xs uppercase tracking-widest text-amber-100 font-semibold leading-tight">20,000<br/>Leagues</h4>
-                    </div>
-                    <span class="text-[7px] text-amber-400/60 uppercase tracking-wider text-center">Nautilus Edition</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Book 3: The Light Story -> The Time Machine -->
-              <div class="book-3d-wrapper cursor-pointer" role="link" tabindex="0" onclick="window.NovelCastRouter.navigate('book', { book: 'the-time-machine' })" title="The Time Machine">
-                <div class="book-edge-right"></div>
-                <div class="book-edge-top"></div>
-                <div class="relative w-full h-full rounded-r-[2px] bg-[#0f172a] border-l-[3px] border-blue-900 p-4 flex flex-col justify-between shadow-2xl overflow-hidden">
-                  <div class="cover-crease"></div>
-                  <div class="cover-sheen"></div>
-                  <div class="flex justify-between items-center text-[8px] uppercase tracking-widest text-blue-300/70">
-                    <span>H. G. Wells</span>
-                    <span>1895</span>
-                  </div>
-                  <div class="my-auto space-y-1">
-                    <span class="text-[9px] uppercase tracking-widest text-blue-200 block font-light">The</span>
-                    <h3 class="font-serif text-lg tracking-wider text-white font-bold leading-tight">TIME<br/>MACHINE</h3>
-                    <div class="w-8 h-[1px] bg-blue-400/40 my-2"></div>
-                    <p class="text-[9px] text-blue-300/70 font-serif italic">Sci-Fi Masterpiece</p>
-                  </div>
-                  <span class="text-[8px] text-neutral-500">London Press</span>
-                </div>
-              </div>
-
-              <!-- Book 4: Around the World in Eighty Days -->
-              <div class="book-3d-wrapper cursor-pointer" role="link" tabindex="0" onclick="window.NovelCastRouter.navigate('book', { book: 'around-the-world-in-eighty-days' })" title="Around the World in Eighty Days">
-                <div class="book-edge-right"></div>
-                <div class="book-edge-top"></div>
-                <div class="relative w-full h-full rounded-r-[2px] bg-[#f5f1e8] text-neutral-900 border-l-[3px] border-neutral-400 p-4 flex flex-col justify-between shadow-2xl overflow-hidden">
-                  <div class="cover-crease"></div>
-                  <div class="cover-sheen"></div>
-                  <div class="border-b border-neutral-300 pb-1 text-center">
-                    <span class="text-[7px] uppercase tracking-widest font-semibold text-neutral-500 block">
-                      Jules Verne Classic
-                    </span>
-                  </div>
-                  <div class="my-auto text-left py-2">
-                    <h3 class="font-serif text-2xl uppercase tracking-wider font-bold text-neutral-950 leading-none mb-1">
-                      EIGHTY<br/>DAYS
-                    </h3>
-                    <div class="w-6 h-[1.5px] bg-neutral-900 my-2"></div>
-                    <p class="font-serif italic text-xs text-neutral-700">Phileas Fogg's<br/>Wager</p>
-                  </div>
-                  <span class="text-[8px] uppercase tracking-widest font-semibold text-neutral-500">Adventure Edition</span>
-                </div>
-              </div>
-
-              <!-- Book 5: Featured Centerpiece (Pride and Prejudice) -->
-              <div class="book-3d-wrapper book-featured cursor-pointer" role="link" tabindex="0" onclick="window.NovelCastRouter.navigate('book', { book: 'pride-and-prejudice' })" title="Pride and Prejudice">
-                <div class="book-edge-right"></div>
-                <div class="book-edge-top"></div>
-                <div class="relative w-full h-full rounded-r-[2px] bg-gradient-to-b from-[#FFFDF2] via-[#FDF5D8] to-[#FCEABB] text-[#802D15] p-4 flex flex-col justify-between border-l-[4px] border-[#D4AF37] shadow-2xl overflow-hidden">
-                  <div class="cover-crease"></div>
-                  <div class="cover-sheen"></div>
-                  <div class="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#d97706_1px,transparent_1px)] [background-size:10px_10px]"></div>
-                  <div class="relative z-10 text-center border-b border-[#ebd79b] pb-1">
-                    <span class="text-[7px] tracking-widest uppercase font-bold text-[#A85A2A] block">
-                      The Sanctuary Centerpiece
-                    </span>
-                  </div>
-                  <div class="relative z-10 my-auto text-center space-y-0.5">
-                    <h2 class="font-serif italic text-2xl md:text-3xl text-[#cf4a21] font-semibold leading-tight drop-shadow-sm">
-                      Pride
-                    </h2>
-                    <p class="text-[9px] tracking-[0.25em] font-serif uppercase text-[#8d5e34] font-bold">
-                      &amp; PREJUDICE
-                    </p>
-                    <h3 class="font-serif text-2xl md:text-3xl text-[#dc5523] font-medium leading-none drop-shadow-sm">
-                      Austen
-                    </h3>
-                  </div>
-                  <div class="relative z-10 pt-1 flex flex-col items-center">
-                    <div class="flex items-center justify-center gap-1.5 mb-1.5">
-                      <span class="text-base drop-shadow">✦</span>
-                      <span class="text-xs opacity-80 drop-shadow">📖</span>
-                      <span class="text-base drop-shadow">✦</span>
-                    </div>
-                    <span class="font-sans text-[10px] uppercase tracking-wider font-bold text-[#56341f]">
-                      Jane Austen
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Book 6: Dracula -->
-              <div class="book-3d-wrapper cursor-pointer" role="link" tabindex="0" onclick="window.NovelCastRouter.navigate('book', { book: 'dracula' })" title="Dracula">
-                <div class="book-edge-right"></div>
-                <div class="book-edge-top"></div>
-                <div class="relative w-full h-full rounded-r-[2px] bg-gradient-to-b from-[#181920] via-[#0d0e12] to-black border-l-[3px] border-neutral-700 p-4 flex flex-col justify-between text-neutral-200 shadow-2xl overflow-hidden">
-                  <div class="cover-crease"></div>
-                  <div class="cover-sheen"></div>
-                  <span class="text-[8px] uppercase tracking-widest text-neutral-400">Bram Stoker</span>
-                  <div class="my-auto space-y-1">
-                    <h3 class="font-serif text-lg tracking-[0.2em] text-white uppercase font-light leading-none">DRACULA</h3>
-                    <p class="font-serif italic text-xs text-neutral-400">Gothic Horror</p>
-                    <div class="w-5 h-[1px] bg-neutral-600 mt-2"></div>
-                  </div>
-                  <span class="text-[9px] uppercase tracking-wider text-neutral-400 font-sans">1897 Classic</span>
-                </div>
-              </div>
-
-              <!-- Book 7: Frankenstein -->
-              <div class="book-3d-wrapper cursor-pointer" role="link" tabindex="0" onclick="window.NovelCastRouter.navigate('book', { book: 'frankenstein' })" title="Frankenstein">
-                <div class="book-edge-right"></div>
-                <div class="book-edge-top"></div>
-                <div class="relative w-full h-full rounded-r-[2px] bg-[#1a2d24] text-white border-l-[3px] border-emerald-900 p-4 flex flex-col justify-between shadow-2xl overflow-hidden">
-                  <div class="cover-crease"></div>
-                  <div class="cover-sheen"></div>
-                  <span class="text-[8px] uppercase font-bold tracking-widest text-emerald-300">Mary Shelley</span>
-                  <div class="my-auto">
-                    <h3 class="font-serif font-black text-xl uppercase leading-none tracking-tight">
-                      FRANKEN<br/>STEIN
-                    </h3>
-                  </div>
-                  <div class="border-t border-emerald-500/40 pt-1">
-                    <span class="text-[8px] uppercase tracking-widest text-emerald-200 font-bold">Modern Prometheus</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Book 8: Treasure Island -->
-              <div class="book-3d-wrapper cursor-pointer" role="link" tabindex="0" onclick="window.NovelCastRouter.navigate('book', { book: 'treasure-island' })" title="Treasure Island">
-                <div class="book-edge-right"></div>
-                <div class="book-edge-top"></div>
-                <div class="relative w-full h-full rounded-r-[2px] bg-[#0c1524] border-l-[3px] border-amber-600/80 p-3.5 flex flex-col justify-between shadow-2xl overflow-hidden">
-                  <div class="cover-crease"></div>
-                  <div class="cover-sheen"></div>
-                  <div class="h-full w-full border border-amber-500/40 p-2.5 flex flex-col justify-between">
-                    <div class="flex justify-center pt-1">
-                      <span class="text-amber-300 text-xs">🏴‍☠️</span>
-                    </div>
-                    <div class="text-center my-auto">
-                      <p class="font-serif text-[9px] text-amber-200 tracking-widest uppercase">R. L. Stevenson</p>
-                      <h4 class="font-serif text-sm tracking-widest text-amber-300 font-semibold uppercase">TREASURE<br/>ISLAND</h4>
-                    </div>
-                    <span class="text-[8px] text-amber-400/70 text-center font-sans tracking-widest uppercase">Seafarer</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Book 9: Moby Dick -->
-              <div class="book-3d-wrapper cursor-pointer" role="link" tabindex="0" onclick="window.NovelCastRouter.navigate('book', { book: 'moby-dick' })" title="Moby Dick">
-                <div class="book-edge-right"></div>
-                <div class="book-edge-top"></div>
-                <div class="relative w-full h-full rounded-r-[2px] bg-[#eeeae0] text-black border-l-[3px] border-neutral-400 p-4 flex flex-col justify-between shadow-2xl overflow-hidden">
-                  <div class="cover-crease"></div>
-                  <div class="cover-sheen"></div>
-                  <span class="text-[8px] uppercase tracking-widest text-neutral-500 font-medium">Herman Melville</span>
-                  <div class="my-auto py-2">
-                    <h3 class="font-serif text-lg tracking-normal uppercase font-bold text-neutral-900 leading-snug">
-                      MOBY<br/>DICK
-                    </h3>
-                  </div>
-                  <span class="text-[8px] uppercase tracking-wider text-neutral-600">The Whale</span>
-                </div>
-              </div>
-
-              <!-- Book 10: The Hound of the Baskervilles -->
-              <div class="book-3d-wrapper cursor-pointer" role="link" tabindex="0" onclick="window.NovelCastRouter.navigate('book', { book: 'the-hound-of-the-baskervilles' })" title="The Hound of the Baskervilles">
-                <div class="book-edge-right"></div>
-                <div class="book-edge-top"></div>
-                <div class="relative w-full h-full rounded-r-[2px] bg-[#070b14] border-l-[3px] border-teal-900 p-4 flex flex-col justify-between text-neutral-300 shadow-2xl overflow-hidden">
-                  <div class="cover-crease"></div>
-                  <div class="cover-sheen"></div>
-                  <span class="text-[8px] uppercase tracking-wider text-teal-400/80">Sherlock Holmes</span>
-                  <div class="my-auto">
-                    <h4 class="font-serif text-base tracking-wider text-white font-semibold">BASKER<br/>VILLE</h4>
-                  </div>
-                  <span class="text-[8px] text-neutral-500">Conan Doyle</span>
-                </div>
-              </div>
+              ${window.NCPage.landingShelf()}
 
             </div>
           </div>
         </div>
 
-        <!-- Bottom Atmospheric Spacer -->
-        <div class="relative z-20 w-full pb-8 md:pb-12 pointer-events-none"></div>
+        <div class="landing-dial-controls" role="group" aria-label="Turn the book dial" hidden>
+          <button type="button" data-dial-step="-1" aria-label="Previous book">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 3-5 5 5 5"/></svg>
+          </button>
+          <div class="landing-dial-caption">
+            <p data-dial-title aria-live="polite"></p>
+            <p id="landing-dial-hint">Drag, swipe, or use the arrows</p>
+          </div>
+          <button type="button" data-dial-step="1" aria-label="Next book">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg>
+          </button>
+        </div>
 
       </div>
     `;
   },
   init: function () {
-    // Ensure background ASCII video plays smoothly
-    const bgVideo = document.querySelector('video[aria-label*="ASCII"]');
-    if (bgVideo) {
-      bgVideo.play().catch(() => {});
-    }
-
+    const bgVideo = document.querySelector('.landing-ascii-video');
     const controller = new AbortController();
-    this.destroy = () => { controller.abort(); if (bgVideo) bgVideo.pause(); };
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (bgVideo && reducedMotion) bgVideo.pause();
-    document.querySelectorAll('.book-3d-wrapper').forEach(wrap => {
-      wrap.addEventListener('keydown', event => {
-        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); wrap.click(); }
-      }, { signal: controller.signal });
-      if (reducedMotion) return;
-      wrap.addEventListener('pointermove', event => {
-        if (event.pointerType === 'touch') return;
-        const rect = wrap.getBoundingClientRect();
-        const tilt = Math.max(-3, Math.min(3, (event.clientX - rect.left - rect.width / 2) / 22));
-        wrap.style.transform = 'rotateY(' + (-54 + tilt) + 'deg) rotateX(4deg) translateY(-16px) translateZ(28px)';
-      }, { signal: controller.signal });
-      wrap.addEventListener('pointerleave', () => { wrap.style.transform = ''; }, { signal: controller.signal });
-    });
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const signal = controller.signal;
+    let turn;
+    this.destroy = () => {
+      controller.abort();
+      turn?.cancel();
+      bgVideo?.pause();
+    };
+    function syncBackgroundMotion() {
+      if (motion.matches) bgVideo?.pause();
+      else bgVideo?.play().catch(() => {});
+    }
+    syncBackgroundMotion();
+    motion.addEventListener('change', syncBackgroundMotion, { signal });
+
+    const shelf = document.querySelector('.landing-original-row');
+    const controls = document.querySelector('.landing-dial-controls');
+    if (!shelf?.firstElementChild) return;
+    const dial = mountLandingBookDial(shelf, controls, motion, signal, () => Boolean(turn));
+    document.addEventListener('novelcast:books-loaded', event => {
+      const liveBooks = new Map(event.detail.books.map(book => [book.id, book]));
+      shelf.querySelectorAll('[data-shelf-book]').forEach(link => {
+        const book = liveBooks.get(link.dataset.shelfBook);
+        if (book?.coverUrl) link.querySelector('.book-cover-art').innerHTML = window.NovelCastView.cover(book, { eager: true });
+      });
+    }, { signal });
+
+    shelf.addEventListener('click', async event => {
+      const book = event.target.closest('a.book-3d-wrapper');
+      if (!book || event.defaultPrevented || event.button !== 0 ||
+          event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+      if (turn || dial.selectBook(book)) {
+        event.preventDefault();
+        return;
+      }
+      if (motion.matches || typeof book.animate !== 'function') return;
+      event.preventDefault();
+      dial.stop();
+      const cover = book.querySelector('.book-cover-art');
+      const startTransform = getComputedStyle(book).transform;
+      book.classList.add('is-opening');
+      turn = book.animate([
+        { transform: startTransform },
+        { offset: .42, transform: 'perspective(920px) translate3d(0, -14px, 32px) rotateZ(-5deg) rotateY(-67deg) rotateX(7deg)' },
+        { offset: .86, transform: 'perspective(920px) translate3d(0, -23px, 58px) rotateZ(-2deg) rotateY(6deg) rotateX(-3deg)' },
+        { transform: 'perspective(920px) translate3d(0, -22px, 55px) rotateZ(0deg) rotateY(0deg) rotateX(0deg)' }
+      ], { duration: 540, easing: 'cubic-bezier(.4, 0, .2, 1)', fill: 'forwards' });
+
+      try {
+        await turn.finished;
+        if (!signal.aborted) window.NovelCastRouter.openBook(book.hash, cover);
+      } catch {
+        // Leaving the landing page cancels the pending turn.
+      }
+    }, { signal });
   }
 };

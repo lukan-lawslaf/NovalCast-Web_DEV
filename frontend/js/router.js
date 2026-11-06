@@ -1,5 +1,7 @@
 (function () {
   let activeView = null;
+  let pendingBookOpening;
+  let bookTransition;
   const routes = {
     'home': window.NovelCastViews.home,
     'search': window.NovelCastViews.search,
@@ -15,7 +17,8 @@
     const defaultRoute = 'landing';
     const hash = raw || defaultRoute;
     const [pathPart, queryPart] = hash.split('?');
-    const path = pathPart.toLowerCase() || defaultRoute;
+    const route = pathPart.toLowerCase();
+    const path = Object.hasOwn(routes, route) ? route : defaultRoute;
     const params = new URLSearchParams(queryPart || '');
     return { path, params };
   }
@@ -25,12 +28,8 @@
       const route = link.dataset.navRoute;
       const isActive = route === currentRoute;
       link.classList.toggle('nav-active', isActive);
-      link.classList.toggle('text-goldAccent', isActive);
-      if (isActive) {
-        link.classList.add('bg-[#181D26]', 'shadow-[0_0_18px_rgba(243,209,130,0.22)]');
-      } else {
-        link.classList.remove('bg-[#181D26]', 'shadow-[0_0_18px_rgba(243,209,130,0.22)]');
-      }
+      if (isActive) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
     });
   }
 
@@ -49,7 +48,7 @@
       }
     }
 
-    const view = routes[path] || routes['landing'];
+    const view = routes[path];
     const container = document.getElementById('app-view');
     if (!container) return;
 
@@ -79,6 +78,7 @@
     document.body.dataset.route = path;
     // Render view HTML
     container.innerHTML = view.render();
+    window.NovelCastTheme?.syncToggles();
 
     // Call view-specific initializer
     if (typeof view.init === 'function') {
@@ -97,6 +97,61 @@
     }
   }
 
+  function handleRouteChange() {
+    if (bookTransition) {
+      bookTransition.transition.skipTransition();
+      bookTransition.cleanup();
+      bookTransition = null;
+    }
+    const opening = pendingBookOpening;
+    pendingBookOpening = null;
+    if (!opening || opening.hash !== location.hash || !opening.cover?.isConnected ||
+        typeof document.startViewTransition !== 'function' ||
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      renderRoute();
+      return;
+    }
+
+    const cover = opening.cover;
+    const rect = cover.getBoundingClientRect();
+    const left = Math.max(0, rect.left);
+    const top = Math.max(0, rect.top);
+    const right = Math.max(0, window.innerWidth - rect.right);
+    const bottom = Math.max(0, window.innerHeight - rect.bottom);
+    if (left + right >= window.innerWidth || top + bottom >= window.innerHeight) {
+      renderRoute();
+      return;
+    }
+    const root = document.documentElement;
+    root.style.setProperty('--book-opening-inset', `${top}px ${right}px ${bottom}px ${left}px`);
+    root.setAttribute('data-book-opening', '');
+    cover.setAttribute('data-book-opening-source', '');
+
+    const cleanup = () => {
+      cover.removeAttribute('data-book-opening-source');
+      root.removeAttribute('data-book-opening');
+      root.style.removeProperty('--book-opening-inset');
+    };
+    let transition;
+    try {
+      transition = document.startViewTransition(() => {
+        if (location.hash === opening.hash) renderRoute();
+      });
+    } catch {
+      cleanup();
+      renderRoute();
+      return;
+    }
+    bookTransition = { transition, cleanup };
+    const finished = () => {
+      if (bookTransition?.transition !== transition) return;
+      bookTransition = null;
+      cleanup();
+    };
+    transition.ready.catch(() => {});
+    transition.finished.then(finished, finished);
+  }
+
   // Intercept legacy relative links (e.g. href="book-details.html?book=ikigai")
   function interceptLinks() {
     document.addEventListener('click', (e) => {
@@ -105,9 +160,9 @@
       const href = link.getAttribute('href');
       if (!href || href.startsWith('http') || href.startsWith('//') || href.startsWith('mailto:')) return;
 
-      if (href.includes('.html')) {
+      const [page, query] = href.split('?');
+      if (page.endsWith('.html') && !page.includes(':')) {
         e.preventDefault();
-        const [page, query] = href.split('?');
         const qStr = query ? '?' + query : '';
         if (page.includes('book-details')) {
           location.hash = `#/book${qStr}`;
@@ -127,12 +182,16 @@
   }
 
   window.NovelCastRouter = {
+    openBook: function (hash, cover) {
+      pendingBookOpening = { hash, cover };
+      location.hash = hash;
+    },
     navigate: function (path, params = {}) {
       const q = new URLSearchParams(params).toString();
       location.hash = `#/${path}${q ? '?' + q : ''}`;
     },
     init: function () {
-      window.addEventListener('hashchange', renderRoute);
+      window.addEventListener('hashchange', handleRouteChange);
       interceptLinks();
       renderRoute();
     }

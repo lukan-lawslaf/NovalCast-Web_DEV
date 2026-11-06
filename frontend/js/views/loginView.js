@@ -4,11 +4,13 @@ window.NovelCastViews.login = {
   render: function () {
     const auth = window.NovelCastAuth;
     const user = auth && auth.isAuthenticated() ? auth.getUser() : null;
+    const themeToggle = '<button type="button" class="nc-theme-toggle" data-theme-toggle aria-label="Light mode" aria-pressed="false"><span class="material-symbols-outlined" data-theme-icon aria-hidden="true">light_mode</span></button>';
 
     if (user) {
       return `
         <!-- Authenticated State Card -->
         <div class="min-h-screen flex items-center justify-center px-4 py-12 relative z-10 bg-obsidian-950 text-ivory-100">
+          <div class="nc-account-theme">${themeToggle}</div>
           <div class="w-full max-w-[440px] sanctuary-glass rounded-2xl p-8 md:p-10 text-center relative overflow-hidden shadow-2xl border border-gold-400/25">
             <div class="flex justify-center mb-4">
               <img src="logo.svg" alt="NovelCast Logo" class="h-12 w-auto object-contain filter drop-shadow-[0_2px_14px_rgba(242,212,121,0.4)]" />
@@ -63,6 +65,7 @@ window.NovelCastViews.login = {
           </a>
           <!-- Minimal Right Navigation Links -->
           <nav class="flex items-center gap-6">
+            ${themeToggle}
             <span class="hidden sm:inline-flex items-center gap-2 text-[10px] tracking-widest-plus uppercase text-gold-400/80">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-400/80"></span>
               Studio Sanctuary

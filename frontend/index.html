@@ -4,6 +4,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>NovelCast — Curated Audiobooks & Readers</title>
+  <script src="js/theme.js"></script>
   
   <!-- Preconnect & Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect"/>
@@ -226,6 +227,9 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
+  <link rel="stylesheet" href="css/audio-player.css"/>
+  <link rel="stylesheet" href="css/shell.css"/>
+  <link rel="stylesheet" href="css/theme.css"/>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-[#181E29] via-[#131722] to-[#0E1217] bg-fixed text-slate-200 antialiased selection:bg-goldAccent/30 selection:text-white">
   
@@ -239,48 +243,10 @@
       </a>
 
       <!-- Main Navigation Icons -->
-      <nav class="flex flex-col items-center gap-6 mt-6 text-[#7E889B]" id="main-nav">
-        <!-- Home -->
-        <a aria-label="Home" class="w-10 h-10 rounded-full flex items-center justify-center hover:text-white hover:bg-[#181D26] hover:scale-105 transition-all" href="#/home" data-nav-route="home" title="Home Discovery">
-          <svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24">
-            <path d="M9.5 2.5C9.8 6.2 11.8 8.2 15.5 8.5C11.8 8.8 9.8 10.8 9.5 14.5C9.2 10.8 7.2 8.8 3.5 8.5C7.2 8.2 9.2 6.2 9.5 2.5Z"></path>
-            <path d="M17.5 3C17.7 4.7 18.8 5.8 20.5 6C18.8 6.2 17.7 7.3 17.5 9C17.3 7.3 16.2 6.2 14.5 6C16.2 5.8 17.3 4.7 17.5 3Z"></path>
-            <path d="M17 13.5C17.15 14.7 17.9 15.45 19.1 15.6C17.9 15.75 17.15 16.5 17 17.7C16.85 16.5 16.1 15.75 14.9 15.6C16.1 15.45 16.85 14.7 17 13.5Z"></path>
-          </svg>
-        </a>
-
-        <!-- Search / Explore -->
-        <a aria-label="Search" class="w-10 h-10 rounded-full flex items-center justify-center hover:text-white hover:bg-[#181D26] hover:scale-105 transition-all" href="#/search" data-nav-route="search" title="Search & Explore">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24">
-            <circle cx="10.5" cy="10.5" r="5.5"></circle>
-            <line x1="14.5" x2="19.5" y1="14.5" y2="19.5"></line>
-          </svg>
-        </a>
-
-        <!-- Book Reader -->
-        <a aria-label="Reader" class="w-10 h-10 rounded-full flex items-center justify-center hover:text-white hover:bg-[#181D26] hover:scale-105 transition-all" href="#/reader" data-nav-route="reader" title="Book Reader">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24">
-            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
-            <path d="M6 6h10"></path>
-            <path d="M6 10h10"></path>
-          </svg>
-        </a>
-
-        <!-- Library & Favorites -->
-        <a aria-label="Library" class="w-10 h-10 rounded-full flex items-center justify-center hover:text-white hover:bg-[#181D26] hover:scale-105 transition-all" href="#/library" data-nav-route="library" title="My Library">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24">
-            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
-          </svg>
-        </a>
-
-        <!-- 3D Perspective Showcase -->
-        <a aria-label="Showcase" class="w-10 h-10 rounded-full flex items-center justify-center hover:text-white hover:bg-[#181D26] hover:scale-105 transition-all" href="#/landing" data-nav-route="landing" title="3D Hero Showcase">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24">
-            <polygon points="12 3 7.5 11 16.5 11"></polygon>
-            <rect height="6.5" rx="0.8" width="6.5" x="4.5" y="14"></rect>
-            <circle cx="16" cy="17.2" r="3.3"></circle>
-          </svg>
-        </a>
+      <nav id="main-nav" class="nc-main-nav" aria-label="Main navigation">
+        <a class="nc-nav-link" href="#/home" data-nav-route="home" aria-label="Home" title="Home"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg></a>
+        <a class="nc-nav-link" href="#/search" data-nav-route="search" aria-label="Search" title="Search"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></a>
+        <a class="nc-nav-link" href="#/library" data-nav-route="library" aria-label="My Library" title="My Library"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h4v14H3zm7 0h4v14h-4zm7 1 3-1 3 13-3 1z"/></svg></a>
       </nav>
     </aside>
 
@@ -297,17 +263,26 @@
         </a>
 
         <!-- Header Actions -->
-        <div class="flex items-center gap-3.5">
-          <button aria-label="Notifications" class="w-9 h-9 rounded-full bg-[#161B24] border border-[#232B39] flex items-center justify-center text-[#B0BAC8] hover:text-white hover:border-[#354054] transition-all" onclick="window.NovelCast.toast('No new notifications')">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+        <div class="nc-header-actions">
+          <button type="button" aria-label="Notifications" class="nc-header-notifications" onclick="window.NovelCast.toast('No new notifications')">
+            <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
               <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
               <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
             </svg>
           </button>
-          <button id="header-user-btn" aria-label="User Profile" class="relative w-9 h-9 rounded-full bg-[#161B24] border border-[#232B39] flex items-center justify-center text-[#B0BAC8] hover:text-goldAccent hover:border-goldAccent/50 transition-all cursor-pointer focus:outline-none" onclick="window.NovelCastAuth && window.NovelCastAuth.isAuthenticated() ? window.NovelCastRouter.navigate('library') : window.NovelCastRouter.navigate('login')" title="Account / My Library">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" stroke-dasharray="40" stroke-dashoffset="0" opacity="1"></path><circle cx="12" cy="7" r="4" opacity="1"></circle></g></svg>
-            <span id="user-auth-indicator" class="hidden absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-goldAccent ring-2 ring-[#0E1218] shadow-[0_0_6px_#f1d69e]"></span>
+          <button class="nc-theme-toggle" type="button" data-theme-toggle aria-label="Light mode" aria-pressed="false">
+            <svg class="nc-theme-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/>
+            </svg>
+            <svg class="nc-theme-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">
+              <path d="M20.7 14.2A9 9 0 0 1 9.8 3.3a9 9 0 1 0 10.9 10.9Z"/>
+            </svg>
           </button>
+          <a id="header-user-btn" class="nc-profile-button" href="#/login" aria-label="Sign in" title="Sign in">
+            <span data-profile-guest><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2"/></svg></span>
+            <span data-profile-initials hidden aria-hidden="true"></span>
+          </a>
         </div>
       </header>
 
@@ -321,24 +296,21 @@
 
 
   <!-- Persistent Global Audio Player Bar -->
-  <div id="global-audio-player" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-2xl bg-[#141924]/95 backdrop-blur-xl border border-goldAccent/30 rounded-full px-5 py-3 shadow-[0_12px_40px_rgba(0,0,0,0.8)] flex items-center justify-between gap-4 transition-all duration-300 translate-y-24 opacity-0 pointer-events-none">
-    <div class="flex items-center gap-3 min-w-0">
-      <div class="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-white/10 shadow" id="player-thumb"></div>
-      <div class="truncate">
-        <h4 class="text-xs font-bold text-white truncate" id="player-title">Track Title</h4>
-        <p class="text-[10px] text-[#8C98AC] truncate" id="player-narrator">Narrator</p>
+  <section id="global-audio-player" class="nc-audio-player" aria-label="Book narration player" hidden>
+    <div class="nc-audio-copy">
+      <h4 id="player-title">Book narration</h4>
+      <div class="nc-audio-meta">
+        <p id="player-chapter"></p>
+        <p id="player-voice"></p>
       </div>
+      <p id="player-status" role="status" aria-live="polite"></p>
     </div>
-    
-    <div class="flex items-center gap-3">
-      <button class="w-8 h-8 rounded-full bg-goldAccent text-[#121620] flex items-center justify-center hover:scale-105 transition-transform" id="player-play-btn">
-        <span class="material-symbols-outlined text-[18px]" id="player-play-icon">pause</span>
-      </button>
-      <button class="text-[#7E8B9C] hover:text-white transition-colors" id="player-close-btn" title="Close">
-        <span class="material-symbols-outlined text-[18px]">close</span>
-      </button>
+    <div class="nc-audio-actions">
+      <button id="player-play-btn" type="button" aria-label="Pause listening">Pause</button>
+      <button id="player-retry-btn" type="button" hidden>Retry</button>
+      <button id="player-close-btn" type="button" aria-label="Close narration player">Close</button>
     </div>
-  </div>
+  </section>
 
   <!-- Supabase Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -349,6 +321,7 @@
   <!-- Core Scripts in Order -->
   <script src="js/data.js"></script>
   <script src="js/auth.js"></script>
+  <script src="js/profile.js"></script>
   <script src="js/ratings.js"></script>
   <script src="js/components/pixelCard.js"></script>
   <script src="js/ui.js"></script>
@@ -364,71 +337,15 @@
   <script src="js/views/loginView.js"></script>
 
   <!-- App Core & SPA Router -->
+  <script src="js/audioPlayer.js"></script>
   <script src="js/app.js"></script>
   <script src="js/router.js"></script>
 
   <!-- Boot SPA -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Global persistent player logic
-      window.NovelCastApp = Object.assign(window.NovelCastApp || {}, {
-        toggleAudio: function (trackId) {
-          const player = document.getElementById('global-audio-player');
-          const titleEl = document.getElementById('player-title');
-          const narratorEl = document.getElementById('player-narrator');
-          const thumbEl = document.getElementById('player-thumb');
-          const iconEl = document.getElementById('player-play-icon');
-
-          if (!player) return;
-
-          const bookId = trackId.replace('book-', '');
-          const book = window.NovelCast.getBook(bookId) || window.NovelCast.books[0];
-
-          titleEl.textContent = book.title;
-          narratorEl.textContent = book.narrator || book.author;
-          thumbEl.innerHTML = window.NovelCastView.cover(book);
-
-          player.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
-          player.classList.add('translate-y-0', 'opacity-100');
-          iconEl.textContent = 'pause';
-          window.NovelCast.toast(`Playing: ${book.title}`);
-        },
-        bindInteractiveElements: function (scope) {
-          if (window.NovelCastUI) {
-            window.NovelCastUI.installBookLinks(scope);
-            window.NovelCastUI.installFavoriteToggle(scope);
-            window.NovelCastUI.installLibraryToggle(scope);
-          }
-          (scope || document).querySelectorAll('[data-audio-stub]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-              e.preventDefault();
-              window.NovelCastApp.toggleAudio(btn.dataset.audioStub);
-            });
-          });
-        }
-      });
-
-      // Player close button
-      const closeBtn = document.getElementById('player-close-btn');
-      if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-          const player = document.getElementById('global-audio-player');
-          player.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
-          player.classList.remove('translate-y-0', 'opacity-100');
-        });
-      }
-
-      // Initialize Supabase Auth & Sync Indicator
-      if (window.NovelCastAuth) {
-        window.NovelCastAuth.init().then(user => {
-          const indicator = document.getElementById('user-auth-indicator');
-          if (indicator) indicator.classList.toggle('hidden', !user);
-        });
-        window.NovelCastAuth.onAuthStateChange(user => {
-          const indicator = document.getElementById('user-auth-indicator');
-          if (indicator) indicator.classList.toggle('hidden', !user);
-        });
-      }
+      window.NovelCastProfile.init();
+      window.NovelCastAuth?.init();
 
       // Initialize SPA Router
       window.NovelCastRouter.init();

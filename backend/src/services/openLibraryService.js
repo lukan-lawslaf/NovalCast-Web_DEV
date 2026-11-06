@@ -30,6 +30,7 @@ const SEARCH_FIELDS = [
 function readableDescription(raw) {
   if (!raw) return '';
   const text = typeof raw === 'string' ? raw : raw.value || '';
+  if (typeof text !== 'string') return '';
   return text
     .replace(/\r\n?/g, '\n')
     .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1') // markdown links -> label
@@ -37,9 +38,31 @@ function readableDescription(raw) {
     .trim();
 }
 
+function normalizeWords(value) {
+  return typeof value === 'string'
+    ? value.normalize('NFKD').replace(/\p{M}/gu, '').replace(/[’‘']/g, '').toLowerCase()
+      .replace(/[^\p{L}\p{N}]+/gu, ' ').trim()
+    : '';
+}
+
+function titleKeys(title) {
+  if (typeof title !== 'string') return [];
+  const mainTitle = title.split(/;|:\s|\s+[–—-]\s+|\s+\/\s+/u)[0];
+  return [...new Set([normalizeWords(title), normalizeWords(mainTitle)].filter(Boolean))];
+}
+
+function authorKeys(author) {
+  if (typeof author !== 'string') return [];
+  const name = author.replace(/\([^()]*\)/g, ' ').replace(/[,\s]+\d{3,4}(?:\s*[-–]\s*\d{0,4})?\s*$/u, '').trim();
+  const normalized = normalizeWords(name);
+  if (!normalized || ['unknown', 'unknown author', 'anonymous'].includes(normalized)) return [];
+  const parts = name.split(',').map(part => part.trim()).filter(Boolean);
+  return parts.length === 2 ? [normalized, normalizeWords(`${parts[1]} ${parts[0]}`)] : [normalized];
+}
+
 /** The work endpoint carries the synopsis; search.json usually does not. */
 async function fetchWorkDescription(workKey) {
-  if (!workKey || !workKey.startsWith('/works/')) return '';
+  if (typeof workKey !== 'string' || !/^\/works\/OL[1-9]\d*W$/.test(workKey)) return '';
   try {
     const work = await fetchJson(`${OPEN_LIBRARY_BASE}${workKey}.json`, {
       timeout: TIMEOUT_MS,
@@ -52,8 +75,10 @@ async function fetchWorkDescription(workKey) {
 }
 
 function buildCoverUrl(doc) {
-  if (doc.cover_i) return `${COVERS_BASE}/id/${doc.cover_i}-L.jpg`;
-  if (doc.cover_edition_key) return `${COVERS_BASE}/olid/${doc.cover_edition_key}-L.jpg`;
+  if (Number.isSafeInteger(doc.cover_i) && doc.cover_i > 0) return `${COVERS_BASE}/id/${doc.cover_i}-L.jpg?default=false`;
+  if (typeof doc.cover_edition_key === 'string' && /^OL[1-9]\d*M$/.test(doc.cover_edition_key)) {
+    return `${COVERS_BASE}/olid/${doc.cover_edition_key}-L.jpg?default=false`;
+  }
   return '';
 }
 
@@ -72,29 +97,41 @@ async function enrich({ title, author } = {}) {
     editionCount: null,
   };
 
-  if (!title) return empty;
+  const titles = titleKeys(title);
+  const authors = new Set(authorKeys(author));
+  if (!titles.length || !authors.size) return empty;
 
   try {
     const params = new URLSearchParams({ title, limit: '5', fields: SEARCH_FIELDS });
-    if (author) params.set('author', author.split(',')[0].trim());
+    params.set('author', author.split(',')[0].replace(/\([^()]*\)/g, ' ').replace(/\s+/g, ' ').trim());
 
     const payload = await fetchJson(`${SEARCH_BASE}?${params.toString()}`, {
       timeout: TIMEOUT_MS,
       retries: 1,
     });
 
-    const docs = payload.docs || [];
-    if (!docs.length) return empty;
-
-    // Prefer an edition that actually has a cover.
-    const doc = docs.find((candidate) => candidate.cover_i || candidate.cover_edition_key) || docs[0];
+    const matches = (Array.isArray(payload.docs) ? payload.docs : []).flatMap(candidate => {
+      if (!candidate || !Array.isArray(candidate.author_name) ||
+          !candidate.author_name.some(name => authorKeys(name).some(key => authors.has(key)))) return [];
+      const candidateTitles = titleKeys(candidate.title);
+      if (!candidateTitles.some(key => titles.includes(key))) return [];
+      return [{ doc: candidate, coverUrl: buildCoverUrl(candidate), exactTitle: candidateTitles[0] === titles[0] }];
+    });
+    // A cover-bearing search hit is useful only after both title and author
+    // match. Rank exact titles before subtitle matches; Gutenberg supplies the
+    // artwork when no matching work has an identifiable cover.
+    const exactMatches = matches.filter(candidate => candidate.exactTitle);
+    const eligible = exactMatches.length ? exactMatches : matches;
+    const match = eligible.find(candidate => candidate.coverUrl) || eligible[0];
+    if (!match) return empty;
+    const { doc, coverUrl } = match;
 
     const description =
       readableDescription(doc.first_sentence && doc.first_sentence.value) ||
       (await fetchWorkDescription(doc.key));
 
     return {
-      coverUrl: buildCoverUrl(doc),
+      coverUrl,
       description,
       subjects: (doc.subject || []).slice(0, 24),
       firstPublishYear: doc.first_publish_year || null,

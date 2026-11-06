@@ -121,8 +121,12 @@ module.exports = {
   MONGODB_DB_NAME: dbName.value || databaseNameFromUri(mongoUri.value) || 'novelcast',
   PORT: Number(port.value) || 4000,
   CORS_ORIGIN: corsOrigin.value || '*',
+  INGEST_ADMIN_TOKEN: lookup(['INGEST_ADMIN_TOKEN']).value || '',
   SUPABASE_URL: lookup(['SUPABASE_URL', 'Supabase_url', 'supabase_url']).value || '',
   SUPABASE_ANON_KEY: lookup(['SUPABASE_ANON_KEY', 'Supabase_anon_key', 'SUPABASE_KEY', 'Supabase_key', 'supabase_anon_key', 'Supabase_api']).value || '',
+  // These values stay on the server. The narration model is fixed in code.
+  FISH_AUDIO_API_KEY: lookup(['FISH_AUDIO_API_KEY', 'FISH_API_KEY', 'Fish_Audio']).value || '',
+  FISH_AUDIO_REFERENCE_ID: lookup(['FISH_AUDIO_REFERENCE_ID']).value || '',
   /**
    * Resolvers used only if the machine's own DNS refuses the SRV lookup that
    * `mongodb+srv://` requires (VPN clients and local stubs often do).

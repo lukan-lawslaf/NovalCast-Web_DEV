@@ -1,0 +1,82 @@
+{
+  "a-tale-of-two-cities": {
+    "referenceId": "76bb6ae7b26c41fbbd484514fdb014c2",
+    "name": "Morgan Freeman"
+  },
+  "alices-adventures-in-wonderland": {
+    "referenceId": "606bc200ea5a44da993890749866ca30",
+    "name": "Alice Kingsleigh - Alice in Wonderland"
+  },
+  "around-the-world-in-eighty-days": {
+    "referenceId": "6b81bd1519bf4267b875ccc2a630bb5d",
+    "name": "LittleBIGPlanet Narrator (Stephen Fry)"
+  },
+  "dr-jekyll-and-mr-hyde": {
+    "referenceId": "68f75cc070bc4989b91a5e865fb0c6a0",
+    "name": "Christopher Lee"
+  },
+  "dracula": {
+    "referenceId": "68f75cc070bc4989b91a5e865fb0c6a0",
+    "name": "Christopher Lee"
+  },
+  "frankenstein": {
+    "referenceId": "68f75cc070bc4989b91a5e865fb0c6a0",
+    "name": "Christopher Lee"
+  },
+  "jane-eyre": {
+    "referenceId": "bf189034a74f4ce6a4c7bd5f28398c52",
+    "name": "Emma Watson"
+  },
+  "moby-dick": {
+    "referenceId": "76bb6ae7b26c41fbbd484514fdb014c2",
+    "name": "Morgan Freeman"
+  },
+  "pride-and-prejudice": {
+    "referenceId": "bf189034a74f4ce6a4c7bd5f28398c52",
+    "name": "Emma Watson"
+  },
+  "the-adventures-of-sherlock-holmes": {
+    "referenceId": "080580e5e570434aac5c131be5572d2b",
+    "name": "Benedict Cumberbatch"
+  },
+  "the-great-gatsby": {
+    "referenceId": "76bb6ae7b26c41fbbd484514fdb014c2",
+    "name": "Morgan Freeman"
+  },
+  "the-hound-of-the-baskervilles": {
+    "referenceId": "080580e5e570434aac5c131be5572d2b",
+    "name": "Benedict Cumberbatch"
+  },
+  "the-metamorphosis": {
+    "referenceId": "76bb6ae7b26c41fbbd484514fdb014c2",
+    "name": "Morgan Freeman"
+  },
+  "the-picture-of-dorian-gray": {
+    "referenceId": "68f75cc070bc4989b91a5e865fb0c6a0",
+    "name": "Christopher Lee"
+  },
+  "the-time-machine": {
+    "referenceId": "256d09f5f7e943a29f0ddb1f796dd336",
+    "name": "David Attenborough"
+  },
+  "the-war-of-the-worlds": {
+    "referenceId": "256d09f5f7e943a29f0ddb1f796dd336",
+    "name": "David Attenborough"
+  },
+  "the-works-of-edgar-allan-poe-volume-1": {
+    "referenceId": "68f75cc070bc4989b91a5e865fb0c6a0",
+    "name": "Christopher Lee"
+  },
+  "treasure-island": {
+    "referenceId": "4d78f878f023424cb77975a6dea180a6",
+    "name": "Pirate"
+  },
+  "twenty-thousand-leagues-under-the-sea": {
+    "referenceId": "256d09f5f7e943a29f0ddb1f796dd336",
+    "name": "David Attenborough"
+  },
+  "wuthering-heights": {
+    "referenceId": "bf189034a74f4ce6a4c7bd5f28398c52",
+    "name": "Emma Watson"
+  }
+}

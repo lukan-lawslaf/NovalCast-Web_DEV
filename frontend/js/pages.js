@@ -4,6 +4,43 @@
   const params = NC.readQuery();
   const findBook = (id) => NC.getBook(id);
 
+  const shelfEditions = [
+    'the-metamorphosis',
+    'the-great-gatsby',
+    'alices-adventures-in-wonderland',
+    'the-war-of-the-worlds',
+    'dr-jekyll-and-mr-hyde',
+    'the-picture-of-dorian-gray',
+    'twenty-thousand-leagues-under-the-sea',
+    'the-time-machine',
+    'around-the-world-in-eighty-days',
+    'pride-and-prejudice',
+    'dracula',
+    'frankenstein',
+    'treasure-island',
+    'moby-dick',
+    'the-hound-of-the-baskervilles',
+    'the-adventures-of-sherlock-holmes',
+    'a-tale-of-two-cities',
+    'jane-eyre',
+    'wuthering-heights'
+  ];
+
+  function landingShelf() {
+    return shelfEditions.map(id => NC.getExactBook(id)).filter(Boolean).map(book => {
+      const title = escapeHtml(book.title);
+      const featured = book.id === 'pride-and-prejudice' ? ' book-featured' : '';
+      const href = bookHref('#/book', book.id);
+      return `
+        <a class="book-3d-wrapper${featured}" href="${escapeHtml(href)}" data-shelf-book="${escapeHtml(book.id)}" aria-label="${title}">
+          <span class="book-spine" aria-hidden="true"><span>${title}</span></span>
+          <div class="book-edge-right" aria-hidden="true"></div>
+          <div class="book-edge-top" aria-hidden="true"></div>
+          <div class="book-cover-art" aria-hidden="true">${window.NovelCastView.cover(book, { eager: true })}</div>
+        </a>`;
+    }).join('');
+  }
+
   function bookHref(page, id, chapter) { return NC.bookUrl(page, id, chapter); }
 
   function featuredCard(book, variant) {
@@ -36,7 +73,7 @@
     <div>
       <div class="flex items-center gap-3">
         <h2 class="text-2xl md:text-[26px] font-bold tracking-wider text-[#F8F1E2] uppercase font-sans">${escapeHtml(book.title)}</h2>
-        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#202735] border border-[#2B3547] text-[11px] font-semibold text-[#E5E9F0]">
+        <span class="featured-book-rating inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#202735] border border-[#2B3547] text-[11px] font-semibold text-[#E5E9F0]">
           <span class="material-symbols-outlined text-goldAccent fill-goldAccent text-[13px]">star</span>${book.rating ? book.rating.toFixed(1) : 'New'}
         </span>
       </div>
@@ -74,7 +111,7 @@
     return `<div class="flex flex-col group cursor-pointer" data-book-link="${book.id}" data-book-target="details">
   <a href="#/book?book=${book.id}" class="block">
     <div class="relative w-full aspect-[1/1.42] rounded-xl overflow-hidden book-shadow book-spine bg-[#1B212E] border border-white/5 transition-transform duration-200 group-hover:-translate-y-1">
-      <div class="absolute top-2 left-2 z-20 flex items-center gap-1 bg-[#1A212E]/90 backdrop-blur-md px-1.5 py-0.5 rounded-full border border-white/10 text-[10px] font-semibold text-white">
+      <div class="cover-book-rating absolute top-2 left-2 z-20 flex items-center gap-1 bg-[#1A212E]/90 backdrop-blur-md px-1.5 py-0.5 rounded-full border border-white/10 text-[10px] font-semibold text-white">
         <span class="text-goldAccent text-[9px]">★</span> ${book.rating ? book.rating.toFixed(1) : 'New'}
       </div>
       <div class="absolute inset-0">${window.NovelCastView.cover(book)}</div>
@@ -184,7 +221,7 @@
               </div>
               <span class="px-space-sm py-0.5 rounded-full bg-primary-container text-on-primary-container font-label-badge text-label-badge shadow-[0_0_12px_rgba(245,215,127,0.3)]">Trending #${NC.books.indexOf(book) + 1}</span>
             </div>
-            <p class="font-body-md text-body-md text-secondary mb-space-sm">Written by : <span class="text-on-surface font-medium">${escapeHtml(book.author)}</span> • Narrated by <span class="text-primary-container">${escapeHtml(book.narrator)}</span></p>
+            <p class="font-body-md text-body-md text-secondary mb-space-sm">Written by : <span class="text-on-surface font-medium">${escapeHtml(book.author)}</span></p>
             <div class="flex items-center gap-space-lg mb-space-md text-on-surface-variant font-label-numeric text-label-numeric flex-wrap">
               <div class="flex items-center gap-space-2xs"><span class="material-symbols-outlined text-[16px] text-primary-container">visibility</span><span>${escapeHtml(book.listens)} listeners</span></div>
               <div class="flex items-center gap-space-2xs"><span class="material-symbols-outlined text-[16px] text-primary-container">schedule</span><span>${escapeHtml(book.duration)}</span></div>
@@ -204,7 +241,7 @@
                 ${window.NovelCastView.cover(book)}
                 <div class="absolute top-3 right-3 bg-surface-container-lowest/80 backdrop-blur-md px-space-xs py-0.5 rounded-full flex items-center gap-1">
                   <span class="material-symbols-outlined text-primary-container text-[14px]">headphones</span>
-                  <span class="font-label-numeric text-[11px] text-primary">Demo audio</span>
+                  <span class="font-label-numeric text-[11px] text-primary">Listen</span>
                 </div>
               </div>
             </a>
@@ -233,6 +270,8 @@
   }
 
   function detailHero(book) {
+    const bookId = escapeHtml(book.id);
+    const readerBookId = encodeURIComponent(book.id);
     return `<section class="relative rounded-lg bg-surface-container-low shadow-[0_16px_48px_rgba(0,0,0,0.6)] overflow-hidden p-space-lg sm:p-space-xl lg:p-space-2xl">
       <div class="absolute -top-12 -right-12 w-96 h-96 bg-primary-container/10 rounded-full blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-16 left-1/3 w-80 h-80 bg-secondary-container/15 rounded-full blur-3xl pointer-events-none"></div>
@@ -243,38 +282,36 @@
             <div class="flex items-center gap-1 px-space-sm py-1 rounded-full bg-surface-container-highest">
               <span class="material-symbols-outlined text-primary-container text-[16px]">star</span>
               <span class="font-label-numeric text-label-numeric text-primary-container font-semibold" id="book-hero-rating">${book.rating ? book.rating.toFixed(1) : 'New'}</span>
-              <span class="font-body-sm text-body-sm text-on-surface-variant" id="book-hero-rating-count">(${(book.reviews || 0).toLocaleString()})</span>
+              <span class="font-body-sm text-body-sm text-on-surface-variant" id="book-hero-rating-count">(${escapeHtml((book.reviews || 0).toLocaleString())})</span>
             </div>
             <span class="px-space-md py-0.5 rounded-full bg-primary-container text-on-primary-container font-label-caps text-label-caps font-bold uppercase">${book.trending ? 'Trending #1' : 'Featured'}</span>
           </div>
           <p class="text-on-surface-variant">Written by: <span class="text-on-surface font-headline-sm ml-1">${escapeHtml(book.author)}</span></p>
-          <p class="flex items-center gap-1.5 text-on-surface-variant font-body-sm"><span class="material-symbols-outlined text-[16px] text-primary-container">mic</span> Narrated by: <span class="text-on-surface font-medium">${escapeHtml(book.narrator)}</span></p>
           <div class="flex flex-wrap items-center gap-space-md text-on-surface-variant font-label-numeric py-space-xs">
             <div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px] text-secondary">visibility</span><span>${escapeHtml(book.listens)} listens</span></div>
             <span class="text-surface-variant">•</span>
             <div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px] text-secondary">schedule</span><span>${escapeHtml(book.duration)}</span></div>
             <span class="text-surface-variant">•</span>
-            <div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px] text-secondary">menu_book</span><span>${book.chapters} chapters</span></div>
+            <div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px] text-secondary">menu_book</span><span>${escapeHtml(book.chapters)} chapters</span></div>
           </div>
           <div class="space-y-space-2xs">
             <span class="font-label-caps text-label-caps text-primary-container uppercase tracking-wider block">Description</span>
             <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">${escapeHtml(book.description)}</p>
           </div>
           <div class="flex flex-wrap items-center gap-space-md pt-space-xs">
-            <button class="flex items-center justify-center gap-space-xs px-space-xl py-space-sm rounded-full bg-primary-container text-on-primary-container font-headline-sm text-headline-sm hover:scale-105 transition-transform shadow-[0_4px_24px_rgba(245,215,127,0.35)]" data-audio-stub="detail-${book.id}" type="button"><span class="material-symbols-outlined text-[20px]">play_arrow</span><span>Listen Now</span></button>
-            <a class="flex items-center justify-center gap-space-xs px-space-xl py-space-sm rounded-full bg-surface-container-high text-primary-container font-headline-sm text-headline-sm hover:bg-surface-bright transition-all" href="#/reader?book=${book.id}&chapter=1"><span class="material-symbols-outlined text-[20px]">auto_stories</span><span>Read Chapter 1</span></a>
+            <button class="flex items-center justify-center gap-space-xs px-space-xl py-space-sm rounded-full bg-primary-container text-on-primary-container font-headline-sm text-headline-sm hover:scale-105 transition-transform shadow-[0_4px_24px_rgba(245,215,127,0.35)]" data-audio-stub="detail-${bookId}" type="button"><span class="material-symbols-outlined text-[20px]">play_arrow</span><span>Listen Now</span></button>
+            <a class="flex items-center justify-center gap-space-xs px-space-xl py-space-sm rounded-full bg-surface-container-high text-primary-container font-headline-sm text-headline-sm hover:bg-surface-bright transition-all" href="#/reader?book=${readerBookId}&amp;chapter=1"><span class="material-symbols-outlined text-[20px]">auto_stories</span><span>Read Chapter 1</span></a>
             <div class="flex items-center gap-space-xs ml-auto sm:ml-0">
-              <button class="w-10 h-10 rounded-full bg-surface-container text-on-surface-variant hover:text-primary-container flex items-center justify-center favorite-toggle" data-favorite-toggle="${book.id}" aria-label="Bookmark" type="button"><span class="material-symbols-outlined text-[20px]">bookmark_add</span></button>
-              <button class="w-10 h-10 rounded-full bg-surface-container text-on-surface-variant hover:text-primary-container flex items-center justify-center" data-audio-stub="detail-share-${book.id}" type="button" aria-label="Share"><span class="material-symbols-outlined text-[20px]">share</span></button>
+              <button class="w-10 h-10 rounded-full bg-surface-container text-on-surface-variant hover:text-primary-container flex items-center justify-center favorite-toggle" data-favorite-toggle="${bookId}" aria-label="Bookmark" type="button"><span class="material-symbols-outlined text-[20px]">bookmark_add</span></button>
+              <button class="w-10 h-10 rounded-full bg-surface-container text-on-surface-variant hover:text-primary-container flex items-center justify-center" data-share-book="${bookId}" type="button" aria-label="Share"><span class="material-symbols-outlined text-[20px]">share</span></button>
             </div>
           </div>
         </div>
         <div class="lg:col-span-5 flex justify-center lg:justify-end">
-          <div class="relative group">
+          <div class="relative group w-64 sm:w-72 md:w-80 max-w-full">
             <div class="absolute -inset-4 bg-primary-container/20 rounded-2xl blur-2xl"></div>
-            <div class="relative w-64 sm:w-72 md:w-80 aspect-[2/3] rounded-DEFAULT overflow-hidden shadow-[0_24px_50px_rgba(0,0,0,0.85)]">
-              ${window.NovelCastView.cover(book)}
-              <div class="absolute top-4 right-4 z-20 bg-primary-container text-on-primary-container font-label-badge uppercase font-extrabold px-space-sm py-1 rounded">Atlas Classic</div>
+            <div class="book-detail-cover relative aspect-[2/3] rounded-DEFAULT overflow-hidden shadow-[0_24px_50px_rgba(0,0,0,0.85)]">
+              <div class="book-cover-art absolute inset-0">${window.NovelCastView.cover(book, { eager: true })}</div>
             </div>
           </div>
         </div>
@@ -324,6 +361,6 @@
   }
 
   window.NCPage = {
-    featuredCard, popularCard, libraryHeroCard, savedCard, searchHighlight, genreCard, detailHero, chapterList, reviews, likeRow,
+    landingShelf, featuredCard, popularCard, libraryHeroCard, savedCard, searchHighlight, genreCard, detailHero, chapterList, reviews, likeRow,
   };
 })();

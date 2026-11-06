@@ -43,8 +43,15 @@ curl http://localhost:4000/api/books/frankenstein/chapters/1
 | `MONGODB_URI` | — | Atlas connection string. Required. |
 | `PORT` | `4000` | HTTP port. |
 | `CORS_ORIGIN` | `*` | Comma-separated allow-list, or `*`. |
+| `INGEST_ADMIN_TOKEN` | unset | Optional server-only secret for both HTTP ingestion routes. Use a random token of 32–512 characters with no whitespace. Without it, HTTP ingestion is disabled; the operator CLI is unchanged. |
 | `MONGODB_DB_NAME` | URI path, else `novelcast` | Database name. |
 | `MONGODB_DNS_SERVERS` | `8.8.8.8,1.1.1.1` | Resolvers used **only** when the machine's own DNS refuses the SRV lookup that `mongodb+srv://` needs (VPN clients and local DNS stubs commonly do). Set to an empty string to disable. |
+| `FISH_AUDIO_API_KEY` | — | Server-only Fish Audio narration key. `FISH_API_KEY` and the existing `Fish_Audio` name are also accepted, using the same source precedence as above. |
+| `FISH_AUDIO_REFERENCE_ID` | unset | Optional voice override for books with no saved narrator. It is saved as the book's choice on first listen; existing choices stay unchanged. |
+
+Keep Fish Audio settings in the root `.env` or the hosting environment. Never
+put the key in browser configuration. The model is fixed to `s2.1-pro-free` in
+server code; no model environment variable or browser override is supported.
 
 ---
 
@@ -52,7 +59,7 @@ curl http://localhost:4000/api/books/frankenstein/chapters/1
 
 | Command | What it does |
 |---|---|
-| `npm start` | Serve the API (connects to Atlas first; exits if it cannot). |
+| `npm start` | Serve the API and connect to Atlas. The built-in catalog remains readable from its available public sources while Atlas is offline. |
 | `npm run dev` | Same, with `--watch`. |
 | `npm run seed` | Ingest the 20 curated classics. Idempotent — re-running upserts books and replaces their chapters. |
 | `npm run seed -- --only=84,11` | Ingest a subset by Gutendex id or slug. |
@@ -72,7 +79,9 @@ Returns `503` with `"status": "degraded"` when Atlas is not reachable, so the
 endpoint is never a false positive.
 
 ### `GET /api/books`
-Query params: `search`, `genre`, `page` (default 1), `limit` (default 20, max 100), `sort` (`popular` | `newest` | `title`).
+Query params: `search` (up to 160 characters), `genre` (up to 80), `page` (default 1),
+`limit` (default 20, capped at 100), and `sort` (`popular` | `newest` | `title`).
+Requests may skip at most 10,000 results.
 
 ```json
 {
@@ -83,25 +92,100 @@ Query params: `search`, `genre`, `page` (default 1), `limit` (default 20, max 10
 Book documents never contain chapter text — that lives in its own collection.
 
 ### `GET /api/books/:id`
-`:id` accepts a Mongo `_id` or a slug. Returns the book plus its chapter table of contents:
+`:id` accepts an exact Mongo `_id` or slug, or a Gutenberg ID for a built-in title.
+Returns the book plus its chapter table of contents:
 ```json
 { "book": { "...": "..." }, "chapters": [ { "chapterNumber": 1, "title": "Chapter I: Down the Rabbit-Hole", "wordCount": 2181 } ] }
 ```
 
 ### `GET /api/books/:id/chapters/:chapterNum`
 Returns one chapter's full text, ready for the reader, plus prev/next navigation.
+If Atlas cannot supply a built-in title's text, the backend tries the matching
+Project Gutenberg edition. A confirmed missing book or chapter returns `404`;
+temporarily unavailable text returns `503`. The API never substitutes another
+book or chapter. Built-in book details can still return metadata with an empty
+table of contents while the source text is unavailable.
 
 ### `POST /api/ingest`
+
+Requires `Authorization: Bearer <INGEST_ADMIN_TOKEN>` and an Atlas connection.
+Keep the token in server and operator configuration; browser code does not use it.
+
 ```bash
-curl -X POST http://localhost:4000/api/ingest -H "Content-Type: application/json" -d '{"gutendexId": 84}'
-curl -X POST http://localhost:4000/api/ingest -H "Content-Type: application/json" -d '{"search": "The Picture of Dorian Gray"}'
+curl -X POST http://localhost:4000/api/ingest \
+  -H "Authorization: Bearer $INGEST_ADMIN_TOKEN" -H "Content-Type: application/json" \
+  -d '{"gutendexId": 84}'
 ```
-Ingests the book and returns `{ book, stats }`. Concurrent ingests are rejected
-with `409` so the volunteer services behind Gutendex are never hammered.
+Provide a positive integer `gutendexId` or a nonempty `search` string of up to
+160 characters. The response contains `{ book, stats }`. Concurrent imports in
+the same server process receive `409`.
 
 ### `POST /api/ingest/curated`
-Seeds the whole curated shelf over HTTP (takes a few minutes — `npm run seed` is
-the better tool for this).
+Requires the same operator token. Imports the curated shelf, or accepts a JSON
+object such as `{ "only": [84, 11] }` for an exact subset. Prefer `npm run seed`
+for a deliberate CLI import. `GET /api/ingest/curated` is public and read-only.
+
+### `POST /api/tts`
+
+Accepts JSON `{ "text": "A short passage to narrate.", "bookId": "frankenstein" }`. The
+book ID must be an exact catalog slug or Atlas ObjectId; local uploads and unknown
+IDs cannot borrow another book's narrator. A missing book ID returns `400`.
+Text must be nonempty
+and at most 1,200 JavaScript string characters (UTF-16 code units), including
+surrounding whitespace. A successful response streams MP3 bytes with
+`Content-Type: audio/mpeg`, `Cache-Control: no-store`, and
+`X-TTS-Model: s2.1-pro-free`, `X-TTS-Voice-Id`, and `X-TTS-Voice-Name`.
+The voice name is URL-percent-encoded; clients can decode it for display.
+These headers are exposed to cross-origin clients.
+
+On a book's first listen, the backend deterministically matches its title,
+synopsis, and subjects to a verified English Fish Audio library voice. Known
+classic titles take precedence over incidental words in a synopsis: Holmes uses
+a detective voice, Moby Dick a reflective literary voice, Treasure Island a
+pirate voice, and scientific adventures an expressive exploration voice. Other
+themes include Gothic, romance, children, and classic wit. An English book
+without a more specific match receives the literary voice, with that general
+choice explained in its saved reason. Books explicitly marked only in an
+unsupported language return `503` rather than using an unsuitable voice.
+
+The result is saved in `Book.narrationVoice` as
+`{ referenceId, name, reason, profile, selectedAt }`. A conditional atomic write
+keeps the first saved choice if concurrent requests or server processes race.
+Every later passage, session, and server restart reuses that saved reference;
+changing the shortlist or environment override does not silently replace it.
+Only choices confirmed by this backend process in Atlas are cached, with
+concurrent selection shared per book. If Atlas is unavailable, an exact slug
+from the built-in public catalog can use its previously saved voice from the
+bundled Atlas export. This does not select a new voice or write metadata. An
+offline result is never cached over a healthy Atlas lookup. Books without a
+confirmed voice remain unavailable until storage recovers. This metadata write
+does not alter the book text.
+
+The server makes one request to `https://api.fish.audio/v1/tts` with the literal
+`model: s2.1-pro-free` header, MP3 output, balanced latency, and the saved
+`reference_id` on every passage. A missing voice is an error; no random default
+voice is requested. The model cannot
+be selected by the client or by configuration. **There are no paid models,
+fallback models, automatic retries, disk caches, or background generation.** If
+Fish Audio refuses the free model or its account allowance, narration stops and
+reports the error. It never switches models to keep playback going.
+
+Clients should split chapter text into short passages, play the current passage,
+and fetch at most one following passage after playback actually starts. Cancel
+pending requests when playback pauses, stops, or changes books. A client
+disconnect aborts the upstream request and stream. The server also stops each
+request after 60 seconds or 8 MiB of audio. At most four requests are active per
+server process; additional requests receive `429` immediately, without queuing.
+
+Before audio starts, failures return JSON `{ "error": "...", "code": "..." }`:
+invalid text or book ID returns `400`, an unknown book returns `404`,
+missing/rejected server credentials or unavailable book/voice storage return `503`, an
+upstream account/credit refusal returns `402`, upstream throttling or local
+capacity exhaustion returns `429`, an upstream network/audio failure returns
+`502`, and a timeout returns `504`. Fish Audio error bodies are never forwarded.
+A failure after streaming begins closes the response so incomplete audio is
+not presented as a completed narration. Narration only writes a book's initial
+voice metadata; it does not change chapter text or ratings.
 
 ---
 
@@ -223,6 +307,16 @@ backend/
 ---
 
 ## Troubleshooting
+
+### Listen Now shows "Not found"
+
+An older backend process may still be serving port 4000, even while a newer
+process responds on the other loopback address. Verify both `127.0.0.1:4000`
+and `localhost:4000` reach the current backend before testing narration.
+`POST /api/tts` with an empty JSON object should return `400` with code
+`TTS_INVALID_TEXT`, without calling Fish Audio; `404` means the running backend
+does not have the narration route. Stop only the confirmed stale NovelCast
+process, then use `npm --prefix backend run dev` for the current code.
 
 ### Reader ratings
 

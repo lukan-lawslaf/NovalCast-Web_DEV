@@ -24,7 +24,7 @@ Referance/Figma/figma-file.json
 # Local Agent & IDE folders and configs
 .antigravity/
 .agents/
-AGENTS.md
+# AGENTS.md and .codex/ are shared Codex project configuration.
 GEMINI.md
 .claude/
 **/.claude/
