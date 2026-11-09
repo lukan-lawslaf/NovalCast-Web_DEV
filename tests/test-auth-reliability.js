@@ -69,6 +69,40 @@ test('unconfirmed accounts get the resend path and missing sessions cannot repor
   assert.equal(missing.auth.isAuthenticated(), false);
 });
 
+test('session restoration subscribes once and a newer sign-out wins over an old session response', async t => {
+  let callback, restore, subscriptions = 0, reads = 0;
+  const user = { id: 'reader', email_confirmed_at: '2026-01-01' };
+  const { auth } = fixture(t, {
+    getSession: () => { reads++; return new Promise(resolve => { restore = resolve; }); },
+    onAuthStateChange: fn => { subscriptions++; callback = fn; },
+  }, user);
+  const first = auth.init();
+  const second = auth.init();
+  callback('SIGNED_OUT', null);
+  restore({ data: { session: { user } }, error: null });
+  await Promise.all([first, second]);
+  assert.equal(auth.getUser(), null);
+  assert.equal(subscriptions, 1);
+  assert.equal(reads, 1);
+  callback('SIGNED_IN', { user });
+  assert.equal(auth.getUser().id, 'reader');
+  callback('TOKEN_REFRESHED', null);
+  assert.equal(auth.getUser(), null);
+});
+
+test('sign-out clears private UI state before a slow remote sign-out completes', async t => {
+  let finish;
+  const user = { id: 'reader', email_confirmed_at: '2026-01-01' };
+  const { auth, w } = fixture(t, { signOut: () => new Promise(resolve => { finish = resolve; }) }, user);
+  w.NovelCastRouter.navigate = () => {};
+  const pending = auth.signOut();
+  assert.equal(auth.getUser(), null);
+  assert.equal(auth.isAuthenticated(), false);
+  assert.equal(await auth.getAccessToken(), null);
+  finish({ error: null });
+  await pending;
+});
+
 test('signup prevents duplicates, restores controls, and renders error text safely', async t => {
   let finish, calls = 0;
   const { w } = fixture(t, { signUp: () => { calls++; return new Promise(resolve => { finish = resolve; }); } });

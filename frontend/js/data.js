@@ -3,6 +3,12 @@ window.NovelCast = (function () {
   const SETTINGS_KEY = 'novelcast.settings.v1';
   const CATALOG_CACHE_KEY = 'novelcast.catalog.cache.v1';
 
+  // Legacy shared keys remain guest-only; signed-in accounts never inherit another reader's shelf.
+  function scopedKey(key) {
+    const id = window.NovelCastAuth?.getUser()?.id;
+    return id ? `${key}.${id}` : key;
+  }
+
   const API_BASE = (window.__ENV__ && window.__ENV__.API_BASE) || 'http://localhost:4000/api';
 
   // Aesthetic curated metadata overrides for the 20 MongoDB Atlas books
@@ -452,22 +458,29 @@ window.NovelCast = (function () {
   };
 
   function loadSettings() {
+    if (window.NovelCastLibrary) return Object.assign({}, defaultSettings, window.NovelCastLibrary.getSection('settings'));
     try {
-      return Object.assign({}, defaultSettings, JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'));
+      return Object.assign({}, defaultSettings, JSON.parse(localStorage.getItem(scopedKey(SETTINGS_KEY)) || '{}'));
     } catch (e) {
       return { ...defaultSettings };
     }
   }
 
   function saveSettings(s) {
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+    if (window.NovelCastLibrary) return window.NovelCastLibrary.setSection('settings', s);
+    localStorage.setItem(scopedKey(SETTINGS_KEY), JSON.stringify(s));
   }
 
   // State
   function loadState() {
+    if (window.NovelCastLibrary) {
+      const state = window.NovelCastLibrary.getSection('state');
+      state.library = Object.assign(Object.create(null), state.library);
+      return state;
+    }
     const library = Object.create(null);
     try {
-      const raw = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+      const raw = JSON.parse(localStorage.getItem(scopedKey(STORE_KEY)) || '{}');
       if (raw?.library && typeof raw.library === 'object' && !Array.isArray(raw.library)) {
         for (const [id, entry] of Object.entries(raw.library)) {
           if (entry && typeof entry === 'object' && !Array.isArray(entry)) library[id] = entry;
@@ -480,7 +493,8 @@ window.NovelCast = (function () {
   }
 
   function saveState(s) {
-    localStorage.setItem(STORE_KEY, JSON.stringify(s));
+    if (window.NovelCastLibrary) window.NovelCastLibrary.setSection('state', s);
+    else localStorage.setItem(scopedKey(STORE_KEY), JSON.stringify(s));
     document.dispatchEvent(new CustomEvent('novelcast:state'));
   }
 
@@ -614,6 +628,7 @@ window.NovelCast = (function () {
   }
 
   function getUserUploads(userId) {
+    if (window.NovelCastLibrary) return window.NovelCastLibrary.getUploads(userId);
     try {
       const raw = localStorage.getItem(getUserUploadsKey(userId));
       const books = raw ? JSON.parse(raw) : [];
@@ -631,7 +646,9 @@ window.NovelCast = (function () {
     book.lastRead = book.lastRead || 'Just added';
     list.unshift(book);
     try {
-      localStorage.setItem(getUserUploadsKey(userId), JSON.stringify(list));
+      if (window.NovelCastLibrary) {
+        if (!window.NovelCastLibrary.setUploads(userId, list)) return null;
+      } else localStorage.setItem(getUserUploadsKey(userId), JSON.stringify(list));
     } catch (e) {
       console.error('Storage full or error:', e);
       return null;
@@ -646,7 +663,8 @@ window.NovelCast = (function () {
       item.progress = Math.min(100, Math.max(0, parseInt(progress, 10)));
       if (lastRead) item.lastRead = lastRead;
       try {
-        localStorage.setItem(getUserUploadsKey(userId), JSON.stringify(list));
+        if (window.NovelCastLibrary) window.NovelCastLibrary.setUploads(userId, list);
+        else localStorage.setItem(getUserUploadsKey(userId), JSON.stringify(list));
       } catch (e) {}
     }
     return item;
@@ -656,7 +674,8 @@ window.NovelCast = (function () {
     let list = getUserUploads(userId);
     list = list.filter(b => b.id !== bookId);
     try {
-      localStorage.setItem(getUserUploadsKey(userId), JSON.stringify(list));
+      if (window.NovelCastLibrary) window.NovelCastLibrary.setUploads(userId, list);
+      else localStorage.setItem(getUserUploadsKey(userId), JSON.stringify(list));
     } catch (e) {}
     return list;
   }

@@ -53,6 +53,7 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api', catalogRoutes);
 app.use('/api', require('./src/routes/ratingRoutes'));
+app.use('/api', require('./src/routes/libraryRoutes'));
 app.use('/api', ttsRoutes);
 
 app.use((req, res) => {

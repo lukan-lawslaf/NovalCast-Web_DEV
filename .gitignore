@@ -11,6 +11,9 @@ atlas-credentials.env
 frontend/js/env.js
 frontend/env.json
 
+# Private per-account JSON library records (served only through authenticated APIs)
+backend/data/
+
 # Build artifacts, visual testing outputs & archive
 outputs/
 archive/

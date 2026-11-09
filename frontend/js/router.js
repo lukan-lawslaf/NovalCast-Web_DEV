@@ -40,6 +40,9 @@
     if (path === 'library') {
       const isAuth = window.NovelCastAuth && window.NovelCastAuth.isAuthenticated();
       if (!isAuth) {
+        if (activeView && typeof activeView.destroy === 'function') activeView.destroy();
+        activeView = null;
+        document.getElementById('app-view')?.replaceChildren();
         if (window.NovelCast && window.NovelCast.toast) {
           window.NovelCast.toast('Please sign in to access your personal library');
         }
@@ -192,6 +195,19 @@
     },
     init: function () {
       window.addEventListener('hashchange', handleRouteChange);
+      let accountId = window.NovelCastAuth?.getUser()?.id || null;
+      window.addEventListener('novelcast:auth', event => {
+        const nextId = event.detail.user?.id || null;
+        if (nextId === accountId) return;
+        accountId = nextId;
+        if (nextId && parseHash().path === 'login') {
+          const redirect = parseHash().params.get('redirect') || 'library';
+          location.hash = `#/${Object.hasOwn(routes, redirect) ? redirect : 'library'}`;
+          return;
+        }
+        // Release private view listeners immediately, including sign-out from another tab.
+        renderRoute();
+      });
       interceptLinks();
       renderRoute();
     }

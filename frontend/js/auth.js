@@ -65,6 +65,9 @@
   }
 
   let currentUser = getStoredUser();
+  let initPromise;
+  let authVersion = 0;
+  let signingOut = false;
   function getClient() {
     if (!client) {
       const { url, key } = getEnvCredentials();
@@ -87,12 +90,13 @@
   }
 
   function setStoredUser(user) {
+    if (signingOut && user) return;
     currentUser = user;
-    if (user) {
-      localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(user));
-    } else {
-      localStorage.removeItem(LOCAL_USER_KEY);
-    }
+    authVersion++;
+    try {
+      if (user) localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(user));
+      else localStorage.removeItem(LOCAL_USER_KEY);
+    } catch { /* Session remains usable even when the browser denies cache writes. */ }
     dispatchAuthChange(user);
   }
 
@@ -106,7 +110,12 @@
   }
 
   const NovelCastAuth = {
-    init: async function () {
+    init: function () {
+      if (!initPromise) initPromise = this.restoreSession();
+      return initPromise;
+    },
+
+    restoreSession: async function () {
       currentUser = getStoredUser();
 
       // If __ENV__ is not available synchronously, attempt to fetch env.json
@@ -122,50 +131,44 @@
       }
 
       const sb = getClient();
-      if (!sb) return currentUser;
+      if (!sb) { setStoredUser(null); return null; }
 
       try {
+        // Subscribe before reading the initial session so an intervening sign-out wins.
+        sb.auth.onAuthStateChange((event, session) => {
+          if (event === 'SIGNED_OUT' || !session?.user) setStoredUser(null);
+          else setStoredUser(session.user);
+        });
+        const version = authVersion;
         const { data: { session }, error } = await sb.auth.getSession();
         if (error) throw error;
-        if (session && session.user) {
-          setStoredUser(session.user);
-        } else if (!session) {
-          setStoredUser(null);
-        }
-
-        // Listen for Supabase auth state changes
-        sb.auth.onAuthStateChange((event, session) => {
-          if (event === 'SIGNED_OUT') {
-            setStoredUser(null);
-          } else if (event === 'USER_UPDATED' || event === 'SIGNED_IN') {
-            if (session && session.user) {
-              setStoredUser(session.user);
-            }
-          } else if (session && session.user) {
-            setStoredUser(session.user);
-          }
-        });
+        if (version === authVersion) setStoredUser(session?.user || null);
       } catch (err) {
+        setStoredUser(null);
         console.warn('[NovelCast Auth] Error checking session:', err);
       }
       return currentUser;
     },
 
     getAccessToken: async function () {
+      if (signingOut) return null;
       const sb = getClient();
       if (!sb) return null;
       const { data, error } = await sb.auth.getSession();
       if (error) throw error;
+      if (signingOut) return null;
+      if (data.session?.user && data.session.user.id !== currentUser?.id) setStoredUser(data.session.user);
+      else if (!data.session && currentUser) setStoredUser(null);
       return data.session ? data.session.access_token : null;
     },
 
     getUser: function () {
-      return currentUser || getStoredUser();
+      return currentUser;
     },
 
     isAuthenticated: function () {
       const u = this.getUser();
-      if (!u) return false;
+      if (!u || !u.id || u.is_anonymous) return false;
       // If user object has email confirmation metadata, ensure it is confirmed
       if (u.email_confirmed_at === null || u.confirmed_at === null) {
         return false;
@@ -238,6 +241,9 @@
 
     signOut: async function () {
       const sb = getClient();
+      signingOut = true;
+      // Hide private data immediately, even if the remote service is slow or offline.
+      setStoredUser(null);
       if (sb) {
         try {
           await sb.auth.signOut();
@@ -246,6 +252,7 @@
         }
       }
       setStoredUser(null);
+      signingOut = false;
       if (window.NovelCast && window.NovelCast.toast) {
         window.NovelCast.toast('Signed out successfully');
       }

@@ -1,6 +1,20 @@
 window.NovelCastViews = window.NovelCastViews || {};
 
 window.NovelCastViews.library = {
+  renderSavedBooks: function () {
+    const NC = window.NovelCast;
+    const saved = Object.entries(NC.loadState().library)
+      .filter(([id, entry]) => !id.startsWith('upload-') && (entry.status || entry.favorite))
+      .map(([id]) => NC.getExactBook(id)).filter(Boolean);
+    return saved.length ? `<div class="nc-saved-grid">${saved.map(book => `
+      <article class="nc-saved-book">
+        <a href="#/book?book=${encodeURIComponent(book.id)}" class="nc-saved-cover" aria-label="${NC.escapeHtml(book.title)} details">${window.NovelCastView.cover(book)}</a>
+        <a href="#/book?book=${encodeURIComponent(book.id)}" class="nc-saved-title">${NC.escapeHtml(book.title)}</a>
+        <p>${NC.escapeHtml(book.author)}</p>
+        <button type="button" data-library-remove="${NC.escapeHtml(book.id)}" class="nc-library-text-button" aria-label="Remove ${NC.escapeHtml(book.title)} from your library">Remove from library</button>
+      </article>`).join('')}</div>` : '<p class="nc-library-hint">Save a catalog book or bookmark it to see it here.</p>';
+  },
+
   render: function () {
     const NC = window.NovelCast;
     const auth = window.NovelCastAuth;
@@ -15,7 +29,7 @@ window.NovelCastViews.library = {
             </div>
             <h2 class="text-2xl font-serifTitle font-bold text-white tracking-wide">Sign In Required</h2>
             <p class="text-sm text-[#8C98AC] mt-2 leading-relaxed">
-              My Library is your private literary sanctuary. Sign in to upload custom manuscripts and track your reading progress.
+              Sign in to save books, record manuscript details, and keep a personal reading plan.
             </p>
             <div class="mt-8">
               <a href="#/login?redirect=library" class="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-goldAccent text-[#10141C] text-sm font-bold shadow-lg hover:bg-[#ffe196] transition-all">
@@ -30,6 +44,7 @@ window.NovelCastViews.library = {
 
     const userId = user.id || user.email;
     const userUploads = NC.getUserUploads(userId);
+    const readingPlan = window.NovelCastLibrary?.getReadingPlan() || { dailyMinutes: 20, favoriteGenre: '' };
 
     return `
       <!-- Library Overview Header -->
@@ -40,9 +55,9 @@ window.NovelCastViews.library = {
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" stroke-dasharray="40" stroke-dashoffset="0" opacity="1"></path><circle cx="12" cy="7" r="4" opacity="1"></circle></g></svg>
             </div>
             <div>
-              <div class="flex items-center gap-2.5">
+              <div class="nc-library-title flex items-center gap-2.5">
                 <h1 class="text-2xl md:text-3xl font-bold text-white font-sans tracking-wide">My Library & Manuscripts</h1>
-                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-mono bg-goldAccent/15 text-goldAccent border border-goldAccent/30">On this device</span>
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-mono bg-goldAccent/15 text-goldAccent border border-goldAccent/30">Private library</span>
               </div>
               <p class="text-[13px] text-[#8C98AC] mt-0.5">
                 Private collection of <span class="text-white font-medium">${NC.escapeHtml(user.email || 'Member')}</span>
@@ -50,7 +65,7 @@ window.NovelCastViews.library = {
             </div>
           </div>
 
-          <div class="flex items-center gap-5">
+          <div class="nc-library-summary flex items-center gap-5">
             <div class="flex flex-col">
               <span class="text-[20px] font-bold text-goldAccent font-sans">${userUploads.length}</span>
               <span class="text-[11px] text-[#738094] uppercase tracking-wider">My Uploads</span>
@@ -70,19 +85,59 @@ window.NovelCastViews.library = {
               <span class="text-[11px] text-[#738094] uppercase tracking-wider">Finished</span>
             </div>
             <div class="h-8 w-px bg-[#232C3D]"></div>
-            <button id="btn-lib-signout" class="p-2 rounded-xl text-[#7E8B9E] hover:text-red-300 hover:bg-[#1A202C] transition-all" title="Sign Out">
+            <button type="button" id="btn-lib-signout" class="p-2 rounded-xl text-[#7E8B9E] hover:text-red-300 hover:bg-[#1A202C] transition-all" title="Sign Out" aria-label="Sign out">
               <span class="material-symbols-outlined text-[20px]">logout</span>
             </button>
           </div>
         </div>
       </section>
 
-      <!-- Drag & Drop Upload Section with React Bits <PixelCard /> -->
+      <section class="nc-library-tools" aria-labelledby="reading-plan-heading">
+        <div class="nc-reading-plan">
+          <h2 id="reading-plan-heading">Your reading plan</h2>
+          <p class="nc-library-hint">Set a daily goal. Your submitted plan is saved with your library.</p>
+          <form id="reading-plan-form">
+            <div class="nc-reading-plan-fields">
+              <label for="daily-minutes">Daily reading goal (minutes)
+                <input id="daily-minutes" name="dailyMinutes" type="number" min="5" max="240" step="1" required value="${Number(readingPlan.dailyMinutes) || 20}" aria-describedby="daily-minutes-help">
+              </label>
+              <label for="favorite-genre">Favorite genre (optional)
+                <input id="favorite-genre" name="favoriteGenre" type="text" maxlength="80" value="${NC.escapeHtml(readingPlan.favoriteGenre)}" placeholder="e.g. Mystery">
+              </label>
+            </div>
+            <p id="daily-minutes-help" class="nc-library-hint">Choose a goal between 5 and 240 minutes.</p>
+            <button type="submit" class="nc-library-button">Save reading plan</button>
+            <p id="reading-plan-feedback" class="nc-library-feedback" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+        <div class="nc-library-backup">
+          <h2>Library backup</h2>
+          <p id="library-sync-status" class="nc-library-sync-status" role="status" aria-live="polite"></p>
+          <p class="nc-library-hint">Your plan, saved books, and manuscript details sync to your account’s JSON file when the server is available. Downloads include this device’s latest changes, even while a save is pending.</p>
+          <div class="nc-library-tool-buttons">
+            <button id="download-library-json" type="button" class="nc-library-button">Download JSON</button>
+            <button id="retry-sync" type="button" class="nc-library-button nc-library-button-secondary">Sync now</button>
+          </div>
+          <p class="nc-library-hint">The backup contains library data only. Manuscript contents and sign-in details are excluded.</p>
+        </div>
+      </section>
+
+      <section class="nc-saved-section" aria-labelledby="saved-books-heading">
+        <h2 id="saved-books-heading">Saved catalog books</h2>
+        ${window.NovelCastLibrary?.hasDeviceBookmarks() ? `
+          <div class="nc-library-hint">
+            <p>Older bookmarks were shared on this browser. Add them to this account only if they are yours.</p>
+            <button type="button" id="import-device-bookmarks" class="nc-library-text-button">Add my older device bookmarks</button>
+          </div>` : ''}
+        <div id="saved-catalog-books">${this.renderSavedBooks()}</div>
+      </section>
+
+      <!-- Drag & Drop Metadata Section -->
       <section class="mb-10">
         <div class="flex items-center justify-between mb-4">
           <div>
             <h3 class="text-[17px] font-bold text-[#F1D69E] flex items-center gap-2">
-              <span>Upload Book or Manuscript</span>
+              <span>Add manuscript details</span>
               <span class="text-xs font-normal text-[#8A97AA]">— Drag and drop or browse files</span>
             </h3>
           </div>
@@ -99,10 +154,10 @@ window.NovelCastViews.library = {
               <span class="material-symbols-outlined text-[28px]">upload_file</span>
             </div>
             <h4 class="text-base md:text-lg font-bold text-white tracking-wide">
-              Drag & drop your novel or book here
+              Choose a file to record its details
             </h4>
             <p class="text-xs text-[#8E9BAC] mt-1 max-w-md">
-              Supports <span class="text-goldAccent font-medium">EPUB, PDF, TXT, MD</span> files. Auto-generates typography and stores to your private shelf.
+              Supports <span class="text-goldAccent font-medium">EPUB, PDF, TXT, MD</span> files. Saves the title, format, and size; the file itself is not uploaded or available to read.
             </p>
             <div class="mt-4 flex items-center gap-2">
               <button type="button" id="btn-browse-file" class="px-5 py-2 rounded-full bg-goldAccent text-[#10141C] text-xs font-bold hover:bg-[#ffe196] shadow-md transition-all flex items-center gap-1.5">
@@ -136,7 +191,7 @@ window.NovelCastViews.library = {
       <section class="mb-12">
         <div class="flex items-center justify-between mb-5">
           <h3 class="text-[18px] font-bold text-[#F1D69E]">
-            My Uploaded Novels (${userUploads.length})
+            My Manuscript Details (${userUploads.length})
           </h3>
         </div>
 
@@ -149,7 +204,7 @@ window.NovelCastViews.library = {
               </div>
               <h4 class="text-base font-semibold text-white">Your Sanctuary Shelf is Empty</h4>
               <p class="text-xs text-[#8C98AC] mt-1 max-w-sm mx-auto">
-                Null books added yet. Drag and drop your first EPUB, PDF, or text novel onto the animated PixelCard above to begin reading and recording progress.
+                No manuscript details saved yet. Choose an EPUB, PDF, or text file above to add its title, format, and size to your shelf.
               </p>
             </div>
           ` : `
@@ -220,22 +275,121 @@ window.NovelCastViews.library = {
     const container = document.getElementById('app-view');
     const pixelCardEl = document.getElementById('pixel-upload-card');
     const pixelCard = pixelCardEl && window.PixelCard?.init(pixelCardEl, { variant: 'gold' });
+    const controller = new AbortController();
+    const signal = controller.signal;
+    const service = window.NovelCastLibrary;
     let uploadTimer;
     let refreshTimer;
+    let planDirty = false;
+    let disposed = false;
+    const ownsView = () => !disposed && (auth.getUser()?.id || auth.getUser()?.email) === userId;
 
     this.destroy = () => {
+      disposed = true;
+      controller.abort();
       clearInterval(uploadTimer);
       clearTimeout(refreshTimer);
       pixelCard?.destroy();
     };
 
     const refresh = () => {
-      if (!container || document.body.dataset.route !== 'library') return;
+      if (!ownsView() || !container || document.body.dataset.route !== 'library') return;
+      const form = document.getElementById('reading-plan-form');
+      const draft = planDirty && form ? {
+        dailyMinutes: form.elements.dailyMinutes.value,
+        favoriteGenre: form.elements.favoriteGenre.value,
+        focused: form.contains(document.activeElement) ? document.activeElement.id : null,
+      } : null;
       this.destroy();
       container.innerHTML = this.render();
       this.init();
+      if (draft) {
+        const restored = document.getElementById('reading-plan-form');
+        restored.elements.dailyMinutes.value = draft.dailyMinutes;
+        restored.elements.favoriteGenre.value = draft.favoriteGenre;
+        restored.dispatchEvent(new Event('input', { bubbles: true }));
+        if (draft.focused) document.getElementById(draft.focused)?.focus({ preventScroll: true });
+      }
       window.NovelCastApp?.bindInteractiveElements(container);
     };
+
+    const paintStatus = () => {
+      if (!ownsView()) return;
+      const status = service?.getStatus() || { phase: 'pending', message: 'Library sync is unavailable. Your changes remain on this device.' };
+      const statusEl = document.getElementById('library-sync-status');
+      if (statusEl) {
+        statusEl.textContent = status.message;
+        statusEl.dataset.phase = status.phase;
+      }
+      const retry = document.getElementById('retry-sync');
+      if (retry) retry.disabled = status.phase === 'loading' || status.phase === 'saving';
+    };
+    paintStatus();
+    document.getElementById('import-device-bookmarks')?.addEventListener('click', () => {
+      if (!ownsView()) return;
+      if (!service?.importDeviceBookmarks()) NC.toast('The bookmarks could not be saved on this device.');
+      else NC.toast('Device bookmarks added. Check the sync status for your account backup.');
+    }, { signal });
+    document.addEventListener('novelcast:library-sync', paintStatus, { signal });
+    document.addEventListener('novelcast:library-loaded', () => {
+      // Completing the metadata add will refresh the view itself.
+      if (!uploadTimer && !refreshTimer) refresh();
+    }, { signal });
+    const paintSavedBooks = () => {
+      if (!ownsView()) return;
+      const saved = document.getElementById('saved-catalog-books');
+      if (!saved) return;
+      saved.innerHTML = this.renderSavedBooks();
+      window.NovelCastApp?.bindInteractiveElements(saved);
+    };
+    document.addEventListener('novelcast:state', paintSavedBooks, { signal });
+    document.addEventListener('novelcast:books-loaded', paintSavedBooks, { signal });
+    container?.addEventListener('click', event => {
+      const remove = event.target.closest('[data-library-remove]');
+      if (!remove || !ownsView()) return;
+      const state = NC.loadState();
+      delete state.library[remove.dataset.libraryRemove];
+      NC.saveState(state);
+      NC.toast('Book removed from your library');
+    }, { signal });
+
+    const planForm = document.getElementById('reading-plan-form');
+    planForm?.addEventListener('input', () => { planDirty = true; }, { signal });
+    planForm?.addEventListener('submit', event => {
+      event.preventDefault();
+      if (!ownsView() || !planForm.reportValidity()) return;
+      const feedback = document.getElementById('reading-plan-feedback');
+      try {
+        const saved = service?.saveReadingPlan({
+          dailyMinutes: Number(planForm.elements.dailyMinutes.value),
+          favoriteGenre: planForm.elements.favoriteGenre.value.trim(),
+        });
+        if (!saved) throw new Error('Your reading plan could not be saved. Please try again.');
+        planDirty = false;
+        feedback.textContent = 'Saved on this device. Check the backup status for account sync.';
+      } catch (error) {
+        feedback.textContent = error.message || 'Your reading plan could not be saved. Please try again.';
+      }
+    }, { signal });
+    document.getElementById('retry-sync')?.addEventListener('click', async () => {
+      if (!ownsView()) return;
+      try { await service?.sync(); }
+      catch { if (ownsView()) NC.toast('Sync could not finish. Your changes remain on this device.'); }
+      paintStatus();
+    }, { signal });
+    document.getElementById('download-library-json')?.addEventListener('click', async event => {
+      if (!ownsView()) return;
+      const button = event.currentTarget;
+      button.disabled = true;
+      try {
+        if (!service) throw new Error('Library download is unavailable. Please reload the page.');
+        await service.download();
+      } catch (error) {
+        if (ownsView()) NC.toast(error.message || 'The library download could not be prepared.');
+      } finally {
+        if (ownsView()) button.disabled = false;
+      }
+    }, { signal });
 
     // Sign out button
     const signoutBtn = document.getElementById('btn-lib-signout');
@@ -299,7 +453,7 @@ window.NovelCastViews.library = {
     }
 
     function handleFile(file) {
-      if (!file || uploadTimer || refreshTimer) return;
+      if (!ownsView() || !file || uploadTimer || refreshTimer) return;
 
       const title = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
       const ext = (file.name.split('.').pop() || 'epub').toUpperCase();
@@ -311,13 +465,18 @@ window.NovelCastViews.library = {
 
       if (progressBox) {
         progressBox.classList.remove('hidden');
-        filenameEl.textContent = `Uploading: ${file.name}`;
+        filenameEl.textContent = `Recording details: ${file.name}`;
         statusTextEl.textContent = '0%';
         progressBar.style.width = '0%';
       }
 
       let pct = 0;
       uploadTimer = setInterval(() => {
+        if (!ownsView()) {
+          clearInterval(uploadTimer);
+          uploadTimer = null;
+          return;
+        }
         pct += 25;
         if (pct >= 100) {
           clearInterval(uploadTimer);
@@ -335,7 +494,7 @@ window.NovelCastViews.library = {
             chapters: 12,
             genre: 'Manuscript',
             uploadedAt: new Date().toISOString(),
-            lastRead: 'Just uploaded'
+            lastRead: 'Details added'
           };
 
           if (!NC.addUserUpload(userId, newBook)) {
