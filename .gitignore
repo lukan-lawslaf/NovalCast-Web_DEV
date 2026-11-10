@@ -4,6 +4,9 @@ node_modules/
 
 # Environment and Secrets
 .env
+# Also ignore the comma typo that previously exposed a credential.
+,env
+,env.*
 *.env
 .env.local
 .env.*.local
