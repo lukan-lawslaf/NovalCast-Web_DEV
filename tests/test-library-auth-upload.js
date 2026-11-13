@@ -111,6 +111,7 @@ const path = require('path');
 
   // Step 5: Test quick progress increment button
   console.log('Testing +20% quick progress increment...');
+  // Perform the click action as a user would, then observe the resulting behavior.
   await page.click('.btn-quick-progress');
   await page.waitForTimeout(500);
 
@@ -120,6 +121,7 @@ const path = require('path');
   await page.screenshot({ path: path.join(__dirname, '../archive/test_library_with_book.png') });
   console.log('Saved library with book screenshot to archive/test_library_with_book.png');
 
+  // Release this browser or server resource so later checks start cleanly.
   await browser.close();
   console.log('All tests finished successfully!');
 })();

@@ -10,11 +10,13 @@ function loadScript(window, name) {
   window.eval(readFileSync(join(__dirname, '..', 'frontend', 'js', name), 'utf8'));
 }
 
+// Scenario: profile displays a supplied photo, then returns to guest when signed out. The checks below exercise this behavior as one independent case.
 test('profile displays a supplied photo, then returns to guest when signed out', t => {
   const dom = new JSDOM('<a id="header-user-btn"><span data-profile-guest></span><span data-profile-initials></span></a>', {
     url: 'http://localhost:3000/',
     runScripts: 'outside-only',
   });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => dom.window.close());
   const { window } = dom;
   let user;
@@ -54,8 +56,10 @@ test('profile displays a supplied photo, then returns to guest when signed out',
   assert.equal(initials.textContent, '');
 });
 
+// Scenario: an uploaded book is only resolved for the signed-in account and is never cached in the public catalog. The checks below exercise this behavior as one independent case.
 test('an uploaded book is only resolved for the signed-in account and is never cached in the public catalog', t => {
   const dom = new JSDOM('', { url: 'http://localhost:3000/', runScripts: 'outside-only' });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => dom.window.close());
   const { window } = dom;
   window.fetch = async () => ({ ok: true, json: async () => ({ books: [] }) });
@@ -71,8 +75,10 @@ test('an uploaded book is only resolved for the signed-in account and is never c
   assert.equal(window.NovelCast.getExactBook('upload-private'), null);
 });
 
+// Scenario: catalog artwork treats URL and edition metadata as data. The checks below exercise this behavior as one independent case.
 test('catalog artwork treats URL and edition metadata as data', t => {
   const dom = new JSDOM('<main></main>', { url: 'http://localhost:3000/', runScripts: 'outside-only' });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => dom.window.close());
   const { window } = dom;
   window.fetch = async () => ({ ok: true, json: async () => ({ books: [], ratings: [] }) });
@@ -93,11 +99,13 @@ test('catalog artwork treats URL and edition metadata as data', t => {
   assert.equal(main.querySelector('img').getAttribute('src'), book.coverUrl);
 });
 
+// Scenario: Romance search keeps Wuthering Heights and its correct fallback cover when Atlas returns no matches. The checks below exercise this behavior as one independent case.
 test('Romance search keeps Wuthering Heights and its correct fallback cover when Atlas returns no matches', async t => {
   const dom = new JSDOM('<main></main>', {
     url: 'http://localhost:3000/#/search?genre=Romance',
     runScripts: 'outside-only',
   });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => dom.window.close());
   const { window } = dom;
   window.fetch = async () => ({ ok: true, json: async () => ({ books: [] }) });
@@ -106,7 +114,6 @@ test('Romance search keeps Wuthering Heights and its correct fallback cover when
   const { document } = window;
   document.querySelector('main').innerHTML = view.render();
   view.init();
-
   assert.equal(document.querySelector('#search-input').value, '');
   assert.equal(document.querySelector('[data-filter="Romance"]').getAttribute('aria-pressed'), 'true');
   const wutheringCover = () => document.querySelector('#search-results-grid [data-book-link="wuthering-heights"] img');

@@ -1,43 +1,80 @@
 /* Reader appearance: page spread, rotating leaf, navigation, and mobile/reduced-motion rules. */
 .reader-shell { --paper:#faf6ee; }
+/* Reader: Set the element dimensions so content fits the available space. */
 .reader-shell>div:first-child>div { min-width:0; max-width:100%; }
+/* Reader: Align child controls along a row or column and manage wrapping/spacing. */
 .reader-shell>div:first-child>div:last-child { flex-wrap:wrap; }
 /* Perspective makes the temporary rotating page look three-dimensional. */
 #book-spread { perspective:2200px; isolation:isolate; overflow:visible; }
+/* Reader: Control overflowing content so long labels or artwork stay inside their container. */
 #book-spread-content { border-radius:12px; overflow:hidden; }
 /* Front/back faces form the animated leaf; clicks pass through to reader controls. */
 .reader-turn-leaf { position:absolute; top:0; bottom:0; width:50%; z-index:50; transform-style:preserve-3d; pointer-events:none; }
+/* Reader: Choose the pivot edge around which this element rotates. */
 .turn-forward { left:50%; transform-origin:left center; }
+/* Reader: Choose the pivot edge around which this element rotates. */
 .turn-backward { left:0; transform-origin:right center; }
+/* Reader: Hide the reverse face when this surface rotates away from the viewer. */
 .reader-turn-leaf>article { position:absolute; inset:0; width:100%; height:100%; margin:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; box-shadow:0 8px 30px #23180940; }
+/* Reader: Position or rotate the element to create the intended visual placement. */
 .reader-turn-leaf .turn-face-back { transform:rotateY(180deg); }
+/* Reader: Hide the reverse face when this surface rotates away from the viewer. */
 .reader-turn-leaf::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,#33281630,transparent 20%,#fff3 75%,#33281625); pointer-events:none; backface-visibility:hidden; }
+/* Reader: Position this layer relative to its container or viewport without disturbing nearby content. */
 .turn-stationary { position:absolute!important; top:0; width:50%; height:100%; z-index:40; pointer-events:none; }
+/* Page appearance: Apply these visual adjustments to the selected elements in this state. */
 #book-left-article,#book-right-article { cursor:auto; user-select:text; }
+/* Page appearance: Set the element dimensions so content fits the available space. */
 #book-left-page-content,#book-right-page-content { min-height:0; overflow-wrap:anywhere; }
+/* Shared navigation: Control overflowing content so long labels or artwork stay inside their container. */
 #book-left-header-title { max-width:65%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+/* Reader: Apply these visual adjustments to the selected elements in this state. */
 #book-spread-content .reader-content { -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+/* Reader: Show a visible focus cue so keyboard users can locate the active control. */
 .reader-shell button:focus-visible,.reader-shell a:focus-visible { outline:2px solid #ddc18a; outline-offset:4px; }
+/* Reader: Provide pointer-hover feedback without changing the underlying action. */
 #reader-next-btn:hover { border-color:#ddc18a66; transform:translateX(2px); }
+/* Reader: Provide pointer-hover feedback without changing the underlying action. */
 #reader-prev-btn:hover { border-color:#ddc18a66; transform:translateX(-2px); }
+/* Reader: Define the outline and rounded shape of this surface. */
 .reader-retry { border:1px solid #8f6d48; border-radius:30px; padding:8px 18px; margin-top:16px; color:#6b4123; }
 /* Match readerView.js: narrow screens show one page instead of a two-page spread. */
-@media(max-width:1023px) { #book-right-article { display:none; } .reader-turn-leaf { width:100%; left:0; transform-origin:left center; } #book-spread { perspective:1500px; } #reader-book-container>div>div:first-child { left:auto; right:24px; width:15px; height:65px; } }
+@media(max-width:1023px) { /* Page appearance: Remove this element from the current layout; responsive or UI state controls when it returns. */
+#book-right-article { display:none; } /* Reader: Choose the pivot edge around which this element rotates. */
+.reader-turn-leaf { width:100%; left:0; transform-origin:left center; } /* Reader: Set the viewing depth that makes rotated book pages appear three-dimensional. */
+#book-spread { perspective:1500px; } /* Reader: Set the element dimensions so content fits the available space. */
+#reader-book-container>div>div:first-child { left:auto; right:24px; width:15px; height:65px; } }
 /* Reserve more reading space and wrap controls on phones. */
 @media(max-width:600px) {
+  /* Reader: Remove this element from the current layout; responsive or UI state controls when it returns. */
   body[data-route="reader"] #app-sidebar { display:none; }
+  /* Reader: Control spacing inside or around this element. */
   body[data-route="reader"] #app-content-wrapper { padding:12px; }
+  /* Reader: Set the element dimensions so content fits the available space. */
   #reader-book-title { max-width:calc(100vw - 120px); }
+  /* Reader: Apply these visual adjustments to the selected elements in this state. */
   .reader-shell>div:first-child>div:last-child { gap:10px; }
+  /* Reader: Apply these visual adjustments to the selected elements in this state. */
   #reader-mode-toggle { gap:0; }
+  /* Reader: Control spacing inside or around this element. */
   #reader-mode-toggle button { padding:6px 10px; }
+  /* Reader: Control spacing inside or around this element. */
   #reader-page-turn-nav { padding:0; gap:12px; }
+  /* Reader: Set the element dimensions so content fits the available space. */
   #reader-nav-middle { order:-1; width:100%; justify-content:center; }
+  /* Reader: Set readable typography and spacing for this text role. */
   #reader-prev-btn,#reader-next-btn { padding:11px 15px; font-size:12px; }
+  /* Page appearance: Set the element dimensions so content fits the available space. */
   #book-left-article { padding:22px; height:min(680px,78svh); min-height:460px; }
+  /* Reader: Align child controls along a row or column and manage wrapping/spacing. */
   #reader-pdf-container>div:first-of-type { flex-wrap:wrap; gap:10px; }
+  /* Reader: Align child controls along a row or column and manage wrapping/spacing. */
   #reader-pdf-container>div:nth-of-type(3),#reader-pdf-container>div:last-child { flex-wrap:wrap; gap:10px; }
+  /* Shared navigation: Remove this element from the current layout; responsive or UI state controls when it returns. */
   #pdf-header-ch-meta,#pdf-nav-counter { display:none; }
+  /* Page appearance: Control spacing inside or around this element. */
   #book-scroll-canvas { padding:20px 12px; }
 }
-@media(prefers-reduced-motion:reduce) { .reader-shell * { scroll-behavior:auto!important; transition:none!important; animation:none!important; } }
+/* Accessibility: remove motion effects when the visitor requests reduced motion. */
+@media(prefers-reduced-motion:reduce) { /* Reader: Set how visual changes animate between UI states. */
+.reader-shell * { scroll-behavior:auto!important; transition:none!important; animation:none!important; } }

@@ -22,9 +22,11 @@ const PROJECT_ROOT = path.resolve(BACKEND_ROOT, '..');
 function parseEnvFile(filePath) {
   if (!fs.existsSync(filePath)) return {};
 
+  // Read the file once and remove an optional byte-order mark before parsing lines.
   const raw = fs.readFileSync(filePath, 'utf8').replace(/^﻿/, '');
   const values = {};
 
+  // Ignore unsupported lines and extract the first equals sign as the key/value boundary.
   for (const line of raw.split(/\r?\n/)) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith('#')) continue;
@@ -89,6 +91,7 @@ const KEY_ALIASES = {
 
 /** First non-empty match for any alias, walking sources in precedence order. */
 function lookup(aliases) {
+  // Check all aliases in each source before moving to the next lower-priority source.
   for (const source of SOURCES) {
     for (const key of aliases) {
       const value = source.values[key];

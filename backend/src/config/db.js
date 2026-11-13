@@ -30,6 +30,7 @@ const SRV_ERROR_CODES = new Set(['ECONNREFUSED', 'ETIMEOUT', 'ESERVFAIL', 'EREFU
 let listenersAttached = false;
 let dnsFallbackApplied = false;
 
+// Pause before another connection attempt without blocking other work.
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Failed attempts wait progressively longer, up to the configured maximum delay.
@@ -90,6 +91,7 @@ async function connectDB(uri, { retries = DEFAULT_RETRIES } = {}) {
   let lastError;
   let attempt = 1;
 
+  // Try a bounded number of handshakes; successful connections return immediately.
   while (attempt <= retries) {
     try {
       const startedAt = Date.now();
@@ -101,6 +103,7 @@ async function connectDB(uri, { retries = DEFAULT_RETRIES } = {}) {
       console.log(`[db] Handshake complete in ${Date.now() - startedAt}ms.`);
       return mongoose;
     } catch (error) {
+      // Keep the latest failure so callers receive a useful error after retries.
       lastError = error;
 
       // A refused SRV lookup is a local resolver problem, not a bad URI —
@@ -117,6 +120,7 @@ async function connectDB(uri, { retries = DEFAULT_RETRIES } = {}) {
       );
       if (isLastAttempt) break;
 
+      // Wait longer after each ordinary failure to avoid hammering Atlas.
       await sleep(backoffDelay(attempt));
       attempt += 1;
     }

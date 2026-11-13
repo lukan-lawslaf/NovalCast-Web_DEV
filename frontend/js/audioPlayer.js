@@ -56,6 +56,7 @@
     return chunks;
   }
 
+  // Resolve either a book ID or a prefixed control ID to the catalog entry used by narration.
   function findBook(value) {
     const NC = window.NovelCast;
     const rawId = String(value || '');
@@ -87,6 +88,7 @@
       document.dispatchEvent(new CustomEvent('novelcast:audio-state', { detail: getState() }));
       return;
     }
+    // Controls may be absent on some pages, so update only elements that exist.
     const setText = (id, value) => { const node = document.getElementById(id); if (node) node.textContent = value; };
     setText('player-title', s.book.title || 'Book');
     setText('player-chapter', `Reading chapter ${getState().chapter}`);
@@ -125,6 +127,7 @@
     s.currentPending = null;
     if (!s.next && !s.nextError) s.nextAttempted = false;
   }
+  // Clear the active session before canceling its work so late responses cannot restart playback.
   function stop() {
     const s = session;
     session = null;
@@ -137,6 +140,7 @@
     const controller = new AbortController();
     s.controllers.add(controller);
     let timedOut = false;
+    // A request timeout aborts the fetch; the epoch check also rejects results from an older session.
     const timeout = setTimeout(() => { timedOut = true; controller.abort(); }, options ? 75000 : 30000);
     try {
       const response = await fetch(url, Object.assign({}, options, { signal: controller.signal }));
@@ -185,6 +189,7 @@
   }
 
   // Load the exact chapter, choose the next passage and ask the backend to synthesize it.
+  // Advance through chapter text and request the next playable chunk using this session’s selected voice.
   async function passage(s, epoch) {
     const sourceCursor = s.cursor;
     let cursor = sourceCursor;
@@ -233,6 +238,7 @@
     return { audio, url, chapter: cursor.chapter, sourceCursor, nextCursor, ended: false };
   }
 
+  // Record a playback error and show retry controls for the active session.
   function fail(s, error) {
     if (session !== s) return;
     abortRequests(s);
@@ -245,6 +251,7 @@
   }
 
   // Prepare at most one upcoming passage while the current passage plays.
+  // Prepare at most one future passage while the current audio is playing.
   function prefetch(s) {
     if (session !== s || !s.wantsPlay || !s.current || s.current.ended || s.next || s.nextPending || s.nextAttempted || s.nextError || s.cursor.chapter === null) return;
     s.nextAttempted = true;
@@ -263,6 +270,7 @@
     render();
   }
 
+  // Record completion of the current passage before moving on.
   function played(s, track) {
     if (session !== s || s.current !== track || track.ended || !s.wantsPlay) return;
     s.started = true;
@@ -272,6 +280,7 @@
     prefetch(s);
   }
 
+  // Start the current audio and handle browser playback restrictions or errors.
   async function playCurrent(s) {
     const track = s.current;
     const epoch = s.epoch;
@@ -291,12 +300,14 @@
   }
 
   // Attach playback events to the current chunk and detach them when that chunk is replaced.
+  // Attach playback events to the current audio and retain cleanup for when the track is replaced.
   function installCurrent(s, track) {
     s.current = track;
     s.lastChapter = track.chapter;
     s.cursor = track.nextCursor;
     s.nextAttempted = false;
     s.nextError = null;
+    // Playback events may arrive late: the handlers check the session and track before advancing.
     const onPlaying = () => played(s, track);
     const onEnded = () => {
       if (session !== s || s.current !== track || track.ended) return;
@@ -307,6 +318,7 @@
     track.audio.addEventListener('playing', onPlaying);
     track.audio.addEventListener('ended', onEnded);
     track.audio.addEventListener('error', onError);
+    // Keep matching listener references so replacing a track removes all its handlers.
     track.cleanup = () => {
       track.audio.removeEventListener('playing', onPlaying);
       track.audio.removeEventListener('ended', onEnded);
@@ -316,6 +328,7 @@
   }
 
   // Move to the prepared chunk, or show buffering while the next one is requested.
+  // Promote the prefetched track when available, or wait for preparation before continuing.
   async function advance(s) {
     if (session !== s || !s.wantsPlay || s.advancing) return;
     s.advancing = true;
@@ -346,6 +359,7 @@
     }
   }
 
+  // Pause the current audio while keeping the session ready to resume.
   function pause() {
     const s = session;
     if (!s) return;
@@ -356,6 +370,7 @@
     s.status = 'paused';
     render();
   }
+  // Resume the active session or continue preparing its next passage.
   function resume() {
     const s = session;
     if (!s || s.status === 'finished') return;
@@ -397,12 +412,14 @@
     advance(session);
     return true;
   }
+  // Choose between starting, pausing and resuming playback from a player control.
   function toggle(value) {
     if (value) return playBook(value);
     if (!session) return;
     if (session.wantsPlay) pause(); else resume();
   }
   // Attach narration buttons once, including buttons inserted by a later view render.
+  // Connect narration buttons inside newly rendered content without binding the same button twice.
   function bind(scope) {
     (scope || document).querySelectorAll('[data-audio-stub]').forEach(button => {
       if (button.dataset.audioStubBound) return;
@@ -413,6 +430,7 @@
       });
     });
   }
+  // Connect the persistent player controls once the page is ready.
   function init() {
     const play = document.getElementById('player-play-btn');
     const close = document.getElementById('player-close-btn');

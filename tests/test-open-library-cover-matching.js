@@ -15,10 +15,12 @@ function mockLibrary(t, docs) {
     if (path === '/search.json') return Response.json({ docs });
     return Response.json({ description: { value: 'A verified work synopsis.' } });
   };
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => { global.fetch = original; });
   return calls;
 }
 
+// Scenario: cover enrichment skips unrelated search hits even when they have artwork. The checks below exercise this behavior as one independent case.
 test('cover enrichment skips unrelated search hits even when they have artwork', async (t) => {
   const calls = mockLibrary(t, [
     { key: '/works/OL1W', title: 'Wuthering Heights', author_name: ['Another Author'], cover_i: 1 },
@@ -31,6 +33,7 @@ test('cover enrichment skips unrelated search hits even when they have artwork',
   assert.deepEqual(calls, ['/search.json', '/works/OL3W.json']);
 });
 
+// Scenario: cover enrichment declines ambiguous titles, unknown authors, and invalid artwork identifiers. The checks below exercise this behavior as one independent case.
 test('cover enrichment declines ambiguous titles, unknown authors, and invalid artwork identifiers', async (t) => {
   const calls = mockLibrary(t, [
     { key: '/works/OL1W', title: 'Alice', author_name: ['Anonymous'], cover_i: 1 },

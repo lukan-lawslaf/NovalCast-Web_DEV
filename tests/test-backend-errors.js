@@ -12,13 +12,17 @@ async function listen(t, app) {
   const server = await new Promise(resolve => {
     const instance = app.listen(0, '127.0.0.1', () => resolve(instance));
   });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => new Promise(resolve => server.close(resolve)));
   return `http://127.0.0.1:${server.address().port}`;
 }
 
+// Scenario: the actual app reports disconnected ratings as a safe service-unavailable message. The checks below exercise this behavior as one independent case.
 test('the actual app reports disconnected ratings as a safe service-unavailable message', async t => {
   const oldState = mongoose.connection.readyState;
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => { mongoose.connection.readyState = oldState; });
+  // Simulate a disconnected database while retaining the real application routes.
   mongoose.connection.readyState = 0;
   // Importing the production app mounts the real middleware but does not start Atlas.
   const base = await listen(t, require('../backend'));
@@ -29,9 +33,11 @@ test('the actual app reports disconnected ratings as a safe service-unavailable 
   assert.equal(health.status, 503);
 });
 
+// Scenario: error middleware exposes only deliberate 503 messages and keeps private failures hidden. The checks below exercise this behavior as one independent case.
 test('error middleware exposes only deliberate 503 messages and keeps private failures hidden', async t => {
   const app = express();
   const privateDetail = 'private database/provider connection details';
+  // Each route raises a different kind of error; only the explicitly public 503 may expose its message.
   app.get('/unexpected', (req, res, next) => next(new Error(privateDetail)));
   app.get('/exposed-500', (req, res, next) => next(Object.assign(new Error(privateDetail), { status: 500, expose: true })));
   app.get('/unmarked-503', (req, res, next) => next(Object.assign(new Error(privateDetail), { status: 503 })));
@@ -48,6 +54,7 @@ test('error middleware exposes only deliberate 503 messages and keeps private fa
   const publicFailure = await fetch(`${base}/public-503`);
   assert.equal(publicFailure.status, 503);
   assert.deepEqual(await publicFailure.json(), { error: 'Please retry this service shortly.' });
+  // Invalid JSON and oversized JSON are separate parser failures with safe client-facing messages.
   for (const [body, status, message] of [
     ['{broken', 400, 'Request body must be valid JSON.'],
     [JSON.stringify({ value: 'x'.repeat(40) }), 413, 'Request body is too large.'],

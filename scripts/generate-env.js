@@ -4,25 +4,31 @@ const path = require('path');
 
 // Generate client environment config from .env
 function generateEnv() {
+  // Resolve paths relative to this script so the command works from any working directory.
   const envPath = path.join(__dirname, '../.env');
   const outJsPath = path.join(__dirname, '../frontend/js/env.js');
   const outJsonPath = path.join(__dirname, '../frontend/env.json');
 
+  // Start with an empty allowlist: arbitrary server secrets must never reach browser files.
   const envConfig = {};
 
+  // Missing local configuration is allowed; the default API address is applied below.
   if (fs.existsSync(envPath)) {
     const raw = fs.readFileSync(envPath, 'utf8');
     const lines = raw.split(/\r?\n/);
 
+    // Process one assignment per line, ignoring blank lines and environment-file comments.
     for (const line of lines) {
       const trimmed = line.trim();
       if (!trimmed || trimmed.startsWith('#')) continue;
+      // Split at the first equals sign so any later equals signs remain part of the value.
       const idx = trimmed.indexOf('=');
       if (idx > -1) {
         const key = trimmed.slice(0, idx).trim();
         const val = trimmed.slice(idx + 1).trim();
 
         // Safely extract client-needed Supabase keys and API_BASE
+        // Normalize accepted key aliases into the three public names the browser expects.
         if (key.toLowerCase() === 'supabase_url') {
           envConfig.SUPABASE_URL = val;
         } else if (key.toLowerCase() === 'supabase_api' || key.toLowerCase() === 'supabase_anon_key') {
@@ -34,6 +40,7 @@ function generateEnv() {
     }
   }
 
+  // A local frontend should still know the backend address when it is not configured.
   if (!envConfig.API_BASE) {
     envConfig.API_BASE = 'http://localhost:4000/api';
   }
@@ -48,4 +55,5 @@ function generateEnv() {
   console.log('[generate-env] Successfully generated frontend/js/env.js and frontend/env.json from .env');
 }
 
+// Execute the generator when npm runs the prestart/predev hook.
 generateEnv();

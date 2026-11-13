@@ -29,6 +29,7 @@ function parseArgs(argv) {
   return args;
 }
 
+// Format counts for the operator’s readable import summary.
 function formatNumber(value) {
   return new Intl.NumberFormat('en-US').format(value || 0);
 }
@@ -42,6 +43,7 @@ async function main() {
     process.exit(1);
   }
 
+  // Select the requested curated IDs or slugs before making any database changes.
   const shelf = args.only
     ? CURATED_BOOKS.filter(
         (entry) => args.only.has(String(entry.gutendexId)) || args.only.has(entry.slug)
@@ -61,10 +63,12 @@ async function main() {
   const startedAt = Date.now();
   const { results, failures } = await ingestCurated({
     books: shelf,
+    // Show completed and total imports after each book finishes or fails.
     onProgress: ({ done, total }) => console.log(`[seed] Progress ${done}/${total}\n`),
   });
 
   console.log('\n================ Seed summary ================');
+  // Report successful imports and failures separately for the operator.
   for (const result of results) {
     const { book, stats } = result;
     console.log(
@@ -93,6 +97,7 @@ async function main() {
   process.exit(failures.length ? 1 : 0);
 }
 
+// On a fatal error, attempt to close Atlas before exiting unsuccessfully.
 main().catch(async (error) => {
   console.error('[seed] Fatal:', error.message);
   await disconnectDB().catch(() => {});

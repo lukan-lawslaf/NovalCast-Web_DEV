@@ -3,6 +3,7 @@
   const NC = window.NovelCast;
   const { escapeHtml } = NC;
   const params = NC.readQuery();
+  // Resolve template references through the shared catalog, including its fallback behavior.
   const findBook = (id) => NC.getBook(id);
 
   const shelfEditions = [
@@ -28,6 +29,7 @@
   ];
 
   // Build linked cover wrappers for the entrance bookshelf.
+  // Resolve the curated shelf IDs to available books before creating the landing cards.
   function landingShelf() {
     return shelfEditions.map(id => NC.getExactBook(id)).filter(Boolean).map(book => {
       const title = escapeHtml(book.title);
@@ -43,9 +45,11 @@
     }).join('');
   }
 
+  // Delegate book-link construction to the shared route helper.
   function bookHref(page, id, chapter) { return NC.bookUrl(page, id, chapter); }
 
   // Build a large book card; the variant selects its presentation.
+  // Build featured-book markup from the catalog record and the requested presentation variant.
   function featuredCard(book, variant) {
     if (variant === 'secondary') {
       return `<div class="relative flex-[1_0_460px] bg-[#161B24] rounded-[22px] border border-appCardBorder/50 p-6 md:p-7 overflow-hidden shadow-xl flex flex-col justify-between opacity-85" data-purpose="secondary-hero-card" style="background: linear-gradient(135deg, #1C2330 0%, #131720 100%); border: 1px solid rgba(241, 214, 158, 0.28); box-shadow: rgba(241, 214, 158, 0.1) 0px 0px 20px -4px, rgba(0, 0, 0, 0.6) 0px 15px 25px -10px;">
@@ -329,6 +333,7 @@
   }
 
   // Build links and narration actions for the available chapter summaries.
+  // Render chapter links from available metadata so each link opens the corresponding reader location.
   function chapterList(book) {
     const list = book.chaptersList || [];
     const total = book.chapters || list.length || 1;
@@ -360,6 +365,7 @@
   }
 
   // Provide the empty container where ratings.js mounts the interactive rating UI.
+  // Create the review section using the selected book’s data.
   function reviews(book) {
     return '<section id="book-ratings" class="reader-ratings"><h3>Reader ratings</h3><div data-rating-content aria-busy="false"><p class="text-on-surface-variant">Loading reader ratings…</p></div></section>';
   }

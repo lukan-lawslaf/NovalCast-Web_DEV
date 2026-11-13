@@ -11,6 +11,7 @@
   color: var(--nc-ink);
 }
 
+/* Library: Set readable typography and spacing for this text role. */
 .nc-library-tools h2,
 .nc-saved-section h2 {
   margin: 0 0 .65rem;
@@ -20,6 +21,7 @@
   font-weight: 600;
 }
 
+/* Library: Set readable typography and spacing for this text role. */
 .nc-library-hint {
   margin: .5rem 0 .9rem;
   color: var(--nc-muted);
@@ -34,6 +36,7 @@
   gap: .85rem;
 }
 
+/* Library: Align child controls along a row or column and manage wrapping/spacing. */
 .nc-reading-plan-fields label {
   display: flex;
   flex-direction: column;
@@ -42,6 +45,7 @@
   line-height: 1.5;
 }
 
+/* Library: Set readable typography and spacing for this text role. */
 .nc-reading-plan-fields input {
   width: 100%;
   min-width: 0;
@@ -53,6 +57,7 @@
   font: inherit;
 }
 
+/* Library: Set readable typography and spacing for this text role. */
 .nc-library-button {
   min-height: 2.75rem;
   padding: .6rem 1rem;
@@ -65,6 +70,7 @@
   cursor: pointer;
 }
 
+/* Library: Apply the foreground and surface colors for this component state. */
 .nc-library-button-secondary {
   background: transparent;
   color: var(--nc-accent);
@@ -76,18 +82,21 @@
   cursor: wait;
 }
 
+/* Library: Show a visible focus cue so keyboard users can locate the active control. */
 .nc-library-tools :is(button, input):focus-visible,
 .nc-saved-section :is(button, a):focus-visible {
   outline: 2px solid var(--nc-focus);
   outline-offset: 3px;
 }
 
+/* Library: Align child controls along a row or column and manage wrapping/spacing. */
 .nc-library-tool-buttons {
   display: flex;
   flex-wrap: wrap;
   gap: .6rem;
 }
 
+/* Library: Set readable typography and spacing for this text role. */
 .nc-library-feedback,
 .nc-library-sync-status {
   margin: .7rem 0;
@@ -96,10 +105,12 @@
   overflow-wrap: anywhere;
 }
 
+/* Library: Apply the foreground and surface colors for this component state. */
 .nc-library-sync-status[data-phase="synced"] {
   color: var(--nc-accent);
 }
 
+/* Library: Apply these visual adjustments to the selected elements in this state. */
 .nc-saved-section {
   margin-bottom: 2.5rem;
 }
@@ -111,11 +122,13 @@
   gap: 1.25rem;
 }
 
+/* Library: Set the element dimensions so content fits the available space. */
 .nc-saved-book {
   min-width: 0;
   max-width: 220px;
 }
 
+/* Library: Control overflowing content so long labels or artwork stay inside their container. */
 .nc-saved-cover {
   position: relative;
   display: block;
@@ -127,6 +140,7 @@
   background: var(--nc-surface);
 }
 
+/* Library: Set readable typography and spacing for this text role. */
 .nc-saved-title {
   display: block;
   color: var(--nc-ink);
@@ -134,12 +148,14 @@
   overflow-wrap: anywhere;
 }
 
+/* Library: Set readable typography and spacing for this text role. */
 .nc-saved-book p {
   margin: .25rem 0;
   color: var(--nc-muted);
   font-size: .75rem;
 }
 
+/* Library: Set readable typography and spacing for this text role. */
 .nc-library-text-button {
   min-height: 2.5rem;
   color: var(--nc-accent);
@@ -151,14 +167,22 @@
 
 /* Stack the plan and backup panels on narrower screens. */
 @media (max-width: 900px) {
+  /* Library: Use grid tracks to align content and control the number of columns. */
   .nc-library-tools { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
 }
 
+/* Responsive layout: these rules apply only at or below this viewport width. */
 @media (max-width: 480px) {
+  /* Library: Align child controls along a row or column and manage wrapping/spacing. */
   .nc-library-title { flex-wrap: wrap; }
+  /* Library: Align child controls along a row or column and manage wrapping/spacing. */
   .nc-library-summary { flex-wrap: wrap; gap: .75rem; justify-content: space-between; }
+  /* Library: Remove this element from the current layout; responsive or UI state controls when it returns. */
   .nc-library-summary > .h-8 { display: none; }
+  /* Library: Control spacing inside or around this element. */
   .nc-library-tools { padding: 1rem; }
+  /* Library: Use grid tracks to align content and control the number of columns. */
   .nc-reading-plan-fields { grid-template-columns: minmax(0, 1fr); }
+  /* Library: Align child controls along a row or column and manage wrapping/spacing. */
   .nc-library-tool-buttons { align-items: stretch; flex-direction: column; }
 }

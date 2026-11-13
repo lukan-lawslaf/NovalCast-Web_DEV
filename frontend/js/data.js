@@ -5,6 +5,7 @@ window.NovelCast = (function () {
   const CATALOG_CACHE_KEY = 'novelcast.catalog.cache.v1';
 
   // Legacy shared keys remain guest-only; signed-in accounts never inherit another reader's shelf.
+  // Include the current account in storage keys to keep different users’ local data separate.
   function scopedKey(key) {
     const id = window.NovelCastAuth?.getUser()?.id;
     return id ? `${key}.${id}` : key;
@@ -178,6 +179,7 @@ window.NovelCast = (function () {
   let communityRatings = Object.create(null);
 
   // Translate backend metadata into the fields expected by cards and reader views.
+  // Adapt the API’s book fields to the shape expected by the existing frontend views.
   function transformBackendBook(b) {
     if (!b) return null;
     const title = cleanTitle(b.title);
@@ -469,6 +471,7 @@ window.NovelCast = (function () {
     }
   }
 
+  // Persist reading settings through the account library when available, with a local fallback.
   function saveSettings(s) {
     if (window.NovelCastLibrary) return window.NovelCastLibrary.setSection('settings', s);
     localStorage.setItem(scopedKey(SETTINGS_KEY), JSON.stringify(s));
@@ -476,6 +479,7 @@ window.NovelCast = (function () {
 
   // State
   // Read the active shelf and use a key-safe object for its book entries.
+  // Read saved library state with defaults when the stored value is missing or invalid.
   function loadState() {
     if (window.NovelCastLibrary) {
       const state = window.NovelCastLibrary.getSection('state');
@@ -504,6 +508,7 @@ window.NovelCast = (function () {
   }
 
   // Fill missing display metadata; generated chapter labels are not parsed manuscript text.
+  // Fill in a consistent set of display fields before a catalog book reaches a view.
   function normalizeBook(match) {
     if (!match) return null;
     match.rating = typeof match.rating === 'number' ? match.rating : 0;
@@ -529,6 +534,7 @@ window.NovelCast = (function () {
     return match;
   }
 
+  // Translate older identifiers so previously saved links still point to the intended book.
   function resolveId(id) {
     if (!id) return books[0].id;
     if (byId[id]) return id;
@@ -553,6 +559,7 @@ window.NovelCast = (function () {
     return getExactBook(id) || books[0];
   }
 
+  // Add encoded book and optional chapter parameters to the supplied page path.
   function bookUrl(page, id, chapter) {
     const params = new URLSearchParams();
     if (id) params.set('book', id);
@@ -562,6 +569,7 @@ window.NovelCast = (function () {
   }
 
   // Encode special characters before placing user/provider text inside HTML strings.
+  // Escape special characters before untrusted text is inserted into HTML markup.
   function escapeHtml(s) {
     return String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
@@ -571,6 +579,7 @@ window.NovelCast = (function () {
     const searchParams = new URLSearchParams(location.search);
     const hashQuery = location.hash.includes('?') ? location.hash.split('?')[1] : '';
     const hashParams = new URLSearchParams(hashQuery);
+    // Prefer hash-route parameters, falling back to the regular URL query.
     const getVal = (k) => hashParams.get(k) || searchParams.get(k);
 
     const rawChapter = getVal('chapter');
@@ -585,6 +594,7 @@ window.NovelCast = (function () {
     };
   }
 
+  // Update route query parameters through the browser’s URL APIs.
   function setQuery(params) {
     const url = new URL(location.href);
     Object.keys(params).forEach((k) => {
@@ -594,6 +604,7 @@ window.NovelCast = (function () {
     history.replaceState({}, '', url);
   }
 
+  // Return the icon markup for one filled or empty rating star.
   function starIcon(filled) {
     return `<span class="material-symbols-outlined icon-star${filled ? ' is-filled' : ''}" aria-hidden="true">star</span>`;
   }
@@ -605,6 +616,7 @@ window.NovelCast = (function () {
   }
 
   // Apply a partial update to one book, preserving the rest of its account state.
+  // Merge the requested fields into one book’s saved state and notify interested views.
   function saveBookState(id, patch) {
     const state = loadState();
     const entry = ensureEntry(state, id);
@@ -613,14 +625,17 @@ window.NovelCast = (function () {
     return entry;
   }
 
+  // List book IDs currently present in the saved library.
   function libraryAllIds() {
     return Object.keys(loadState().library).filter((id) => byId[id]);
   }
 
+  // Read a book’s saved library status for display controls.
   function statusOf(id) {
     return loadState().library[id] && loadState().library[id].status;
   }
 
+  // Show a temporary message to acknowledge an action or explain a problem.
   function toast(message) {
     let host = document.getElementById('nc-toast');
     if (!host) {
@@ -635,10 +650,12 @@ window.NovelCast = (function () {
     host._t = setTimeout(() => host.classList.remove('is-visible'), 2200);
   }
 
+  // Choose the local upload-storage key for the given account.
   function getUserUploadsKey(userId) {
     return `novelcast.uploads.${userId || 'guest'}`;
   }
 
+  // Read this account’s uploaded-book metadata from its available storage.
   function getUserUploads(userId) {
     if (window.NovelCastLibrary) return window.NovelCastLibrary.getUploads(userId);
     try {
@@ -669,6 +686,7 @@ window.NovelCast = (function () {
     return book;
   }
 
+  // Update reading progress on the matching uploaded book.
   function updateUserUploadProgress(userId, bookId, progress, lastRead) {
     const list = getUserUploads(userId);
     const item = list.find(b => b.id === bookId);
@@ -683,6 +701,7 @@ window.NovelCast = (function () {
     return item;
   }
 
+  // Remove the matching uploaded-book metadata from the selected account.
   function deleteUserUpload(userId, bookId) {
     let list = getUserUploads(userId);
     list = list.filter(b => b.id !== bookId);
@@ -697,6 +716,7 @@ window.NovelCast = (function () {
   let isLoaded = false;
 
   // Refresh catalog/ratings from the API while keeping cached metadata usable on failure.
+  // Fetch and normalize remote books, keeping the local catalog usable if the request fails.
   async function fetchCatalog(options = {}) {
     const limit = options.limit || 50;
     const sort = options.sort || 'popular';
@@ -741,6 +761,7 @@ window.NovelCast = (function () {
   }
 
   // Refresh only the requested book and convert its chapter summaries for the UI.
+  // Load fuller metadata for one book and update the shared catalog cache.
   async function fetchBookDetails(slugOrId) {
     const target = resolveId(slugOrId);
     if (String(target).startsWith('upload-')) return getExactBook(target);
@@ -777,6 +798,7 @@ window.NovelCast = (function () {
   }
 
   // Fetch original chapter text and reject previews or mismatched book/chapter identities.
+  // Request chapter content separately so the catalog does not need to load full books up front.
   async function fetchChapter(slugOrId, chapterNumber = 1, { signal } = {}) {
     const target = resolveId(slugOrId);
     const num = Math.max(1, parseInt(chapterNumber || 1, 10));
@@ -796,6 +818,7 @@ window.NovelCast = (function () {
   }
 
   // Return backend matches, or null so the search view keeps its local results.
+  // Ask the backend for catalog matches while leaving display and fallback behavior to the caller.
   async function searchCatalog(query = '', genre = '') {
     try {
       const url = new URL(`${API_BASE}/books`);
@@ -821,6 +844,7 @@ window.NovelCast = (function () {
   }
 
   return {
+    // Getters expose the current catalog and index even when a later fetch replaces them.
     get books() { return books; },
     get byId() { return byId; },
     defaultSettings,
@@ -847,6 +871,7 @@ window.NovelCast = (function () {
     // Live API methods
     fetchCatalog,
     fetchBookDetails,
+    // Keep the shared book entry and rating cache in sync with a confirmed rating summary.
     setBookRating(id, summary) {
       const book = byId[resolveId(id)];
       if (!book) return;
@@ -858,6 +883,7 @@ window.NovelCast = (function () {
     searchCatalog,
     transformBackendBook,
     API_BASE,
+    // Let views distinguish the initial catalog load from its later state.
     isLoaded: () => isLoaded,
     cleanTitle
   };

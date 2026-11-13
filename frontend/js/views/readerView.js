@@ -256,8 +256,10 @@ window.NovelCastViews.reader = {
   init: function () {
     const controller = new AbortController();
     let resizeTimer;
+    // Start with a no-op cleanup; a running page turn replaces it with its own cancellation.
     let cancelTurn = () => {};
     // This closure remembers this screen's resources so leaving the route can release them.
+    // Leaving the reader aborts chapter work, cancels page-turn animation and disconnects resizing.
     this.destroy = () => { controller.abort(); clearTimeout(resizeTimer); cancelTurn(); if (observer) observer.disconnect(); };
     let observer;
 
@@ -311,6 +313,7 @@ window.NovelCastViews.reader = {
     const pdfStatusBar = document.getElementById('reader-pdf-status-bar');
 
     // Switch between paginated HTML and scrolling HTML; the PDF label does not mean a PDF parser.
+    // Switch between book and scrolling layouts, preserving the selected mode for later visits.
     function setMode(mode) {
       cancelTurn();
       btnBook.setAttribute('aria-pressed', String(mode !== 'pdf'));
@@ -416,11 +419,13 @@ window.NovelCastViews.reader = {
       let currentPageItems = [];
       let pageIdx = 0;
 
+      // Reserve space for the chapter heading only on the first page.
       const getMaxHeight = (idx) => {
         if (idx === 0) return Math.max(40, targetHeight - headingHeight);
         return targetHeight;
       };
 
+      // Format a paragraph and add the decorative initial only at the start of the chapter.
       function wrapPara(text, isFirst) {
         const formatted = formatPara(text);
         if (isFirst && /^[A-Za-z]/.test(formatted)) {
@@ -431,6 +436,7 @@ window.NovelCastViews.reader = {
         return `<p class="text-justify">${formatted}</p>`;
       }
 
+      // Measure paragraphs in order, carrying any overflow into the next page.
       for (const paragraph of rawParagraphs) {
         let remaining = paragraph;
         while (remaining) {
@@ -451,6 +457,7 @@ window.NovelCastViews.reader = {
             if (sandbox.scrollHeight <= maxHeight) { fit = mid; low = mid + 1; }
             else high = mid - 1;
           }
+          // If no word fits on a partly filled page, start a fresh page and try the same text again.
           if (!fit && currentPageItems.length) {
             pages.push(currentPageItems);
             currentPageItems = [];
@@ -469,6 +476,7 @@ window.NovelCastViews.reader = {
         pages.push(currentPageItems);
       }
 
+      // Remove the off-screen measurement element after pagination to avoid accumulating hidden nodes.
       if (document.body.contains(sandbox)) {
         document.body.removeChild(sandbox);
       }
@@ -496,6 +504,7 @@ window.NovelCastViews.reader = {
 
     // --- FETCH LIVE CHAPTER FROM MONGO ATLAS BACKEND ---
     const targetSlug = book.slug || book.id;
+    // Load the requested chapter asynchronously; an aborted view must ignore its response.
     NC.fetchChapter(targetSlug, chapterNum, { signal: controller.signal }).then(data => {
       if (controller.signal.aborted) return;
       if (!data || !data.chapter) throw new Error('Chapter is temporarily unavailable.');
@@ -542,6 +551,7 @@ window.NovelCastViews.reader = {
       if (leftHeaderCh) leftHeaderCh.textContent = `Chapter ${chNumber}`;
 
       // Parse full raw content into paragraphs
+      // Split chapter text into paragraphs before measuring it for book mode.
       const rawParagraphs = (chapter.content || '')
         .split(/\n\s*\n/)
         .map(p => p.trim())
@@ -565,6 +575,7 @@ window.NovelCastViews.reader = {
 
       let turning = false;
       // Update the current pages/navigation and animate a cloned page when appropriate.
+      // Update visible pages and controls, avoiding overlapping page-turn animations.
       function renderSpread(idx, animate = true) {
         if (controller.signal.aborted || (animate && turning)) return;
         const forward = idx > currentSpread;
@@ -662,6 +673,7 @@ window.NovelCastViews.reader = {
         spreadEl.setAttribute('aria-busy', 'true');
         const leaf = document.createElement('div');
         leaf.className = 'reader-turn-leaf' + (forward ? ' turn-forward' : ' turn-backward') + (desktop ? '' : ' turn-single');
+        // Prepare animation copies without duplicating live element IDs or interactive controls.
         const cleanClone = (clone, className) => {
           clone.removeAttribute('id');
           clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
@@ -714,6 +726,7 @@ window.NovelCastViews.reader = {
 
       // Re-paginate on font size change or window resize
       // Re-measure pages after a font/size change while keeping approximately the same place.
+      // Recalculate pages after layout or font changes, retaining the closest reading position.
       rePaginate = () => {
         const position = currentSpread / spreads.length;
         const currentContainer = document.getElementById('book-left-page-content');
@@ -724,6 +737,7 @@ window.NovelCastViews.reader = {
         renderSpread(Math.min(Math.floor(position * spreads.length), spreads.length - 1), false);
       };
 
+      // Debounce size changes so repeated resize events do not repeatedly measure the entire chapter.
       observer = new ResizeObserver(() => {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(() => { if (!controller.signal.aborted) rePaginate(); }, 150);
@@ -773,6 +787,7 @@ window.NovelCastViews.reader = {
       }
 
       // Keyboard Arrow Navigation
+      // Allow keyboard navigation while respecting the current reader mode and focused controls.
       const onKeyDown = (e) => {
         if (controller.signal.aborted || e.target.closest('input, textarea, select, [contenteditable]')) return;
         if (localStorage.getItem('novelcast.reader.mode') === 'pdf') return;

@@ -5,6 +5,7 @@ document.addEventListener('novelcast:state', () => {
 
 (function () {
   // Match a bookmark icon and its pressed state to the saved book entry.
+  // Keep each favorite control’s appearance and accessible label in step with saved state.
   function syncFavorite(button, state) {
     const active = Boolean(state.library[button.dataset.favoriteToggle]?.favorite);
     button.classList.toggle('is-active', active);
@@ -22,6 +23,7 @@ document.addEventListener('novelcast:state', () => {
   });
 
   // Despite the legacy name, these buttons now delegate to the real narration player.
+  // Delegate narration-button setup to the shared audio player for the given scope.
   function installAudioOffLinks(scope) {
     if (window.NovelCastAudio) window.NovelCastAudio.bind(scope);
   }
@@ -32,6 +34,7 @@ document.addEventListener('novelcast:state', () => {
     (scope || document).querySelectorAll('[data-book-link]').forEach((a) => {
       if (a.dataset.bookLinkBound) return;
       a.dataset.bookLinkBound = '1';
+      // Route ordinary clicks in the SPA while leaving modified clicks to the browser.
       a.addEventListener('click', (e) => {
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
         const id = a.dataset.bookLink;
@@ -58,6 +61,7 @@ document.addEventListener('novelcast:state', () => {
       btn.dataset.favoriteToggleBound = '1';
       const id = btn.dataset.favoriteToggle;
       syncFavorite(btn, window.NovelCast.loadState());
+      // Read the control’s book identifier and update the matching saved-library state.
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -91,6 +95,7 @@ document.addEventListener('novelcast:state', () => {
 window.NovelCastView = Object.assign({}, window.NovelCastView, window.NovelCastUI);
 })();
 window.NovelCastApp = Object.assign(window.NovelCastApp || {}, {
+  // Start narration for a book through the shared player when it is available.
   toggleAudio: function (trackId, options) {
     if (window.NovelCastAudio) return window.NovelCastAudio.playBook(trackId, options);
   },

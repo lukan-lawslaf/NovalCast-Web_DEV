@@ -6,8 +6,10 @@ const path = require('node:path');
 const { JSDOM } = require('jsdom');
 
 const playerSource = fs.readFileSync(path.join(__dirname, '..', 'frontend', 'js', 'audioPlayer.js'), 'utf8');
+// Allow queued asynchronous work to run before checking the player state.
 const settle = () => new Promise(resolve => setImmediate(resolve));
 
+// Create a promise whose completion the test controls, so timing and pending requests can be checked.
 function deferred() {
   let resolve;
   let reject;
@@ -15,6 +17,7 @@ function deferred() {
   return { promise, resolve, reject };
 }
 
+// Wait for asynchronous work to reach the expected state before checking its result.
 async function waitFor(predicate, description, timeoutMs = 1500) {
   const deadline = Date.now() + timeoutMs;
   while (!predicate()) {
@@ -23,10 +26,12 @@ async function waitFor(predicate, description, timeoutMs = 1500) {
   }
 }
 
+// Build a controlled response so the caller can exercise the same boundary without a live service.
 function responseJson(payload, { ok = true, status = 200 } = {}) {
   return { ok, status, json: async () => payload };
 }
 
+// Build the harness used by these scenarios, with controlled dependencies and observable state.
 function createHarness({ chapterHandler, ttsHandler, books, book = 'dracula', voiceHeaders, playerDom = false } = {}) {
   const markup = playerDom
     ? '<!doctype html><html><body><section id="global-audio-player"><span id="player-voice"></span><span id="player-status"></span></section></body></html>'
@@ -43,7 +48,9 @@ function createHarness({ chapterHandler, ttsHandler, books, book = 'dracula', vo
   const playBehaviors = new Map();
   let urlSequence = 0;
 
+  // This fake audio supplies a controllable stand-in for the real browser or service dependency.
   class FakeAudio {
+    // Record each audio instance and initialize the state inspected by playback tests.
     constructor() {
       this.index = audio.length;
       this.src = '';
@@ -54,27 +61,33 @@ function createHarness({ chapterHandler, ttsHandler, books, book = 'dracula', vo
       this.listeners = new Map();
       audio.push(this);
     }
+    // Register listeners by event type so tests can trigger browser-like events.
     addEventListener(type, listener) {
       if (!this.listeners.has(type)) this.listeners.set(type, new Set());
       this.listeners.get(type).add(listener);
     }
+    // Remove a listener so cleanup and stale event handling can be exercised.
     removeEventListener(type, listener) {
       if (this.listeners.has(type)) this.listeners.get(type).delete(listener);
     }
+    // Deliver a synthetic audio event to the currently registered listeners.
     emit(type) {
       for (const listener of this.listeners.get(type) || []) listener({ type, target: this });
     }
+    // Record playback and allow a test to delay or reject the returned promise.
     play() {
       this.playCalls += 1;
       this.paused = false;
       const behavior = playBehaviors.get(this.index);
       return behavior ? behavior(this) : Promise.resolve();
     }
+    // Track pauses and source cleanup; load is a no-op because no real media is decoded.
     pause() { this.pauseCalls += 1; this.paused = true; }
     removeAttribute(name) { if (name === 'src') this.src = ''; }
     load() {}
   }
 
+  // Replace browser audio and object URLs so playback and resource cleanup are observable.
   window.Audio = FakeAudio;
   window.__ENV__ = { API_BASE: 'http://novelcast.test/api' };
   window.URL.createObjectURL = blob => {
@@ -89,10 +102,12 @@ function createHarness({ chapterHandler, ttsHandler, books, book = 'dracula', vo
   window.NovelCast = {
     books: Object.values(bookMap),
     byId: bookMap,
+    // Resolve test books from the fixture; toast intentionally has no visual effect here.
     getBook(id) { return bookMap[id] || null; },
     toast() {},
   };
 
+  // Route chapter and speech requests through test handlers instead of contacting external services.
   window.fetch = async (input, options = {}) => {
     const url = new URL(String(input), 'http://novelcast.test');
     const call = { url, options, signal: options.signal || null };
@@ -152,6 +167,7 @@ function createHarness({ chapterHandler, ttsHandler, books, book = 'dracula', vo
   };
 }
 
+// Resolve when the request is aborted, allowing the test to wait for cancellation instead of guessing its timing.
 function onAbort(signal) {
   return new Promise(resolve => {
     if (!signal || signal.aborted) return resolve();
@@ -159,23 +175,28 @@ function onAbort(signal) {
   });
 }
 
+// Scenario: narrates exact chapter text with one passage ahead and waits for the next passage to start. The checks below exercise this behavior as one independent case.
 test('narrates exact chapter text with one passage ahead and waits for the next passage to start', async t => {
   const text = Array.from({ length: 700 }, (_, index) => `word${index}`).join(' ');
   const harness = createHarness({
     book: 'dracula',
+    // Return this scenario’s chapter fixture instead of requesting a real chapter.
     chapterHandler: async call => responseJson({
       book: { slug: call.bookId },
       chapter: { chapterNumber: call.chapter, content: text },
       navigation: { next: null },
     }),
   });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => harness.dom.window.close());
 
+  // Hold the next play call open to check that lookahead waits for playback to begin.
   const nextPlay = deferred();
   harness.playBehaviors.set(1, () => nextPlay.promise);
   assert.equal(harness.player.playBook('dracula'), true);
   await waitFor(() => harness.requests.filter(request => request.kind === 'tts').length === 2, 'the current and next narration passages');
 
+  // Select recorded speech requests to check how far generation has progressed.
   const ttsCalls = () => harness.requests.filter(request => request.kind === 'tts');
   assert.equal(harness.player.getState().status, 'playing');
   assert.equal(harness.audio[0].playCalls, 1);
@@ -208,19 +229,21 @@ test('narrates exact chapter text with one passage ahead and waits for the next 
     }, 'the next passage to become current');
     assert.notEqual(harness.player.getState().status, 'error', harness.player.getState().error || 'audio passage failed');
   }
-
   assert.equal(ttsCalls().map(call => call.text).join(''), text, 'chunk requests must preserve every source character in order');
   assert.ok(ttsCalls().length > 2, 'the fixture must exercise incremental generation beyond two passages');
 });
 
+// Scenario: autoplay blocking holds generation at the current passage until the listener resumes. The checks below exercise this behavior as one independent case.
 test('autoplay blocking holds generation at the current passage until the listener resumes', async t => {
   const text = 'A passage with enough words to exercise the next requested audio chunk. '.repeat(9);
   const harness = createHarness({
+    // Return this scenario’s chapter fixture instead of requesting a real chapter.
     chapterHandler: async call => responseJson({
       chapter: { chapterNumber: call.chapter, content: text },
       navigation: { next: null },
     }),
   });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => harness.dom.window.close());
 
   let firstPlay = true;
@@ -233,6 +256,7 @@ test('autoplay blocking holds generation at the current passage until the listen
   });
   harness.player.playBook('dracula');
   await waitFor(() => harness.audio.length === 1 && harness.player.getState().status === 'paused', 'the browser autoplay block');
+  // Select recorded speech requests to check how far generation has progressed.
   const ttsCalls = () => harness.requests.filter(request => request.kind === 'tts');
   assert.equal(ttsCalls().length, 1, 'the player must not spend a request on speculative audio after autoplay is blocked');
   assert.match(harness.player.getState().status, /paused/);
@@ -242,6 +266,7 @@ test('autoplay blocking holds generation at the current passage until the listen
   assert.equal(harness.player.getState().status, 'playing');
 });
 
+// Scenario: pause and stop abort an in-flight next-passage request. The checks below exercise this behavior as one independent case.
 test('pause and stop abort an in-flight next-passage request', async t => {
   for (const action of ['pause', 'stop']) {
     let harness;
@@ -258,12 +283,15 @@ test('pause and stop abort an in-flight next-passage request', async t => {
       });
     };
     harness = createHarness({
+      // Control the speech response or pending request for this scenario.
       ttsHandler: pendingNext,
+      // Return this scenario’s chapter fixture instead of requesting a real chapter.
       chapterHandler: async call => responseJson({
         chapter: { chapterNumber: call.chapter, content: `${'first '.repeat(100)}${'next '.repeat(220)}` },
         navigation: { next: null },
       }),
     });
+    // Restore or release the test resources even if an assertion fails.
     t.after(() => harness.dom.window.close());
     harness.player.playBook('dracula');
     await waitFor(() => harness.requests.filter(request => request.kind === 'tts').length === 2, `${action} to have an in-flight lookahead request`);
@@ -281,16 +309,20 @@ test('pause and stop abort an in-flight next-passage request', async t => {
   }
 });
 
+// Scenario: stop aborts the initial narration request before creating an audio URL. The checks below exercise this behavior as one independent case.
 test('stop aborts the initial narration request before creating an audio URL', async t => {
   const harness = createHarness({
+    // Control the speech response or pending request for this scenario.
     ttsHandler: call => new Promise((resolve, reject) => {
       call.signal.addEventListener('abort', () => reject(new harness.window.DOMException('Aborted', 'AbortError')), { once: true });
     }),
+    // Return this scenario’s chapter fixture instead of requesting a real chapter.
     chapterHandler: async call => responseJson({
       chapter: { chapterNumber: call.chapter, content: 'The current chapter begins here.' },
       navigation: { next: null },
     }),
   });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => harness.dom.window.close());
 
   harness.player.playBook('dracula');
@@ -303,6 +335,7 @@ test('stop aborts the initial narration request before creating an audio URL', a
   assert.equal(harness.createdUrls.length, 0, 'an aborted response must not become playable audio');
 });
 
+// Scenario: switching books cancels old chapter work and ignores its late response. The checks below exercise this behavior as one independent case.
 test('switching books cancels old chapter work and ignores its late response', async t => {
   const oldChapter = deferred();
   const harness = createHarness({
@@ -310,10 +343,12 @@ test('switching books cancels old chapter work and ignores its late response', a
       { id: 'book-a', slug: 'book-a', title: 'Book A', totalChapters: 1 },
       { id: 'book-b', slug: 'book-b', title: 'Book B', totalChapters: 1 },
     ],
+    // Return this scenario’s chapter fixture instead of requesting a real chapter.
     chapterHandler: call => call.bookId === 'book-a'
       ? oldChapter.promise
       : Promise.resolve(responseJson({ chapter: { chapterNumber: 1, content: 'Book B is the current book.' }, navigation: { next: null } })),
   });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => harness.dom.window.close());
 
   harness.player.playBook('book-a');
@@ -330,8 +365,10 @@ test('switching books cancels old chapter work and ignores its late response', a
   assert.deepEqual(harness.requests.filter(request => request.kind === 'tts').map(request => request.text), ['Book B is the current book.']);
 });
 
+// Scenario: prefetch crosses a chapter boundary only as the single next passage. The checks below exercise this behavior as one independent case.
 test('prefetch crosses a chapter boundary only as the single next passage', async t => {
   const harness = createHarness({
+    // Return this scenario’s chapter fixture instead of requesting a real chapter.
     chapterHandler: async call => responseJson({
       chapter: {
         chapterNumber: call.chapter,
@@ -340,6 +377,7 @@ test('prefetch crosses a chapter boundary only as the single next passage', asyn
       navigation: { next: call.chapter === 1 ? 2 : null },
     }),
   });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => harness.dom.window.close());
 
   harness.player.playBook('dracula');
@@ -354,16 +392,20 @@ test('prefetch crosses a chapter boundary only as the single next passage', asyn
   assert.equal(harness.player.getState().status, 'playing');
 });
 
+// Scenario: the selected book voice name is decoded and displayed as text. The checks below exercise this behavior as one independent case.
 test('the selected book voice name is decoded and displayed as text', async t => {
   const displayedName = 'Clara & Éowyn <Reader>';
   const harness = createHarness({
     playerDom: true,
+    // Provide the voice metadata that the player should use for this scenario.
     voiceHeaders: () => ({ id: 'library-voice-42', name: displayedName }),
+    // Return this scenario’s chapter fixture instead of requesting a real chapter.
     chapterHandler: async call => responseJson({
       chapter: { chapterNumber: call.chapter, content: 'One passage for the voice label.' },
       navigation: { next: null },
     }),
   });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => harness.dom.window.close());
 
   harness.player.playBook('dracula');
@@ -373,15 +415,19 @@ test('the selected book voice name is decoded and displayed as text', async t =>
   assert.equal(harness.window.document.querySelector('#player-voice script'), null, 'voice names must be rendered as text');
 });
 
+// Scenario: a changed or missing voice header stops the session before mixed-voice audio can play. The checks below exercise this behavior as one independent case.
 test('a changed or missing voice header stops the session before mixed-voice audio can play', async t => {
   for (const mismatch of ['changed', 'missing']) {
     const text = 'A first passage that is long enough to request the next passage. '.repeat(8);
     const harness = createHarness({
+      // Provide the voice metadata that the player should use for this scenario.
       voiceHeaders: call => call.index === 0
         ? { id: 'library-voice-stable', name: 'Stable Narrator' }
         : mismatch === 'changed' ? { id: 'library-voice-different', name: 'Different Narrator' } : null,
+      // Return this scenario’s chapter fixture instead of requesting a real chapter.
       chapterHandler: async call => responseJson({ chapter: { chapterNumber: call.chapter, content: text }, navigation: { next: null } }),
     });
+    // Restore or release the test resources even if an assertion fails.
     t.after(() => harness.dom.window.close());
 
     harness.player.playBook('dracula');
@@ -401,14 +447,18 @@ test('a changed or missing voice header stops the session before mixed-voice aud
   }
 });
 
+// Scenario: a present voice-header contract without an initial voice ID is rejected. The checks below exercise this behavior as one independent case.
 test('a present voice-header contract without an initial voice ID is rejected', async t => {
   const harness = createHarness({
+    // Provide the voice metadata that the player should use for this scenario.
     voiceHeaders: () => null,
+    // Return this scenario’s chapter fixture instead of requesting a real chapter.
     chapterHandler: async call => responseJson({
       chapter: { chapterNumber: call.chapter, content: 'Narration requires a confirmed library voice.' },
       navigation: { next: null },
     }),
   });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => harness.dom.window.close());
 
   harness.player.playBook('dracula');
@@ -420,8 +470,10 @@ test('a present voice-header contract without an initial voice ID is rejected', 
   assert.equal(harness.player.getState().voiceId, null);
 });
 
+// Scenario: HTML chapter text is extracted without executing or narrating embedded scripts. The checks below exercise this behavior as one independent case.
 test('HTML chapter text is extracted without executing or narrating embedded scripts', async t => {
   const harness = createHarness({
+    // Return this scenario’s chapter fixture instead of requesting a real chapter.
     chapterHandler: async call => responseJson({
       chapter: {
         chapterNumber: call.chapter,
@@ -430,6 +482,7 @@ test('HTML chapter text is extracted without executing or narrating embedded scr
       navigation: { next: null },
     }),
   });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => harness.dom.window.close());
 
   harness.player.playBook('dracula');
@@ -439,10 +492,13 @@ test('HTML chapter text is extracted without executing or narrating embedded scr
   assert.equal(harness.window.__audioTestXss, undefined);
 });
 
+// Scenario: a failed prefetched passage can be retried from its exact text cursor. The checks below exercise this behavior as one independent case.
 test('a failed prefetched passage can be retried from its exact text cursor', async t => {
   const text = `${'First passage words. '.repeat(18)}${'Second passage words. '.repeat(18)}`.trim();
   const harness = createHarness({
+    // Return this scenario’s chapter fixture instead of requesting a real chapter.
     chapterHandler: async call => responseJson({ chapter: { chapterNumber: call.chapter, content: text }, navigation: { next: null } }),
+    // Control the speech response or pending request for this scenario.
     ttsHandler: async call => call.index === 1
       ? responseJson({ error: 'Temporary narration failure for the next passage.' }, { ok: false, status: 502 })
       : {
@@ -451,10 +507,12 @@ test('a failed prefetched passage can be retried from its exact text cursor', as
         blob: async () => new harness.window.Blob([Uint8Array.from([1, 2, 3])], { type: 'audio/mpeg' }),
       },
   });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => harness.dom.window.close());
 
   harness.player.playBook('dracula');
   await waitFor(() => harness.requests.filter(request => request.kind === 'tts').length === 2 && !harness.player.getState().isPrefetching, 'a failed lookahead passage');
+  // Select recorded speech requests to check how far generation has progressed.
   const ttsCalls = () => harness.requests.filter(request => request.kind === 'tts');
   harness.audio[0].emit('ended');
   await waitFor(() => harness.player.getState().status === 'error', 'the failed passage to become a visible error');
@@ -466,13 +524,16 @@ test('a failed prefetched passage can be retried from its exact text cursor', as
   assert.equal(ttsCalls()[0].text + ttsCalls()[2].text, text, 'successful passages must cover the source exactly once');
 });
 
+// Scenario: stop revokes every current and prefetched object URL. The checks below exercise this behavior as one independent case.
 test('stop revokes every current and prefetched object URL', async t => {
   const harness = createHarness({
+    // Return this scenario’s chapter fixture instead of requesting a real chapter.
     chapterHandler: async call => responseJson({
       chapter: { chapterNumber: call.chapter, content: `${'Current passage. '.repeat(30)}${'Next passage. '.repeat(30)}` },
       navigation: { next: null },
     }),
   });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => harness.dom.window.close());
 
   harness.player.playBook('dracula');
@@ -482,10 +543,13 @@ test('stop revokes every current and prefetched object URL', async t => {
   assert.deepEqual([...harness.revokedUrls].sort(), [...harness.createdUrls].sort());
 });
 
+// Scenario: empty and failed chapter loads produce visible errors without sending text to TTS. The checks below exercise this behavior as one independent case.
 test('empty and failed chapter loads produce visible errors without sending text to TTS', async t => {
   const empty = createHarness({
+    // Return this scenario’s chapter fixture instead of requesting a real chapter.
     chapterHandler: async call => responseJson({ chapter: { chapterNumber: call.chapter, content: '   ' }, navigation: { next: null } }),
   });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => empty.dom.window.close());
   empty.player.playBook('dracula');
   await waitFor(() => empty.player.getState().status === 'error', 'an empty chapter error');
@@ -493,8 +557,10 @@ test('empty and failed chapter loads produce visible errors without sending text
   assert.equal(empty.requests.filter(request => request.kind === 'tts').length, 0);
 
   const failed = createHarness({
+    // Return this scenario’s chapter fixture instead of requesting a real chapter.
     chapterHandler: async () => responseJson({ error: 'Chapter text is unavailable right now.' }, { ok: false, status: 503 }),
   });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => failed.dom.window.close());
   failed.player.playBook('dracula');
   await waitFor(() => failed.player.getState().status === 'error', 'a failed chapter request error');
@@ -502,9 +568,11 @@ test('empty and failed chapter loads produce visible errors without sending text
   assert.equal(failed.requests.filter(request => request.kind === 'tts').length, 0);
 });
 
+// Scenario: metadata-only uploaded books fail clearly without fetching a catalog chapter. The checks below exercise this behavior as one independent case.
 test('metadata-only uploaded books fail clearly without fetching a catalog chapter', async t => {
   const upload = { id: 'upload-local-1', slug: 'upload-local-1', title: 'Local Upload', isUpload: true, chaptersList: [] };
   const harness = createHarness({ books: [upload] });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => harness.dom.window.close());
 
   harness.player.playBook('upload-local-1');
@@ -514,10 +582,13 @@ test('metadata-only uploaded books fail clearly without fetching a catalog chapt
   assert.equal(harness.requests.filter(request => request.kind === 'tts').length, 0);
 });
 
+// Scenario: a stale backend missing the narration route reports how to recover without retrying automatically. The checks below exercise this behavior as one independent case.
 test('a stale backend missing the narration route reports how to recover without retrying automatically', async t => {
   const harness = createHarness({
+    // Control the speech response or pending request for this scenario.
     ttsHandler: async () => responseJson({ error: 'Not found', path: '/api/tts' }, { ok: false, status: 404 }),
   });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => harness.dom.window.close());
   harness.player.playBook('dracula');
   await waitFor(() => harness.player.getState().status === 'error', 'a missing narration endpoint');
@@ -526,11 +597,14 @@ test('a stale backend missing the narration route reports how to recover without
   assert.equal(harness.createdUrls.length, 0);
 });
 
+// Scenario: a known book-not-found response preserves its server message instead of suggesting a backend restart. The checks below exercise this behavior as one independent case.
 test('a known book-not-found response preserves its server message instead of suggesting a backend restart', async t => {
   const serverMessage = 'This book is no longer available in the catalog.';
   const harness = createHarness({
+    // Control the speech response or pending request for this scenario.
     ttsHandler: async () => responseJson({ error: serverMessage, code: 'TTS_BOOK_NOT_FOUND' }, { ok: false, status: 404 }),
   });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => harness.dom.window.close());
 
   harness.player.playBook('dracula');
@@ -540,6 +614,7 @@ test('a known book-not-found response preserves its server message instead of su
   assert.equal(harness.createdUrls.length, 0);
 });
 
+// Scenario: substitute chapters and previews are rejected before narration. The checks below exercise this behavior as one independent case.
 test('substitute chapters and previews are rejected before narration', async t => {
   const cases = [
     {
@@ -561,6 +636,7 @@ test('substitute chapters and previews are rejected before narration', async t =
 
   for (const item of cases) {
     const harness = createHarness({ chapterHandler: async () => responseJson(item.payload) });
+    // Restore or release the test resources even if an assertion fails.
     t.after(() => harness.dom.window.close());
     harness.player.playBook('dracula');
     await waitFor(() => harness.player.getState().status === 'error', `${item.name} mismatch`);

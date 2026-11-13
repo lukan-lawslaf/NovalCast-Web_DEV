@@ -17,6 +17,7 @@ const path = require('path');
 
   // 1. Visit Login Page in unauthenticated state
   console.log('Navigating to http://localhost:3000/#/login...');
+  // Open the page before checking the interface in its rendered state.
   await page.goto('http://localhost:3000/#/home', { waitUntil: 'networkidle' });
   await page.evaluate(() => {
     localStorage.removeItem('novelcast.auth.user.v1');
@@ -54,15 +55,20 @@ const path = require('path');
 
   // 5. Test Sign Up flow with Email Confirmation requirement
   console.log('Switching to "Request Access" tab to test email confirmation flow...');
+  // Perform the click action as a user would, then observe the resulting behavior.
   await page.click('#tab-signup');
   await page.waitForTimeout(400);
 
   const testEmail = `patron_${Date.now()}@gmail.com`;
+  // Perform the fill action as a user would, then observe the resulting behavior.
   await page.fill('#sanctuary-name', 'Lord Alistair');
+  // Perform the fill action as a user would, then observe the resulting behavior.
   await page.fill('#sanctuary-id', testEmail);
+  // Perform the fill action as a user would, then observe the resulting behavior.
   await page.fill('#master-cipher', 'SanctuaryCipher99!');
 
   console.log('Submitting signup with test email:', testEmail);
+  // Perform the click action as a user would, then observe the resulting behavior.
   await page.click('#btn-submit');
 
   // Wait for Supabase dispatch and UI state change
@@ -94,6 +100,7 @@ const path = require('path');
 
   // 6. Test "Proceed to Sign In" button returns to Sign In form
   console.log('Testing "Proceed to Sign In" action...');
+  // Perform the click action as a user would, then observe the resulting behavior.
   await page.click('#btn-back-to-signin');
   await page.waitForTimeout(400);
 
@@ -107,8 +114,11 @@ const path = require('path');
 
   // 7. Test unconfirmed email sign-in attempt
   console.log('Attempting to sign in with unconfirmed email...');
+  // Perform the fill action as a user would, then observe the resulting behavior.
   await page.fill('#sanctuary-id', testEmail);
+  // Perform the fill action as a user would, then observe the resulting behavior.
   await page.fill('#master-cipher', 'SanctuaryCipher99!');
+  // Perform the click action as a user would, then observe the resulting behavior.
   await page.click('#btn-submit');
   await page.waitForTimeout(2000);
 
@@ -121,6 +131,7 @@ const path = require('path');
     console.error('FAIL: Unconfirmed email was allowed to sign in.');
   }
 
+  // Release this browser or server resource so later checks start cleanly.
   await browser.close();
   console.log('All verification checks for email confirmation & clean auth card completed successfully!');
 })();

@@ -2,9 +2,11 @@
 <!-- SPA shell: shared navigation and player remain mounted while router.js replaces #app-view. -->
 <html lang="en">
 <head>
+  <!-- UTF-8 keeps punctuation/book titles readable; viewport makes responsive sizes use the device width. -->
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>NovelCast — Curated Audiobooks & Readers</title>
+  <!-- Load the optional ink renderer first, then apply the saved theme before the first page paint. -->
   <script src="js/themeInk.js?v=20261111-clip"></script>
   <script src="js/theme.js?v=20261111-clip"></script>
   
@@ -17,11 +19,14 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
   <!-- Complete Design System Tailwind Configuration (Stitch + Figma + Landing) -->
+  <!-- These names extend the CDN Tailwind configuration; HTML class names reference these design values. -->
   <script data-purpose="tailwind-config">
     tailwind.config = {
+      // A root CSS class controls dark-mode utilities instead of relying on the operating-system theme.
       darkMode: "class",
       theme: {
         extend: {
+          // Named surface, text, and accent colors keep cards and controls visually consistent.
           colors: {
             appDark: '#0E1217',
             appSidebar: '#0C1016',
@@ -33,6 +38,7 @@
             goldMuted: '#BFA15F',
             textGray: '#8E97A6',
             lightMuted: '#A2ABB9',
+            // Shade families provide related dark, gold, and ivory variants for utility classes.
             obsidian: {
               950: '#06080b',
               900: '#0b0e13',
@@ -106,12 +112,14 @@
             "on-primary": "#3c2f00",
             "secondary-container": "#414657"
           },
+          // Shared corner sizes let components choose consistent rounded shapes.
           borderRadius: {
             DEFAULT: "1rem",
             lg: "2rem",
             xl: "3rem",
             full: "9999px"
           },
+          // Reusable spacing tokens cover gaps, padding, and shared shell dimensions.
           spacing: {
             "space-3xl": "4rem",
             "space-sm": "0.75rem",
@@ -125,6 +133,7 @@
             "space-xs": "0.5rem",
             "space-md": "1rem"
           },
+          // Typography roles select editorial headings, readable body text, and numeric labels.
           fontFamily: {
             sans: ['"Plus Jakarta Sans"', 'sans-serif'],
             serif: ['"Playfair Display"', '"Bodoni Moda"', 'Didot', 'serif'],
@@ -143,6 +152,7 @@
             "headline-xl": ["Plus Jakarta Sans"],
             "body-md": ["Plus Jakarta Sans"]
           },
+          // Each role pairs a text size with line height, weight, and optional letter spacing.
           fontSize: {
             "body-sm": ["12px", { lineHeight: "18px", fontWeight: "400" }],
             "label-badge": ["11px", { lineHeight: "14px", letterSpacing: "0.02em", fontWeight: "700" }],
@@ -180,6 +190,7 @@
       color: inherit;
     }
     
+    /* The fixed gradient remains behind the SPA while its view content changes. */
     body {
       background: linear-gradient(135deg, #222B3A 0%, #151A24 50%, #0B0E14 100%);
       background-attachment: fixed;
@@ -199,6 +210,7 @@
     .book-shadow {
       box-shadow: -4px 6px 16px rgba(0, 0, 0, 0.6), 0 10px 24px -5px rgba(0, 0, 0, 0.8);
     }
+    /* Position the spine decoration relative to the cover; its pseudo-element adds the edge highlight. */
     .book-spine {
       position: relative;
     }
@@ -226,6 +238,7 @@
       background: #181E29 !important;
       box-shadow: 0 0 18px rgba(241, 214, 158, 0.22);
     }
+    /* Hide native scrollbar chrome while preserving ordinary scroll behavior. */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
@@ -236,6 +249,7 @@
 </head>
 <body class="min-h-screen bg-gradient-to-br from-[#181E29] via-[#131722] to-[#0E1217] bg-fixed text-slate-200 antialiased selection:bg-goldAccent/30 selection:text-white">
   
+  <!-- The outer flex layout reserves a narrow sidebar beside the flexible application content. -->
   <div class="flex w-full relative min-h-screen">
     
     <!-- Unified Sidebar Navigation -->
@@ -246,6 +260,7 @@
       </a>
 
       <!-- Main Navigation Icons -->
+      <!-- Hash links change the logical screen; data-nav-route lets the router highlight the active link. -->
       <nav id="main-nav" class="nc-main-nav" aria-label="Main navigation">
         <a class="nc-nav-link" href="#/home" data-nav-route="home" aria-label="Home" title="Home"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg></a>
         <a class="nc-nav-link" href="#/search" data-nav-route="search" aria-label="Search" title="Search"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></a>
@@ -257,6 +272,7 @@
     <div id="app-content-wrapper" class="flex-1 flex flex-col px-4 sm:px-6 md:px-10 py-5 min-w-0 overflow-x-hidden transition-all">
       
       <!-- Shared Header -->
+      <!-- Shared branding and account/theme controls stay outside the replaced route content. -->
       <header id="app-header" class="w-full flex items-center justify-between pb-6 pt-1 border-b border-[#1A2230]/50 mb-6 transition-all">
         <a href="#/home" class="flex items-center gap-3 group focus:outline-none cursor-pointer">
           <img src="logo.svg" alt="NovelCast Logo" class="h-8 w-auto object-contain" />
@@ -267,12 +283,14 @@
 
         <!-- Header Actions -->
         <div class="nc-header-actions">
+          <!-- Notifications currently show a toast; this control does not fetch a notification inbox. -->
           <button type="button" aria-label="Notifications" class="nc-header-notifications" onclick="window.NovelCast.toast('No new notifications')">
             <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
               <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
               <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
             </svg>
           </button>
+          <!-- The delegated theme listener finds data-theme-toggle and updates aria-pressed and the palette. -->
           <button class="nc-theme-toggle" type="button" data-theme-toggle aria-label="Light mode" aria-pressed="false">
             <svg class="nc-theme-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
               <circle cx="12" cy="12" r="4"/>
@@ -282,6 +300,7 @@
               <path d="M20.7 14.2A9 9 0 0 1 9.8 3.3a9 9 0 1 0 10.9 10.9Z"/>
             </svg>
           </button>
+          <!-- profile.js chooses the guest icon, user initials, or a safe provider image after auth changes. -->
           <a id="header-user-btn" class="nc-profile-button" href="#/login" aria-label="Sign in" title="Sign in">
             <span data-profile-guest><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2"/></svg></span>
             <span data-profile-initials hidden aria-hidden="true"></span>
@@ -290,6 +309,7 @@
       </header>
 
       <!-- Dynamic View Container (SPA Mount Target) -->
+      <!-- The router inserts view.render() here, then calls view.init() to attach interactions. -->
       <main id="app-view" class="flex-1 w-full relative min-h-0">
         <!-- Content dynamically injected by router -->
       </main>
@@ -299,6 +319,7 @@
 
 
   <!-- Persistent Global Audio Player Bar -->
+  <!-- This player survives route changes; audioPlayer.js updates its text and hidden/playing states. -->
   <section id="global-audio-player" class="nc-audio-player" aria-label="Book narration player" hidden>
     <div class="nc-audio-copy">
       <h4 id="player-title">Book narration</h4>
@@ -306,8 +327,10 @@
         <p id="player-chapter"></p>
         <p id="player-voice"></p>
       </div>
+      <!-- The live region announces playback/loading/error changes to assistive technology. -->
       <p id="player-status" role="status" aria-live="polite"></p>
     </div>
+    <!-- Playback/retry/close buttons are wired by the shared audio service, not by individual views. -->
     <div class="nc-audio-actions">
       <button id="player-play-btn" type="button" aria-label="Pause listening">Pause</button>
       <button id="player-retry-btn" type="button" hidden>Retry</button>
@@ -319,9 +342,11 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- Environment Configuration (Generated from .env) -->
+  <!-- Only public runtime values belong in this generated file; private backend credentials stay server-side. -->
   <script src="js/env.js"></script>
 
   <!-- Services load before views; the router needs both before it can mount a screen. -->
+  <!-- Catalog helpers load before auth and library services that reuse their data operations. -->
   <script src="js/data.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/librarySync.js"></script>
@@ -329,6 +354,7 @@
   <script src="js/ratings.js"></script>
   <script src="js/components/pixelCard.js"></script>
   <script src="js/ui.js"></script>
+  <!-- Reusable HTML builders must exist before the view controllers call their template helpers. -->
   <script src="js/pages.js"></script>
   
   <!-- View Controllers -->
@@ -341,15 +367,20 @@
   <script src="js/views/loginView.js"></script>
 
   <!-- App Core & SPA Router -->
+  <!-- Shared behavior and routing are installed after the view objects have registered themselves. -->
   <script src="js/audioPlayer.js"></script>
   <script src="js/app.js"></script>
   <script src="js/router.js"></script>
 
   <!-- Restore the session before choosing an account cache and rendering protected routes. -->
   <script>
+    // Run after the HTML elements exist, so profile and navigation listeners can find their targets.
     document.addEventListener('DOMContentLoaded', async () => {
+      // Subscribe the shared account button to authentication changes.
       window.NovelCastProfile.init();
+      // Finish the initial session check before a library guard decides whether the visitor is signed in.
       await window.NovelCastAuth?.init();
+      // Select the active account cache and schedule a background load of its private JSON document.
       window.NovelCastLibrary.init();
 
       // Initialize SPA Router

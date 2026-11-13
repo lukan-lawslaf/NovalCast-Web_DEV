@@ -18,6 +18,7 @@ async function open(t, app) {
     const listener = app.listen(0, '127.0.0.1', () => resolve(listener));
     listener.once('error', reject);
   });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => new Promise((resolve) => {
     server.close(resolve);
     server.closeAllConnections?.();
@@ -25,6 +26,7 @@ async function open(t, app) {
   return (path, options) => localFetch(`http://127.0.0.1:${server.address().port}${path}`, options);
 }
 
+// Scenario: catalog outages never substitute unrelated books, chapters, or synthetic text. The checks below exercise this behavior as one independent case.
 test('catalog outages never substitute unrelated books, chapters, or synthetic text', async (t) => {
   const sources = [];
   const first = 'The harbor passage introduces a solitary narrator and remains unique.';
@@ -34,6 +36,7 @@ test('catalog outages never substitute unrelated books, chapters, or synthetic t
     sources.push(String(url));
     return String(url).includes('/345/') ? new Response(raw) : new Response('', { status: 503 });
   };
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => { global.fetch = localFetch; });
   const get = await open(t, backend);
 
@@ -78,6 +81,7 @@ test('catalog outages never substitute unrelated books, chapters, or synthetic t
   assert.equal(sources.length, 3, 'recent failures are not retried on every chapter request');
 });
 
+// Scenario: catalog responses correct legacy Alice artwork without changing healthy covers or stored data. The checks below exercise this behavior as one independent case.
 test('catalog responses correct legacy Alice artwork without changing healthy covers or stored data', async (t) => {
   const alice = Object.freeze({
     _id: 'alice-test', slug: 'alices-adventures-in-wonderland', gutendexId: 11,
@@ -89,6 +93,7 @@ test('catalog responses correct legacy Alice artwork without changing healthy co
     title: 'Wuthering Heights', author: 'Emily Brontë', coverUrl: 'https://covers.openlibrary.org/b/id/12818862-L.jpg',
   });
   const originals = { find: Book.find, count: Book.countDocuments, book: Book.findOne, chapters: Chapter.find, state: mongoose.connection.readyState };
+  // In-memory query helpers reproduce the database chain without contacting Atlas.
   const match = filter => filter.$or ? filter.$or.some(item => item.gutendexId === 11) ? [alice] : [] : [alice, wuthering];
   const query = result => ({
     sort() { return this; }, skip() { return this; }, limit() { return this; }, select() { return this; },
@@ -99,6 +104,7 @@ test('catalog responses correct legacy Alice artwork without changing healthy co
   Book.findOne = filter => query([alice, wuthering].find(book => book.slug === filter.slug));
   Chapter.find = () => query([{ chapterNumber: 1, title: 'Chapter I', wordCount: 100, order: 1 }]);
   mongoose.connection.readyState = 1;
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => {
     Book.find = originals.find;
     Book.countDocuments = originals.count;
@@ -123,6 +129,7 @@ test('catalog responses correct legacy Alice artwork without changing healthy co
   assert.match(alice.coverUrl, /1004242-L\.jpg$/);
 });
 
+// Scenario: both ingestion writes require the configured operator token before reading the body. The checks below exercise this behavior as one independent case.
 test('both ingestion writes require the configured operator token before reading the body', async (t) => {
   const adminToken = 'isolated-test-token-for-ingest-operator';
   const calls = [];

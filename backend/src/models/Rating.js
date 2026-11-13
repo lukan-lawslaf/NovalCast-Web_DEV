@@ -8,6 +8,7 @@ const schema = new mongoose.Schema({
   userId: { type: String, required: true },
   score: { type: Number, required: true, min: 1, max: 5, validate: Number.isInteger },
 }, { timestamps: true, versionKey: false });
-// Each account owns exactly one editable rating per book.
+// This compound unique index enforces one editable rating per account and book,
+// including when two requests attempt to create the first rating concurrently.
 schema.index({ bookSlug: 1, userId: 1 }, { unique: true });
 module.exports = mongoose.models.Rating || mongoose.model('Rating', schema);

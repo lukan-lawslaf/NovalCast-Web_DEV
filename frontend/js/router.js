@@ -41,6 +41,7 @@
     const { path, params } = parseHash();
 
     // Guard: Library route requires authentication
+    // Private navigation checks the current authentication state before rendering the library.
     if (path === 'library') {
       const isAuth = window.NovelCastAuth && window.NovelCastAuth.isAuthenticated();
       if (!isAuth) {
@@ -60,6 +61,7 @@
     if (!container) return;
 
     // Focused mode for landing and login pages: hide app sidebar and header, remove shell padding
+    // Landing and login use the full viewport; other routes restore the shared app shell.
     const isFocused = path === 'landing' || path === 'login';
     const sidebar = document.getElementById('app-sidebar');
     const header = document.getElementById('app-header');
@@ -84,6 +86,7 @@
     activeView = view;
     document.body.dataset.route = path;
     // Render view HTML
+    // The route first creates markup, then initializes behavior and binds shared controls to the new nodes.
     container.innerHTML = view.render();
     window.NovelCastTheme?.syncToggles();
 
@@ -106,6 +109,7 @@
 
   // Handle hash navigation and optionally animate the selected book cover into its details view.
   function handleRouteChange() {
+    // Finish any previous cover animation before starting another navigation.
     if (bookTransition) {
       bookTransition.transition.skipTransition();
       bookTransition.cleanup();
@@ -135,6 +139,7 @@
     root.setAttribute('data-book-opening', '');
     cover.setAttribute('data-book-opening-source', '');
 
+    // Remove the temporary cover and viewport styling after the opening animation.
     const cleanup = () => {
       cover.removeAttribute('data-book-opening-source');
       root.removeAttribute('data-book-opening');
@@ -151,6 +156,7 @@
       return;
     }
     bookTransition = { transition, cleanup };
+    // Ignore completion from an older transition; only the active one owns this cleanup.
     const finished = () => {
       if (bookTransition?.transition !== transition) return;
       bookTransition = null;
@@ -161,6 +167,7 @@
   }
 
   // Intercept legacy relative links (e.g. href="book-details.html?book=ikigai")
+  // Use delegated clicks to handle eligible internal navigation from dynamically rendered links.
   function interceptLinks() {
     document.addEventListener('click', (e) => {
       const link = e.target.closest('a');
@@ -190,14 +197,17 @@
   }
 
   window.NovelCastRouter = {
+    // Remember the cover for the next route transition and navigate to its destination.
     openBook: function (hash, cover) {
       pendingBookOpening = { hash, cover };
       location.hash = hash;
     },
+    // Encode route parameters into the hash, triggering the normal navigation handler.
     navigate: function (path, params = {}) {
       const q = new URLSearchParams(params).toString();
       location.hash = `#/${path}${q ? '?' + q : ''}`;
     },
+    // Install navigation and account listeners, then render the initial route.
     init: function () {
       window.addEventListener('hashchange', handleRouteChange);
       let accountId = window.NovelCastAuth?.getUser()?.id || null;

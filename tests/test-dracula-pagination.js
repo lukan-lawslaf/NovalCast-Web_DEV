@@ -1,6 +1,7 @@
 // Check Dracula chapter pagination in a browser; requires the local app servers.
 const { chromium } = require('playwright');
 
+// Run the browser checks for Dracula pagination, including navigation through its pages.
 async function testDraculaPagination() {
   console.log('--- Testing In-Chapter Book Pagination on Dracula Chapter 1 ---');
   const browser = await chromium.launch({ headless: true });
@@ -16,6 +17,7 @@ async function testDraculaPagination() {
   try {
     // 1. Navigate to Dracula Chapter 1
     console.log('\n[1/5] Navigating to http://localhost:3000/#/reader?book=dracula&chapter=1 ...');
+    // Open the page before checking the interface in its rendered state.
     await page.goto('http://localhost:3000/#/reader?book=dracula&chapter=1', { waitUntil: 'networkidle' });
     await page.waitForTimeout(800);
 
@@ -47,6 +49,7 @@ async function testDraculaPagination() {
       throw new Error(`Expected button label "Next Page", got "${nextLabel}"`);
     }
 
+    // Perform the click action as a user would, then observe the resulting behavior.
     await nextBtn.click();
     await page.waitForTimeout(400);
 
@@ -63,6 +66,7 @@ async function testDraculaPagination() {
     // 3. Test Turning to Previous Spread (Pages 1 & 2)
     console.log('\n[3/5] Testing Previous Page button...');
     const prevBtn = page.locator('#reader-prev-btn');
+    // Perform the click action as a user would, then observe the resulting behavior.
     await prevBtn.click();
     await page.waitForTimeout(400);
 
@@ -74,6 +78,7 @@ async function testDraculaPagination() {
 
     // 4. Test Keyboard Arrow Navigation
     console.log('\n[4/5] Testing Keyboard ArrowRight navigation...');
+    // Perform the press action as a user would, then observe the resulting behavior.
     await page.keyboard.press('ArrowRight');
     await page.waitForTimeout(400);
     const indicatorAfterKey = await page.textContent('#reader-nav-indicator');
@@ -84,6 +89,7 @@ async function testDraculaPagination() {
 
     // 5. Test Chapter Skip Button
     console.log('\n[5/5] Testing Quick Chapter Skip (Jump to Chapter 2)...');
+    // Perform the click action as a user would, then observe the resulting behavior.
     await page.click('#reader-jump-next-ch');
     await page.waitForTimeout(800);
 
@@ -105,6 +111,7 @@ async function testDraculaPagination() {
     }
     process.exit(1);
   } finally {
+    // Release this browser or server resource so later checks start cleanly.
     await browser.close();
   }
 }

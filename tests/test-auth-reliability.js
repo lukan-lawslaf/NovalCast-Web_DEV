@@ -3,30 +3,37 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const { JSDOM } = require('jsdom');
+// Allow queued authentication work to run before inspecting its result.
 const settle = () => new Promise(resolve => setImmediate(resolve));
 
 // Build a fresh browser-like page and replace Supabase calls with test responses.
 function fixture(t, handlers = {}, storedUser) {
   const dom = new JSDOM('<main id="app-view"></main>', { url: 'http://127.0.0.1:3000/#/login', runScripts: 'outside-only' });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => dom.window.close());
   const w = dom.window;
   let clientOptions;
   w.__ENV__ = { SUPABASE_URL: 'https://auth.example.test', SUPABASE_ANON_KEY: 'test-public-key' };
   if (storedUser) w.localStorage.setItem('novelcast.auth.user.v1', JSON.stringify(storedUser));
+  // Capture client options and supply a fake auth API; individual scenarios override its methods.
   w.supabase = { createClient(url, key, options) {
     clientOptions = options;
     return { auth: {
+      // Start with no session; handler overrides simulate sign-in, signup, and network failures.
       getSession: async () => ({ data: { session: null }, error: null }),
       onAuthStateChange: () => {}, ...handlers,
     } };
   } };
+  // Stub unrelated UI and fail if an authentication error incorrectly navigates away.
   w.NovelCast = { toast: () => {}, escapeHtml: value => String(value).replace(/</g, '&lt;') };
   w.NovelCastRouter = { navigate: () => { throw new Error('Unexpected navigation after failed authentication'); } };
   w.eval(fs.readFileSync('frontend/js/auth.js', 'utf8'));
   return { w, auth: w.NovelCastAuth, options: () => clientOptions };
 }
 
+// Scenario: signup, signin and resend normalize network failures without authenticating. The checks below exercise this behavior as one independent case.
 test('signup, signin and resend normalize network failures without authenticating', async t => {
+  // Reuse the same provider failure across all three operations to compare their error handling.
   const network = async () => ({ data: null, error: { status: 0, message: 'NetworkError when attempting to fetch resource.' } });
   const { auth } = fixture(t, { signUp: network, signInWithPassword: network, resend: network });
   for (const operation of [() => auth.signUp('reader@example.test', 'test-password'), () => auth.signIn('reader@example.test', 'test-password'), () => auth.resendConfirmation('reader@example.test')]) {
@@ -35,6 +42,7 @@ test('signup, signin and resend normalize network failures without authenticatin
   }
 });
 
+// Scenario: credential and confirmation errors remain distinguishable; expired cache is cleared. The checks below exercise this behavior as one independent case.
 test('credential and confirmation errors remain distinguishable; expired cache is cleared', async t => {
   const { auth, w } = fixture(t, {
     signInWithPassword: async () => ({ error: { message: 'Invalid login credentials', status: 400 } }),
@@ -49,12 +57,14 @@ test('credential and confirmation errors remain distinguishable; expired cache i
   assert.equal(auth.getUser(), null);
 });
 
+// Scenario: request timeout aborts the actual fetch. The checks below exercise this behavior as one independent case.
 test('request timeout aborts the actual fetch', async t => {
   const { w, auth, options } = fixture(t);
   await auth.init();
   const originalTimeout = w.setTimeout.bind(w);
   w.setTimeout = fn => originalTimeout(fn, 5);
   let signal;
+  // Keep fetch pending until its abort signal fires, proving timeout reaches the actual request.
   w.fetch = (url, request) => new Promise((resolve, reject) => {
     signal = request.signal;
     signal.addEventListener('abort', () => reject(new w.DOMException('Aborted', 'AbortError')), { once: true });
@@ -63,6 +73,7 @@ test('request timeout aborts the actual fetch', async t => {
   assert.equal(signal.aborted, true);
 });
 
+// Scenario: unconfirmed accounts get the resend path and missing sessions cannot report success. The checks below exercise this behavior as one independent case.
 test('unconfirmed accounts get the resend path and missing sessions cannot report success', async t => {
   const pending = fixture(t, { signInWithPassword: async () => ({ error: { status: 400, message: 'Email not confirmed' } }) });
   await assert.rejects(() => pending.auth.signIn('reader@example.test', 'test-password'), error => error.code === 'email_not_confirmed');
@@ -71,6 +82,7 @@ test('unconfirmed accounts get the resend path and missing sessions cannot repor
   assert.equal(missing.auth.isAuthenticated(), false);
 });
 
+// Scenario: session restoration subscribes once and a newer sign-out wins over an old session response. The checks below exercise this behavior as one independent case.
 test('session restoration subscribes once and a newer sign-out wins over an old session response', async t => {
   let callback, restore, subscriptions = 0, reads = 0;
   const user = { id: 'reader', email_confirmed_at: '2026-01-01' };
@@ -92,6 +104,7 @@ test('session restoration subscribes once and a newer sign-out wins over an old 
   assert.equal(auth.getUser(), null);
 });
 
+// Scenario: sign-out clears private UI state before a slow remote sign-out completes. The checks below exercise this behavior as one independent case.
 test('sign-out clears private UI state before a slow remote sign-out completes', async t => {
   let finish;
   const user = { id: 'reader', email_confirmed_at: '2026-01-01' };
@@ -105,6 +118,7 @@ test('sign-out clears private UI state before a slow remote sign-out completes',
   await pending;
 });
 
+// Scenario: signup prevents duplicates, restores controls, and renders error text safely. The checks below exercise this behavior as one independent case.
 test('signup prevents duplicates, restores controls, and renders error text safely', async t => {
   let finish, calls = 0;
   const { w } = fixture(t, { signUp: () => { calls++; return new Promise(resolve => { finish = resolve; }); } });

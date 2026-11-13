@@ -5,6 +5,7 @@ const { chromium } = require('playwright');
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 1440, height: 950 } });
   
+  // Open the page before checking the interface in its rendered state.
   await page.goto('http://localhost:3000/', { waitUntil: 'networkidle' });
   
   const featuredBook = page.locator('.book-featured');
@@ -19,5 +20,6 @@ const { chromium } = require('playwright');
   const featuredTransform = await featuredBook.evaluate(el => el.style.transform);
   console.log('Middle book transform during mouse movement:', featuredTransform);
 
+  // Release this browser or server resource so later checks start cleanly.
   await browser.close();
 })();

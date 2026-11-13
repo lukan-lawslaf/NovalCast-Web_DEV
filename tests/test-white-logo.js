@@ -69,8 +69,10 @@ const { chromium } = require('playwright');
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 800, height: 600 } });
   const path = require('path');
+  // Open the page before checking the interface in its rendered state.
   await page.goto('file:///' + path.resolve('Referance/compare-white-logos.html').replace(/\\\\/g, '/'));
   await page.screenshot({ path: 'Referance/compare-white-logos.png' });
+  // Release this browser or server resource so later checks start cleanly.
   await browser.close();
   console.log('Rendered Referance/compare-white-logos.png');
 })();

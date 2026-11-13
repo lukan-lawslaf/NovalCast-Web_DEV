@@ -6,6 +6,7 @@ const express = require('express');
 const env = require('../config/env');
 const { createLibraryJsonStore } = require('../services/libraryJsonStore');
 
+// Attach an HTTP status so the route can return expected authentication errors.
 function httpError(message, status) { return Object.assign(new Error(message), { status }); }
 
 // Ask Supabase who owns the token; never trust an account ID supplied in the form data.
@@ -13,6 +14,7 @@ async function verifiedUser(req) {
   const match = /^Bearer (\S+)$/i.exec(req.headers.authorization || '');
   if (!match) throw httpError('Please sign in to sync your library.', 401);
   if (!env.SUPABASE_URL || !env.SUPABASE_ANON_KEY) throw httpError('Account verification is unavailable.', 503);
+  // Send the bearer token to Supabase with a timeout; the response supplies the account identity.
   let response;
   try {
     response = await fetch(`${env.SUPABASE_URL.replace(/\/$/, '')}/auth/v1/user`, {
@@ -22,8 +24,10 @@ async function verifiedUser(req) {
   } catch {
     throw httpError('Could not verify your account. Please try again.', 503);
   }
+  // Distinguish a temporarily unavailable verifier from an invalid or expired session.
   if (response.status >= 500 || response.status === 429) throw httpError('Account verification is temporarily unavailable.', 503);
   if (!response.ok) throw httpError('Your session expired. Please sign in again.', 401);
+  // Parse and validate the verified account before using its ID as a storage key.
   let user;
   try { user = await response.json(); }
   catch { throw httpError('Account verification is temporarily unavailable.', 503); }
@@ -40,6 +44,7 @@ function createLibraryRouter({ store = createLibraryJsonStore(), verifyUser = ve
     try {
       const user = await verifyUser(req);
       res.json(await operation(req, user));
+    // Return expected client or availability errors; forward unexpected failures to Express.
     } catch (error) {
       if ([400, 401, 409, 503].includes(error.status)) {
         return res.status(error.status).json({ error: error.message, ...(error.status === 409 ? { document: error.document } : {}) });

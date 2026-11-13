@@ -31,6 +31,7 @@ app.use(
 );
 app.use((req, res, next) => {
   const startedAt = Date.now();
+  // Record the final status and elapsed time after Express finishes the response.
   res.on('finish', () => {
     console.log(`[http] ${req.method} ${req.path} ${res.statusCode} ${Date.now() - startedAt}ms`);
   });
@@ -60,6 +61,7 @@ app.use('/api', require('./src/routes/ratingRoutes'));
 app.use('/api', require('./src/routes/libraryRoutes'));
 app.use('/api', ttsRoutes);
 
+// Requests not matched by a feature router receive a consistent JSON 404.
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found', path: req.originalUrl });
 });
@@ -81,12 +83,14 @@ async function start() {
     console.log(`[startup] Database: ${env.MONGODB_DB_NAME}`);
   });
 
+  // Connection failure leaves the HTTP server running with its catalog fallback.
   if (env.MONGODB_URI) {
     connectDB(env.MONGODB_URI).catch((error) => {
       console.warn(`[startup] MongoDB Atlas connection delayed/unreachable: ${error.message}. Running in resilient public-domain catalog mode.`);
     });
   }
 
+  // Stop accepting requests, close Atlas, and exit when the process is asked to stop.
   const shutdown = async (signal) => {
     console.log(`[shutdown] ${signal} received, closing server.`);
     server.close(async () => {

@@ -8,6 +8,7 @@ const Rating = require('../backend/src/models/Rating');
 const env = require('../backend/src/config/env');
 const errorHandler = require('../backend/src/middleware/errorHandler');
 
+// Scenario: ratings enforce verified identity, validate scores, and update one vote per account. The checks below exercise this behavior as one independent case.
 test('ratings enforce verified identity, validate scores, and update one vote per account', async t => {
   const records = new Map();
   const originals = { book: Book.findOne, own: Rating.findOne, aggregate: Rating.aggregate, upsert: Rating.findOneAndUpdate, init: Rating.init, state: mongoose.connection.readyState, authUrl: env.SUPABASE_URL, authKey: env.SUPABASE_ANON_KEY };
@@ -47,6 +48,7 @@ test('ratings enforce verified identity, validate scores, and update one vote pe
   app.use('/api', require('../backend/src/routes/ratingRoutes'));
   app.use(errorHandler);
   const server = await new Promise(resolve => { const instance = app.listen(0, '127.0.0.1', () => resolve(instance)); });
+  // Restore or release the test resources even if an assertion fails.
   t.after(async () => {
     Book.findOne = originals.book; Rating.findOne = originals.own; Rating.aggregate = originals.aggregate;
     Rating.findOneAndUpdate = originals.upsert; Rating.init = originals.init; mongoose.connection.readyState = originals.state;

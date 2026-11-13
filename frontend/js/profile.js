@@ -1,6 +1,7 @@
 // Update the header account link, profile photo and fallback initials when sign-in state changes.
 (function () {
   // Accept a provider photo only when it is a valid HTTPS URL without embedded credentials.
+  // Choose an appropriate profile photo from the signed-in user’s metadata.
   function photoUrl(user) {
     const sources = [user.user_metadata, ...(Array.isArray(user.identities)
       ? user.identities.map(identity => identity?.identity_data) : [])];
@@ -19,6 +20,7 @@
   }
 
   // Choose letters from the account name or email prefix when no photo is available.
+  // Derive a readable fallback when the account has no usable profile photo.
   function initials(user) {
     const metadata = user.user_metadata || {};
     const emailName = typeof user.email === 'string' ? user.email.split('@')[0] : '';
@@ -35,6 +37,7 @@
     if (!button || !auth) return;
     const guest = button.querySelector('[data-profile-guest]');
     const fallback = button.querySelector('[data-profile-initials]');
+    // Refresh the profile display whenever the authentication identity changes.
     auth.onAuthStateChange(user => {
       const signedIn = Boolean(user && auth.isAuthenticated());
       button.querySelector('img')?.remove();
@@ -58,6 +61,7 @@
         fallback.hidden = true;
         photo.hidden = false;
       }, { once: true });
+      // Remove failed images so the initials fallback remains visible.
       photo.addEventListener('error', () => photo.remove(), { once: true });
       button.append(photo);
       photo.src = url;

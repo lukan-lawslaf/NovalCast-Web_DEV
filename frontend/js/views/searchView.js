@@ -201,6 +201,7 @@ window.NovelCastViews.search = {
     let searchVersion = 0;
     let disposed = false;
     // This closure remembers this screen's resources so leaving the route can release them.
+    // Invalidate pending search responses and cancel the typing timer when leaving the view.
     this.destroy = () => { disposed = true; searchVersion++; clearTimeout(searchDebounceTimer); };
     const NC = window.NovelCast;
     const NCPage = window.NCPage;
@@ -233,6 +234,7 @@ window.NovelCastViews.search = {
     async function performSearch(q, filterType = currentFilter) {
       if (disposed) return;
       clearTimeout(searchDebounceTimer);
+      // Each search gets a newer version; late responses from older searches cannot replace its results.
       const version = ++searchVersion;
       const term = (q || '').trim();
       selectFilter(filterType);
@@ -271,6 +273,7 @@ window.NovelCastViews.search = {
         const backendResults = await NC.searchCatalog(term, filterType === 'all' ? '' : filterType);
         if (!disposed && version === searchVersion && backendResults) {
           // Curated genres can be broader than the provider's raw subject labels.
+          // Combine local and server matches by book ID to prevent duplicate cards.
           const results = new Map([...matched, ...backendResults].map(book => [book.id, book]));
           renderResults([...results.values()], term);
         }
@@ -307,6 +310,7 @@ window.NovelCastViews.search = {
           performSearch(input.value);
         }, 180);
       });
+      // Escape clears the query using the same behavior as the visible clear button.
       input.addEventListener('keydown', event => {
         if (event.key === 'Escape') clearBtn?.click();
       });

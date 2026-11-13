@@ -286,9 +286,11 @@ window.NovelCastViews.library = {
     let refreshTimer;
     let planDirty = false;
     let disposed = false;
+    // Ignore delayed work after navigation or a switch to a different account.
     const ownsView = () => !disposed && (auth.getUser()?.id || auth.getUser()?.email) === userId;
 
     // This closure remembers this screen's resources so leaving the route can release them.
+    // Release library listeners, timers and decorative effects when the view is replaced.
     this.destroy = () => {
       disposed = true;
       controller.abort();
@@ -320,6 +322,7 @@ window.NovelCastViews.library = {
     };
 
     // Show the actual cache/sync result; a local save is not proof of a server save.
+    // Translate the current synchronization status into the visible library message and controls.
     const paintStatus = () => {
       if (!ownsView()) return;
       const status = service?.getStatus() || { phase: 'pending', message: 'Library sync is unavailable. Your changes remain on this device.' };
@@ -342,6 +345,7 @@ window.NovelCastViews.library = {
       // Completing the metadata add will refresh the view itself.
       if (!uploadTimer && !refreshTimer) refresh();
     }, { signal });
+    // Rebuild saved-book cards when local state or catalog metadata changes.
     const paintSavedBooks = () => {
       if (!ownsView()) return;
       const saved = document.getElementById('saved-catalog-books');
@@ -363,6 +367,7 @@ window.NovelCastViews.library = {
     const planForm = document.getElementById('reading-plan-form');
     planForm?.addEventListener('input', () => { planDirty = true; }, { signal });
     // Intercept submission, run native constraints, convert the input values and save the plan.
+    // Validate and save the reading plan without letting the form reload the page.
     planForm?.addEventListener('submit', event => {
       event.preventDefault();
       if (!ownsView() || !planForm.reportValidity()) return;
@@ -444,6 +449,7 @@ window.NovelCastViews.library = {
         });
       });
 
+      // Read the dropped file through the same handler used by the file picker.
       pixelCardEl.addEventListener('drop', (e) => {
         const dt = e.dataTransfer;
         const files = dt.files;
@@ -462,6 +468,7 @@ window.NovelCastViews.library = {
     }
 
     // Validate the extension and record file metadata; the progress timer does not upload its contents.
+    // Validate the selected upload, then update the library UI as its local progress advances.
     function handleFile(file) {
       if (!ownsView() || !file || uploadTimer || refreshTimer) return;
 

@@ -7,15 +7,18 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Page appearance: Control scrollbar appearance while leaving normal scrolling behavior intact. */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
+/* Page appearance: Control scrollbar appearance while leaving normal scrolling behavior intact. */
 ::-webkit-scrollbar-track {
   background: #0E1217;
 }
 
+/* Page appearance: Control scrollbar appearance while leaving normal scrolling behavior intact. */
 ::-webkit-scrollbar-thumb {
   background: #222B3A;
   border-radius: 9999px;
@@ -34,10 +37,12 @@ body {
   box-shadow: -4px 6px 16px rgba(0, 0, 0, 0.6), 0 10px 24px -5px rgba(0, 0, 0, 0.8);
 }
 
+/* Page appearance: Position this layer relative to its container or viewport without disturbing nearby content. */
 .book-spine {
   position: relative;
 }
 
+/* Page appearance: Draw a decorative pseudo-element without adding extra HTML markup. */
 .book-spine::before {
   content: '';
   position: absolute;
@@ -51,6 +56,7 @@ body {
   z-index: 2;
 }
 
+/* Page appearance: Add depth or glow to distinguish the element from its background. */
 .gold-glow {
   text-shadow: 0 0 16px rgba(241, 214, 158, 0.4);
 }
@@ -66,12 +72,14 @@ body {
   opacity: .34;
 }
 
+/* Light theme: Apply these visual adjustments to the selected elements in this state. */
 html[data-theme="light"] #featured-row [data-purpose="primary-hero-card"]::after,
 html[data-theme="light"] .home-catalog::after {
   background-image: radial-gradient(circle, #605846 0.65px, transparent 1px);
   opacity: .25;
 }
 
+/* Page appearance: Clip the incoming theme to the contour supplied by the animation code. */
 #featured-row [data-purpose="primary-hero-card"]::after {
   inset-block-start: 14px;
   inset-inline-start: 4px;
@@ -81,8 +89,10 @@ html[data-theme="light"] .home-catalog::after {
   mask-image: linear-gradient(#000, transparent);
 }
 
+/* Page appearance: Position this layer relative to its container or viewport without disturbing nearby content. */
 .home-catalog { position: relative; }
 
+/* Page appearance: Clip the incoming theme to the contour supplied by the animation code. */
 .home-catalog::after {
   inset-block-start: -20px;
   inset-inline-start: 0;
@@ -92,7 +102,9 @@ html[data-theme="light"] .home-catalog::after {
   mask-image: linear-gradient(to right, #000, transparent);
 }
 
+/* Responsive layout: these rules apply only at or above this viewport width. */
 @media (min-width: 768px) {
+  /* Page appearance: Clip the incoming theme to the contour supplied by the animation code. */
   .home-catalog::after {
     inset-block-start: 2.25rem;
     inset-inline-start: -34px;

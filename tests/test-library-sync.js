@@ -8,6 +8,7 @@ const path = require('node:path');
 const { JSDOM } = require('jsdom');
 const { emptyDocument, normalizeDocument } = require('../backend/src/services/libraryJsonStore');
 
+// Advance the event loop and clone data so async work and fixture mutations stay independent.
 const tick = () => new Promise(resolve => setImmediate(resolve));
 const copy = value => JSON.parse(JSON.stringify(value));
 
@@ -16,6 +17,7 @@ function fixture(t, options = {}) {
   const dom = new JSDOM('<!doctype html><html><body></body></html>', {
     url: 'http://127.0.0.1:3000/', runScripts: 'outside-only', pretendToBeVisual: true,
   });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => dom.window.close());
   const w = dom.window;
   const disk = new Map(Object.entries(options.localStorage || {}));
@@ -26,6 +28,7 @@ function fixture(t, options = {}) {
   const calls = [];
   let onGet;
   let onPut;
+  // Simulate the active account, its access token, and notifications when the account changes.
   w.NovelCastAuth = {
     getUser: () => currentUser,
     isAuthenticated: () => Boolean(currentUser?.id && currentUser?.email_confirmed_at && !currentUser?.is_anonymous),
@@ -44,6 +47,7 @@ function fixture(t, options = {}) {
     const id = currentUser?.id;
     calls.push({ method: init.method || 'GET', id, body: init.body && JSON.parse(init.body) });
     if (!id) return { ok: false, status: 401, json: async () => ({ error: 'Sign in' }) };
+    // Save only the current revision; return the server copy on conflict for merge tests.
     if (init.method === 'PUT') {
       const body = JSON.parse(init.body);
       const current = server.get(id) || emptyDocument();
@@ -56,6 +60,7 @@ function fixture(t, options = {}) {
       server.set(id, saved);
       return { ok: true, status: 200, json: async () => copy(saved) };
     }
+    // GET returns a copy so client edits cannot silently mutate server state.
     const value = copy(server.get(id) || emptyDocument());
     if (onGet) await onGet({ id, document: value });
     return { ok: true, status: 200, json: async () => value };
@@ -66,19 +71,24 @@ function fixture(t, options = {}) {
   w.NovelCastLibrary.init();
   return {
     w, server, calls,
+    // Switch the fake identity and notify subscribers, just as an auth state change would.
     setUser(user) { currentUser = user; authListeners.forEach(callback => callback(user)); },
+    // Hooks let individual cases delay or inspect requests while they are in flight.
     setOnGet(callback) { onGet = callback; },
     setOnPut(callback) { onPut = callback; },
   };
 }
 
+// Build a confirmed test user with a predictable identity for account isolation checks.
 function user(id) { return { id, email: `${id}@example.test`, email_confirmed_at: '2026-11-01T00:00:00Z' }; }
+// Read and update the fixture state for the requested user.
 function savedState(f, id, changes) {
   const state = f.w.NovelCast.loadState();
   Object.assign(f.w.NovelCast.ensureEntry(state, id), changes);
   assert.equal(f.w.NovelCast.saveState(state), undefined);
 }
 
+// Scenario: account switches isolate state and uploads; returning restores each account cache. The checks below exercise this behavior as one independent case.
 test('account switches isolate state and uploads; returning restores each account cache', async t => {
   const f = fixture(t, { user: user('reader-a') });
   f.w.NovelCastLibrary.init();
@@ -107,6 +117,7 @@ test('account switches isolate state and uploads; returning restores each accoun
   assert.equal(f.w.NovelCast.getUserUploads('reader-a').length, 0);
 });
 
+// Scenario: migrates an account upload key without assigning the old shared shelf to a new account. The checks below exercise this behavior as one independent case.
 test('migrates an account upload key without assigning the old shared shelf to a new account', async t => {
   const legacy = {
     'novelcast.state.v1': JSON.stringify({ library: { pride: { favorite: true } }, collections: [] }),
@@ -121,6 +132,7 @@ test('migrates an account upload key without assigning the old shared shelf to a
   assert.equal(Object.keys(f.w.NovelCast.loadState().library).length, 0);
 });
 
+// Scenario: older shared bookmarks require an explicit import and never replace existing account entries. The checks below exercise this behavior as one independent case.
 test('older shared bookmarks require an explicit import and never replace existing account entries', async t => {
   const f = fixture(t, { user: user('reader-a'), localStorage: {
     'novelcast.state.v1': JSON.stringify({ library: {
@@ -142,6 +154,7 @@ test('older shared bookmarks require an explicit import and never replace existi
   assert.equal(f.w.NovelCast.loadState().library.emma, undefined);
 });
 
+// Scenario: offline local edits survive in the account cache, page recreation, and a later successful sync. The checks below exercise this behavior as one independent case.
 test('offline local edits survive in the account cache, page recreation, and a later successful sync', async t => {
   const f = fixture(t, { user: user('reader-a') });
   f.w.fetch = async (url, init = {}) => {
@@ -166,6 +179,7 @@ test('offline local edits survive in the account cache, page recreation, and a l
   assert.equal(restored.w.NovelCastLibrary.getStatus().phase, 'synced');
 });
 
+// Scenario: revision conflict combines independent remote and local fields without losing a local edit. The checks below exercise this behavior as one independent case.
 test('revision conflict combines independent remote and local fields without losing a local edit', async t => {
   const initial = emptyDocument();
   initial.state.library.dracula = { status: 'saved', favorite: false, chapter: 1, page: 0, bookmarks: [] };
@@ -186,6 +200,7 @@ test('revision conflict combines independent remote and local fields without los
   assert.ok(f.calls.some(call => call.method === 'PUT'));
 });
 
+// Scenario: a local removal remains removed when an unrelated remote account edit arrives. The checks below exercise this behavior as one independent case.
 test('a local removal remains removed when an unrelated remote account edit arrives', async t => {
   const initial = emptyDocument();
   initial.state.library = {
@@ -209,6 +224,7 @@ test('a local removal remains removed when an unrelated remote account edit arri
   assert.equal(f.server.get('reader-a').state.library.emma.chapter, 2);
 });
 
+// Scenario: local edits made while a save is pending are kept for the next revision. The checks below exercise this behavior as one independent case.
 test('local edits made while a save is pending are kept for the next revision', async t => {
   const f = fixture(t, { user: user('reader-a') });
   let beginPut, releasePut;
@@ -226,6 +242,7 @@ test('local edits made while a save is pending are kept for the next revision', 
   assert.equal(f.server.get('reader-a').revision, 2);
 });
 
+// Scenario: late responses after an account switch never populate the next account cache. The checks below exercise this behavior as one independent case.
 test('late responses after an account switch never populate the next account cache', async t => {
   const f = fixture(t, { user: user('reader-a') });
   let beginGet, releaseGet;
@@ -241,6 +258,7 @@ test('late responses after an account switch never populate the next account cac
   assert.equal(f.w.NovelCastLibrary.getStatus().phase, 'loading');
 });
 
+// Scenario: a refreshed Supabase session identity changes cache ownership before its token is sent. The checks below exercise this behavior as one independent case.
 test('a refreshed Supabase session identity changes cache ownership before its token is sent', async t => {
   const f = fixture(t, { user: user('reader-a') });
   f.w.NovelCastAuth.getAccessToken = async () => {
@@ -253,6 +271,7 @@ test('a refreshed Supabase session identity changes cache ownership before its t
   assert.equal(Object.keys(f.w.NovelCast.loadState().library).length, 0);
 });
 
+// Scenario: Supabase state callbacks schedule API work after the synchronous callback returns. The checks below exercise this behavior as one independent case.
 test('Supabase state callbacks schedule API work after the synchronous callback returns', async t => {
   let insideCallback = false;
   let started = false;
@@ -273,6 +292,7 @@ test('Supabase state callbacks schedule API work after the synchronous callback 
   assert.equal(started, true);
 });
 
+// Scenario: cross-tab storage updates reload the correct account cache. The checks below exercise this behavior as one independent case.
 test('cross-tab storage updates reload the correct account cache', async t => {
   const f = fixture(t, { user: user('reader-a') });
   const envelope = {
@@ -284,6 +304,7 @@ test('cross-tab storage updates reload the correct account cache', async t => {
   assert.equal(f.w.NovelCast.loadState().library.emma.chapter, 7);
 });
 
+// Scenario: download contains the current library and reading plan, without account credentials. The checks below exercise this behavior as one independent case.
 test('download contains the current library and reading plan, without account credentials', async t => {
   const f = fixture(t, { user: user('reader-a') });
   let blob, clicked;

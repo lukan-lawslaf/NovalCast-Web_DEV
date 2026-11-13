@@ -1,16 +1,29 @@
 /* Styles the persistent narration bar, playback buttons, and compact mobile layout. */
 #global-audio-player[hidden], #player-retry-btn[hidden] { display: none; }
+/* Audio player: Align child controls along a row or column and manage wrapping/spacing. */
 .nc-audio-player { position: fixed; bottom: max(20px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); z-index: 100; width: min(680px, calc(100% - 24px)); display: flex; align-items: center; gap: 16px; padding: 16px 18px; background: #141924; color: #f8f1e2; border: 1px solid #f1d69e66; border-radius: 18px; box-shadow: 0 12px 40px #000b; }
+/* Audio player: Apply these visual adjustments to the selected elements in this state. */
 .nc-audio-copy { flex: 1; min-width: 0; }
+/* Audio player: Control overflowing content so long labels or artwork stay inside their container. */
 .nc-audio-copy h4 { margin: 0 0 4px; font: 600 17px/1.3 Georgia, serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Audio player: Set readable typography and spacing for this text role. */
 .nc-audio-copy p { margin: 2px 0 0; font-size: 12px; line-height: 1.4; color: #b8c0ce; overflow-wrap: anywhere; }
+/* Audio player: Align child controls along a row or column and manage wrapping/spacing. */
 .nc-audio-meta { display: flex; flex-wrap: wrap; column-gap: 12px; }
+/* Audio player: Apply the foreground and surface colors for this component state. */
 .nc-audio-meta #player-voice { color: #d7c49f; }
 /* Keep playback actions separate from the flexible title/status area. */
 .nc-audio-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+/* Audio player: Set readable typography and spacing for this text role. */
 .nc-audio-actions button { min-height: 44px; min-width: 44px; padding: 8px 12px; border: 1px solid #f1d69e55; border-radius: 24px; font-family: inherit; font-size: 12px; font-weight: 600; line-height: 1.2; color: #f1d69e; background: transparent; cursor: pointer; }
+/* Audio player: Apply the foreground and surface colors for this component state. */
 .nc-audio-actions #player-play-btn { background: #f1d69e; color: #121620; }
+/* Audio player: Visually distinguish unavailable controls from actions that can be used. */
 .nc-audio-actions button:disabled { opacity: .5; cursor: default; }
+/* Audio player: Show a visible focus cue so keyboard users can locate the active control. */
 .nc-audio-actions button:focus-visible { outline: 2px solid #f1d69e; outline-offset: 3px; }
 /* Wrap controls onto another line on small phones. */
-@media (max-width: 480px) { .nc-audio-player { flex-wrap: wrap; gap: 10px; padding: 12px 14px; } .nc-audio-copy { flex-basis: calc(100% - 54px); } .nc-audio-actions { width: 100%; justify-content: flex-end; } }
+@media (max-width: 480px) { /* Audio player: Align child controls along a row or column and manage wrapping/spacing. */
+.nc-audio-player { flex-wrap: wrap; gap: 10px; padding: 12px 14px; } /* Audio player: Apply these visual adjustments to the selected elements in this state. */
+.nc-audio-copy { flex-basis: calc(100% - 54px); } /* Audio player: Set the element dimensions so content fits the available space. */
+.nc-audio-actions { width: 100%; justify-content: flex-end; } }

@@ -1,6 +1,7 @@
 // Exercise catalog, search and reader flows in a browser; requires the local app servers.
 const { chromium } = require('playwright');
 
+// Run the frontend and backend integration scenarios against their configured local services.
 async function runIntegrationTests() {
   console.log('--- Starting NovelCast Frontend-Backend Integration Test ---');
   const browser = await chromium.launch({ headless: true });
@@ -18,6 +19,7 @@ async function runIntegrationTests() {
   try {
     // 1. Test Home View (#/home)
     console.log('\n[1/5] Testing Home View (#/home)...');
+    // Open the page before checking the interface in its rendered state.
     await page.goto('http://localhost:3000/#/home', { waitUntil: 'networkidle' });
     await page.waitForTimeout(600);
 
@@ -41,11 +43,13 @@ async function runIntegrationTests() {
 
     // 2. Test Search View (#/search)
     console.log('\n[2/5] Testing Search View with Live Backend (#/search)...');
+    // Open the page before checking the interface in its rendered state.
     await page.goto('http://localhost:3000/#/search', { waitUntil: 'networkidle' });
     await page.waitForTimeout(400);
 
     // Test text search for "Gothic"
     const searchInput = page.locator('#search-input');
+    // Perform the fill action as a user would, then observe the resulting behavior.
     await searchInput.fill('Gothic');
     await page.waitForTimeout(500);
 
@@ -62,6 +66,7 @@ async function runIntegrationTests() {
 
     // Test Genre Chip Filter
     console.log('  Testing Science Fiction filter chip...');
+    // Perform the click action as a user would, then observe the resulting behavior.
     await page.click('#search-chips [data-filter="Science Fiction"]');
     await page.waitForTimeout(500);
     const sciFiResults = await page.$$eval('#search-results-grid [data-book-link]', cards =>
@@ -74,6 +79,7 @@ async function runIntegrationTests() {
 
     // 3. Test Book Details View (#/book?book=frankenstein)
     console.log('\n[3/5] Testing Book Details View with Live TOC (#/book?book=frankenstein)...');
+    // Open the page before checking the interface in its rendered state.
     await page.goto('http://localhost:3000/#/book?book=frankenstein', { waitUntil: 'networkidle' });
     await page.waitForTimeout(800);
 
@@ -102,6 +108,7 @@ async function runIntegrationTests() {
 
     // 4. Test Book Reader View (#/reader?book=frankenstein&chapter=1)
     console.log('\n[4/5] Testing Reader View with Live Gutenberg Full-Text (#/reader?book=frankenstein&chapter=1)...');
+    // Open the page before checking the interface in its rendered state.
     await page.goto('http://localhost:3000/#/reader?book=frankenstein&chapter=1', { waitUntil: 'networkidle' });
     await page.waitForTimeout(1000);
 
@@ -118,6 +125,7 @@ async function runIntegrationTests() {
     // Test In-Chapter Spread Flip
     console.log('  Testing In-Chapter Next Page flip...');
     const nextBtn = page.locator('#reader-next-btn');
+    // Perform the click action as a user would, then observe the resulting behavior.
     await nextBtn.click();
     await page.waitForTimeout(600);
     const navInd = await page.textContent('#reader-nav-indicator');
@@ -125,6 +133,7 @@ async function runIntegrationTests() {
 
     // Test Navigation to Chapter 2
     console.log('  Navigating to Chapter 2 via quick skip button...');
+    // Perform the click action as a user would, then observe the resulting behavior.
     await page.click('#reader-jump-next-ch');
     await page.waitForTimeout(1000);
 
@@ -135,6 +144,7 @@ async function runIntegrationTests() {
 
     // Test Switching to PDF Mode
     console.log('  Switching to [PDF] Continuous Scroll Mode...');
+    // Perform the click action as a user would, then observe the resulting behavior.
     await page.click('#btn-mode-pdf');
     await page.waitForTimeout(400);
 
@@ -153,10 +163,12 @@ async function runIntegrationTests() {
 
     // 5. Test 3D Hardcover Book Parade on Landing View (#/landing)
     console.log('\n[5/5] Testing 3D Parade Book Targets (#/landing)...');
+    // Open the page before checking the interface in its rendered state.
     await page.goto('http://localhost:3000/#/landing', { waitUntil: 'networkidle' });
     await page.waitForTimeout(500);
 
     const centerpiece = page.locator('.book-featured');
+    // Perform the click action as a user would, then observe the resulting behavior.
     await centerpiece.click();
     await page.waitForTimeout(600);
 
@@ -176,6 +188,7 @@ async function runIntegrationTests() {
     }
     process.exit(1);
   } finally {
+    // Release this browser or server resource so later checks start cleanly.
     await browser.close();
   }
 }

@@ -49,10 +49,12 @@ const PROFILE_SIGNALS = [
   { profile: 'literary', pattern: /\b(?:literary|psychological|historical|reflective)\b/ },
 ];
 
+// Normalize accents, punctuation, and case so metadata can be compared consistently.
 function normalizedText(value) {
   return String(value || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 }
 
+// Reject malformed book IDs before constructing a database lookup.
 function validateBookId(bookId) {
   if (typeof bookId !== 'string' || !/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,199}$/.test(bookId.trim())) {
     throw new TtsError(400, 'TTS_INVALID_BOOK', 'Provide the catalog book ID or slug for narration.');
@@ -60,6 +62,7 @@ function validateBookId(bookId) {
   return bookId.trim().toLowerCase();
 }
 
+// Select exactly one Atlas ID or slug field from the validated book key.
 function exactBookQuery(bookId) {
   return /^[a-f0-9]{24}$/.test(bookId) ? { _id: bookId } : { slug: bookId };
 }
@@ -78,6 +81,7 @@ function selectNarrationProfile(book) {
     { name: 'synopsis', text: normalizedText(book.description), weight: 1 },
   ];
   let winner;
+  // Score matching themes by source weight, giving title and subjects more influence than synopsis.
   for (const rule of PROFILE_SIGNALS) {
     const matches = sources.filter((source) => rule.pattern.test(source.text));
     const score = matches.reduce((total, source) => total + source.weight, 0);
@@ -141,6 +145,7 @@ function savedVoice(value) {
   });
 }
 
+// Create a consistent availability error without exposing database details.
 function storageError() {
   return new TtsError(503, 'TTS_VOICE_STORAGE_UNAVAILABLE', 'Book narration settings are temporarily unavailable. Please try again shortly.');
 }
@@ -150,6 +155,7 @@ function waitWithSignal(promise, signal) {
   if (!signal) return promise;
   if (signal.aborted) return Promise.reject(signal.reason || new Error('Narration cancelled.'));
   return new Promise((resolve, reject) => {
+    // Reject this caller’s wait on cancellation and remove its listener after the shared lookup settles.
     const onAbort = () => reject(signal.reason || new Error('Narration cancelled.'));
     signal.addEventListener('abort', onAbort, { once: true });
     promise.then(resolve, reject).finally(() => signal.removeEventListener('abort', onAbort));
@@ -169,11 +175,13 @@ function createNarrationVoiceResolver({
   const lookups = new Map();
   const selections = new Map();
 
+  // Cache confirmed assignments under book aliases and evict oldest keys when full.
   function remember(key, voice) {
     cached.set(key, voice);
     while (cached.size > MAX_CACHED_BOOK_KEYS) cached.delete(cached.keys().next().value);
   }
 
+  // Use only a previously exported assignment for a known exact catalog slug.
   function savedCatalogVoice(key) {
     // These are exported Atlas assignments for exact public catalog slugs.
     // They must never select a new voice or stand in for an unknown book.
@@ -187,6 +195,7 @@ function createNarrationVoiceResolver({
     }
   }
 
+  // Limit Atlas lookup time and translate database failures into a safe narration error.
   async function readBook(query, fields = BOOK_VOICE_FIELDS) {
     try {
       return await BookModel.findOne(query, fields, { maxTimeMS: QUERY_TIMEOUT_MS }).lean();
@@ -217,6 +226,7 @@ function createNarrationVoiceResolver({
 
   // Reuse an existing assignment; share first-time selection for aliases of the same book.
   async function lookupVoice(key) {
+    // Read the saved assignment, with a known catalog fallback only when storage is unavailable.
     let book;
     try {
       book = await readBook(exactBookQuery(key));
@@ -249,6 +259,7 @@ function createNarrationVoiceResolver({
     return voice;
   }
 
+  // Validate each request, reuse confirmed results, and share concurrent lookups without sharing cancellation.
   return async function resolveNarrationVoice(bookId, { signal } = {}) {
     const key = validateBookId(bookId);
     if (signal && signal.aborted) return Promise.reject(signal.reason || new Error('Narration cancelled.'));

@@ -4,9 +4,11 @@ window.NovelCastViews = window.NovelCastViews || {};
 let landingDialIndex;
 
 // Keep bookshelf position and drag state inside this mount; the abort signal releases its listeners.
+// Set up the interactive shelf, including its geometry, drag handling and cleanup signal.
 function mountLandingBookDial(shelf, controls, motion, signal, isOpening) {
   const books = Array.from(shelf.querySelectorAll('.book-3d-wrapper'));
   const status = controls.querySelector('[data-dial-title]');
+  // Wrap indices around the shelf, find the shortest relative offset, and compress distant spacing.
   const wrap = index => ((index % books.length) + books.length) % books.length;
   const relative = index => wrap(index - position + books.length / 2) - books.length / 2;
   const compressedSteps = distance => (1 - .88 ** distance) / .12;
@@ -20,6 +22,7 @@ function mountLandingBookDial(shelf, controls, motion, signal, isOpening) {
   let suppressClick = false;
 
   // Translate each book relative to the selection using CSS position/scale variables.
+  // Position each cover around the dial using the current rotation and measured shelf size.
   function placeBooks() {
     books.forEach((book, index) => {
       const distance = relative(index);
@@ -64,6 +67,7 @@ function mountLandingBookDial(shelf, controls, motion, signal, isOpening) {
     if (focus) book.focus({ preventScroll: true });
   }
 
+  // Cancel any in-progress dial animation before starting another.
   function stop() {
     cancelAnimationFrame(frame);
     frame = 0;
@@ -71,6 +75,7 @@ function mountLandingBookDial(shelf, controls, motion, signal, isOpening) {
   }
 
   // Move toward a chosen book, respecting the reduced-motion preference.
+  // Animate the dial toward a selected book and optionally move keyboard focus to it.
   function snap(index, focus = false) {
     stop();
     destination = index;
@@ -84,6 +89,7 @@ function mountLandingBookDial(shelf, controls, motion, signal, isOpening) {
 
     shelf.classList.add('is-turning');
     const startTime = performance.now();
+    // Advance the snap animation until the selected cover reaches its final position.
     function settle(now) {
       const progress = motion.matches ? 1 : Math.min(1, (now - startTime) / 550);
       position = start + (index - start) * (1 - (1 - progress) ** 3);
@@ -132,6 +138,7 @@ function mountLandingBookDial(shelf, controls, motion, signal, isOpening) {
   }, { signal });
 
   // Finish the drag and settle on the nearest book.
+  // Finish pointer dragging and settle the shelf on the nearest book.
   function endDrag(event) {
     if (event.pointerId !== drag?.id) return;
     const moved = drag.moving;
@@ -164,6 +171,7 @@ function mountLandingBookDial(shelf, controls, motion, signal, isOpening) {
 
   return {
     stop,
+    // Rotate a newly selected book into focus; report whether movement was needed.
     selectBook(book) {
       const index = books.indexOf(book);
       if (index === landingDialIndex && !frame) return false;
@@ -272,11 +280,13 @@ window.NovelCastViews.landing = {
     const signal = controller.signal;
     let turn;
     // This closure remembers this screen's resources so leaving the route can release them.
+    // Stop landing-page media and release interactions when the route changes.
     this.destroy = () => {
       controller.abort();
       turn?.cancel();
       bgVideo?.pause();
     };
+    // Pause or resume decorative video according to the reduced-motion preference.
     function syncBackgroundMotion() {
       if (motion.matches) bgVideo?.pause();
       else bgVideo?.play().catch(() => {});

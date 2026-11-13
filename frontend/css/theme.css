@@ -39,10 +39,12 @@ html[data-theme="light"] {
   filter: none;
 }
 
+/* Theme snapshot: Apply these visual adjustments to the selected elements in this state. */
 :root[data-theme-transition]::view-transition-image-pair(root) {
   isolation: isolate;
 }
 
+/* Theme snapshot: Set how visual changes animate between UI states. */
 :root[data-theme-transition]::view-transition-old(root),
 :root[data-theme-transition]::view-transition-new(root) {
   animation: none;
@@ -51,10 +53,12 @@ html[data-theme="light"] {
   opacity: 1;
 }
 
+/* Theme snapshot: Apply these visual adjustments to the selected elements in this state. */
 :root[data-theme-transition]::view-transition-old(root) {
   z-index: 1;
 }
 
+/* Theme snapshot: Clip the incoming theme to the contour supplied by the animation code. */
 :root[data-theme-transition]::view-transition-new(root) {
   z-index: 2;
   clip-path: var(--nc-theme-ink-clip, inset(0 0 0 100%));
@@ -64,31 +68,38 @@ html[data-theme="light"] {
 
 /* A native snapshot stays present while themeInk.js advances the reveal boundary. */
 @keyframes nc-theme-ink-sweep {
+  /* Page appearance: Define the appearance at this animation step; the browser interpolates between steps. */
   from, to { opacity: 1; }
 }
 
+/* Accessibility: remove motion effects when the visitor requests reduced motion. */
 @media (prefers-reduced-motion: reduce) {
+  /* Theme snapshot: Apply these visual adjustments to the selected elements in this state. */
   :root[data-theme-transition]::view-transition-group(root) {
     filter: none;
   }
 
+  /* Theme snapshot: Clip the incoming theme to the contour supplied by the animation code. */
   :root[data-theme-transition]::view-transition-new(root) {
     animation: none;
     clip-path: none;
   }
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] body {
   background: var(--nc-paper) !important;
   background-image: none !important;
   color: var(--nc-ink) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-content-wrapper,
 html[data-theme="light"] #app-view {
   color: var(--nc-ink);
 }
 
+/* Light theme: Add depth or glow to distinguish the element from its background. */
 html[data-theme="light"] #app-sidebar {
   background: #e2dcd1 !important;
   border-color: #c9c1b4 !important;
@@ -96,14 +107,17 @@ html[data-theme="light"] #app-sidebar {
   box-shadow: 2px 0 14px rgba(48, 38, 21, .07);
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #main-nav {
   color: var(--nc-muted) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #main-nav a {
   color: var(--nc-muted) !important;
 }
 
+/* Light theme: Provide pointer-hover feedback without changing the underlying action. */
 html[data-theme="light"] #main-nav a:hover,
 html[data-theme="light"] #main-nav a.nav-active {
   color: var(--nc-accent) !important;
@@ -111,14 +125,17 @@ html[data-theme="light"] #main-nav a.nav-active {
   box-shadow: 0 0 0 1px rgba(31, 63, 176, .12);
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] .nc-main-nav {
   color: var(--nc-muted) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] .nc-nav-link {
   color: var(--nc-muted) !important;
 }
 
+/* Light theme: Provide pointer-hover feedback without changing the underlying action. */
 html[data-theme="light"] .nc-nav-link:hover,
 html[data-theme="light"] .nc-nav-link[aria-current="page"] {
   color: var(--nc-accent) !important;
@@ -126,21 +143,25 @@ html[data-theme="light"] .nc-nav-link[aria-current="page"] {
   border-color: rgba(31, 63, 176, .2) !important;
 }
 
+/* Light theme: Show a visible focus cue so keyboard users can locate the active control. */
 html[data-theme="light"] .nc-nav-link:focus-visible,
 html[data-theme="light"] .nc-header-notifications:focus-visible,
 html[data-theme="light"] .nc-profile-button:focus-visible {
   outline-color: var(--nc-focus) !important;
 }
 
+/* Light theme: Apply these visual adjustments to the selected elements in this state. */
 html[data-theme="light"] #app-header {
   border-color: #c9c1b4 !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-header > a,
 html[data-theme="light"] #app-header > a span {
   color: var(--nc-ink) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-header button:not(.nc-theme-toggle),
 html[data-theme="light"] .nc-profile-button {
   color: var(--nc-ink) !important;
@@ -148,6 +169,7 @@ html[data-theme="light"] .nc-profile-button {
   border-color: #c4bcaf !important;
 }
 
+/* Light theme: Provide pointer-hover feedback without changing the underlying action. */
 html[data-theme="light"] #app-header button:not(.nc-theme-toggle):hover,
 html[data-theme="light"] .nc-profile-button:hover {
   color: var(--nc-accent) !important;
@@ -155,10 +177,12 @@ html[data-theme="light"] .nc-profile-button:hover {
   background: #e4e8f5 !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] .nc-profile-button [data-profile-initials] {
   color: var(--nc-accent) !important;
 }
 
+/* Page appearance: Set how visual changes animate between UI states. */
 .nc-theme-toggle {
   display: inline-grid;
   place-items: center;
@@ -173,16 +197,19 @@ html[data-theme="light"] .nc-profile-button [data-profile-initials] {
   transition: color .18s ease, background-color .18s ease, border-color .18s ease, transform .18s ease;
 }
 
+/* Page appearance: Provide pointer-hover feedback without changing the underlying action. */
 .nc-theme-toggle:hover {
   transform: translateY(-1px);
   border-color: currentColor;
 }
 
+/* Page appearance: Show a visible focus cue so keyboard users can locate the active control. */
 .nc-theme-toggle:focus-visible {
   outline: 3px solid var(--nc-focus);
   outline-offset: 3px;
 }
 
+/* Page appearance: Set readable typography and spacing for this text role. */
 .nc-theme-toggle svg,
 .nc-theme-toggle [data-theme-icon] {
   display: block;
@@ -192,31 +219,38 @@ html[data-theme="light"] .nc-profile-button [data-profile-initials] {
   line-height: 1;
 }
 
+/* Light theme: Remove this element from the current layout; responsive or UI state controls when it returns. */
 .nc-theme-toggle .nc-theme-moon,
 html[data-theme="light"] .nc-theme-toggle .nc-theme-sun {
   display: none;
 }
 
+/* Light theme: Apply these visual adjustments to the selected elements in this state. */
 html[data-theme="light"] .nc-theme-toggle .nc-theme-moon {
   display: block;
 }
 
+/* Accessibility: remove motion effects when the visitor requests reduced motion. */
 @media (prefers-reduced-motion: reduce) {
+  /* Page appearance: Set how visual changes animate between UI states. */
   .nc-theme-toggle {
     transition: none;
   }
 
+  /* Page appearance: Provide pointer-hover feedback without changing the underlying action. */
   .nc-theme-toggle:hover {
     transform: none;
   }
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] .nc-theme-toggle {
   color: var(--nc-accent);
   background: var(--nc-sheet);
   border-color: #b9b2a6;
 }
 
+/* Light theme: Provide pointer-hover feedback without changing the underlying action. */
 html[data-theme="light"] .nc-theme-toggle:hover {
   background: #e4e8f5;
 }
@@ -227,43 +261,52 @@ html[data-theme="light"] #app-view :is(.bg-background, .bg-surface, .bg-surface-
   background-image: none !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view :is(.bg-surface-container-lowest, .bg-surface-container-low, .bg-surface-container, .bg-appSidebar, .bg-appCard, .bg-obsidian-800):not(.book-cover-art, .book-cover-art *, .book-detail-cover, .book-detail-cover *, .book-3d-wrapper, .book-3d-wrapper *, .book-spine, .book-spine *) {
   background-color: var(--nc-sheet) !important;
   background-image: none !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view :is(.bg-surface-container-high, .bg-surface-container-highest, .bg-surface-bright, .bg-surface-variant, .bg-obsidian-700, .bg-obsidian-600):not(.book-cover-art, .book-cover-art *, .book-detail-cover, .book-detail-cover *, .book-3d-wrapper, .book-3d-wrapper *, .book-spine, .book-spine *) {
   background-color: var(--nc-surface-raised) !important;
   background-image: none !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view :is(.bg-primary-container, .bg-primary-fixed, .bg-primary-fixed-dim):not(.book-cover-art, .book-cover-art *, .book-detail-cover, .book-detail-cover *, .book-3d-wrapper, .book-3d-wrapper *, .book-spine, .book-spine *) {
   background-color: var(--nc-accent) !important;
   background-image: none !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view [class~="bg-surface-container-low/90"] {
   background-color: var(--nc-surface) !important;
   background-image: none !important;
   border-color: #c6bfb2 !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view :is(.text-primary, .text-on-surface, .text-on-background, .text-white, .text-slate-100, .text-slate-200, .text-ivory-50, .text-ivory-100):not(.book-cover-art, .book-cover-art *, .book-detail-cover, .book-detail-cover *, .book-3d-wrapper, .book-3d-wrapper *, .book-spine, .book-spine *) {
   color: var(--nc-ink) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view :is(.text-on-surface-variant, .text-on-secondary-container, .text-secondary, .text-outline, .text-neutral-300, .text-neutral-400, .text-neutral-500, .text-neutral-600, .text-textGray, .text-lightMuted, .text-ivory-300, .text-ivory-400):not(.book-cover-art, .book-cover-art *, .book-detail-cover, .book-detail-cover *, .book-3d-wrapper, .book-3d-wrapper *, .book-spine, .book-spine *) {
   color: var(--nc-muted) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view :is(.text-primary-container, .text-inverse-primary):not(.book-cover-art, .book-cover-art *, .book-detail-cover, .book-detail-cover *, .book-3d-wrapper, .book-3d-wrapper *, .book-spine, .book-spine *) {
   color: var(--nc-accent) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view [class*="text-primary-container/"]:not(.book-cover-art):not(.book-cover-art *):not(.book-detail-cover):not(.book-detail-cover *):not(.book-3d-wrapper):not(.book-3d-wrapper *):not(.book-spine):not(.book-spine *) {
   color: var(--nc-accent) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view :is(.text-goldAccent, .text-gold-300, .text-gold-400, .text-goldMuted):not(.book-cover-art, .book-cover-art *, .book-detail-cover, .book-detail-cover *, .book-3d-wrapper, .book-3d-wrapper *, .book-spine, .book-spine *) {
   color: var(--nc-gold) !important;
 }
@@ -274,18 +317,22 @@ html[data-theme="light"] #app-view :is([class*="text-gold-"], [class*="text-gold
   color: var(--nc-gold) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view [class*="text-ivory-"][class*="/"]:not(.book-cover-art):not(.book-cover-art *):not(.book-detail-cover):not(.book-detail-cover *):not(.book-3d-wrapper):not(.book-3d-wrapper *):not(.book-spine):not(.book-spine *) {
   color: var(--nc-muted) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view :is([class*="text-white/"], [class*="text-slate-100/"], [class*="text-slate-200/"], [class*="text-ivory-50/"], [class*="text-ivory-100/"]):not(.book-cover-art):not(.book-cover-art *):not(.book-detail-cover):not(.book-detail-cover *):not(.book-3d-wrapper):not(.book-3d-wrapper *):not(.book-spine):not(.book-spine *) {
   color: var(--nc-ink) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view :is(.text-on-primary-container, .text-on-primary, .text-on-primary-fixed):not(.book-cover-art, .book-cover-art *, .book-detail-cover, .book-detail-cover *, .book-3d-wrapper, .book-3d-wrapper *, .book-spine, .book-spine *) {
   color: var(--nc-accent-ink) !important;
 }
 
+/* Light theme: Apply these visual adjustments to the selected elements in this state. */
 html[data-theme="light"] #app-view .border-outline,
 html[data-theme="light"] #app-view .border-outline-variant,
 html[data-theme="light"] #app-view .border-appCardBorder,
@@ -313,6 +360,7 @@ html[data-theme="light"] #app-view [class~="bg-[#202735]"]:not(.book-cover-art):
   background-image: none !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view [class~="bg-[#121722]/40"],
 html[data-theme="light"] #app-view [class~="bg-[#111622]/40"],
 html[data-theme="light"] #app-view [class~="bg-black/40"],
@@ -320,14 +368,17 @@ html[data-theme="light"] #app-view [class~="bg-black/50"] {
   background-color: rgba(31, 63, 176, .055) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view [class~="bg-red-950/60"] {
   background-color: #f7e3df !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view [class~="bg-emerald-950/60"] {
   background-color: #e3eee3 !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view [class~="text-[#F8F1E2]"],
 html[data-theme="light"] #app-view [class~="text-[#F3DCA0]"],
 html[data-theme="light"] #app-view [class~="text-[#F1D69E]"],
@@ -349,10 +400,12 @@ html[data-theme="light"] #app-view [class~="text-[#6A788E]"] {
   color: var(--nc-muted) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view :is([class~="text-[#7A8699]"], [class~="text-[#8B95A6]"], [class~="text-[#7F8B9C]"], [class~="text-[#857b6a]"], [class~="text-[#7E8B9C]"], [class~="text-[#64748B]"], [class~="text-[#E5E9F0]"]):not(.book-cover-art, .book-cover-art *, .book-detail-cover, .book-detail-cover *, .book-3d-wrapper, .book-3d-wrapper *, .book-spine, .book-spine *) {
   color: var(--nc-muted) !important;
 }
 
+/* Light theme: Apply these visual adjustments to the selected elements in this state. */
 html[data-theme="light"] #app-view [class~="border-[#1F2735]"],
 html[data-theme="light"] #app-view [class~="border-[#222B3A]"],
 html[data-theme="light"] #app-view [class~="border-[#232C3D]"],
@@ -365,16 +418,19 @@ html[data-theme="light"] #app-view [class~="border-[#3E4759]"] {
   border-color: #c6bfb2 !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view [class~="text-red-300"],
 html[data-theme="light"] #app-view [class~="text-red-400"],
 html[data-theme="light"] #app-view [class~="text-red-800"] {
   color: #8d2924 !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view [class~="text-emerald-300"]:not(.book-cover-art):not(.book-cover-art *):not(.book-detail-cover):not(.book-detail-cover *):not(.book-3d-wrapper):not(.book-3d-wrapper *):not(.book-spine):not(.book-spine *) {
   color: #245a37 !important;
 }
 
+/* Light theme: Add depth or glow to distinguish the element from its background. */
 html[data-theme="light"] #app-view [data-purpose="primary-hero-card"],
 html[data-theme="light"] #app-view [data-purpose="secondary-hero-card"] {
   color: var(--nc-ink) !important;
@@ -383,10 +439,12 @@ html[data-theme="light"] #app-view [data-purpose="secondary-hero-card"] {
   box-shadow: 0 12px 28px rgba(48, 38, 21, .11) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view #featured-row h2 {
   color: var(--nc-ink) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view #featured-row .featured-book-rating {
   background: var(--nc-surface) !important;
   color: var(--nc-muted) !important;
@@ -398,10 +456,12 @@ html[data-theme="light"] #app-view .cover-book-rating {
   color: #fff !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view .cover-book-rating .text-goldAccent {
   color: #f3d182 !important;
 }
 
+/* Light theme: Add depth or glow to distinguish the element from its background. */
 html[data-theme="light"] #app-view .sanctuary-glass,
 html[data-theme="light"] #app-view [role="dialog"],
 html[data-theme="light"] #app-view dialog,
@@ -414,6 +474,7 @@ html[data-theme="light"] #app-view [data-dialog-panel] {
   backdrop-filter: blur(16px);
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view [role="dialog"] input,
 html[data-theme="light"] #app-view [role="dialog"] textarea,
 html[data-theme="light"] #app-view [role="dialog"] select,
@@ -428,17 +489,20 @@ html[data-theme="light"] #app-view select {
   border-color: #bdb5a8 !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view input::placeholder,
 html[data-theme="light"] #app-view textarea::placeholder {
   color: #6d6a63 !important;
   opacity: 1;
 }
 
+/* Light theme: Apply these visual adjustments to the selected elements in this state. */
 html[data-theme="light"] #app-view input[type="checkbox"],
 html[data-theme="light"] #app-view input[type="radio"] {
   accent-color: var(--nc-accent);
 }
 
+/* Light theme: Show a visible focus cue so keyboard users can locate the active control. */
 html[data-theme="light"] #app-view input:focus,
 html[data-theme="light"] #app-view textarea:focus,
 html[data-theme="light"] #app-view select:focus {
@@ -453,6 +517,7 @@ html[data-theme="light"] .landing-original {
   background: var(--nc-paper) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] .landing-original header,
 html[data-theme="light"] .landing-original header a,
 html[data-theme="light"] .landing-original header span,
@@ -460,57 +525,69 @@ html[data-theme="light"] .landing-original header nav {
   color: var(--nc-ink) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] .landing-original header nav a,
 html[data-theme="light"] .landing-original header > div > a {
   color: var(--nc-muted) !important;
 }
 
+/* Light theme: Provide pointer-hover feedback without changing the underlying action. */
 html[data-theme="light"] #app-view .landing-original header nav a:not(:hover) {
   color: var(--nc-muted) !important;
 }
 
+/* Light theme: Provide pointer-hover feedback without changing the underlying action. */
 html[data-theme="light"] .landing-original header nav a:hover,
 html[data-theme="light"] .landing-original header > div > a:hover {
   color: var(--nc-accent) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] .landing-original header .nc-theme-toggle {
   color: var(--nc-accent) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] .landing-original .landing-hero-title {
   color: var(--nc-ink) !important;
   filter: none;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] .landing-original > div.relative.z-30 p:first-child {
   color: var(--nc-gold) !important;
   filter: none;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] .landing-original > div.relative.z-30 p:last-child {
   color: var(--nc-muted) !important;
   filter: none;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] .landing-dial-caption [data-dial-title] {
   color: var(--nc-ink) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #landing-dial-hint {
   color: var(--nc-muted) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] .landing-dial-controls button[data-dial-step] {
   color: var(--nc-accent) !important;
   background: var(--nc-sheet) !important;
   border-color: #b9b2a6 !important;
 }
 
+/* Light theme: Provide pointer-hover feedback without changing the underlying action. */
 html[data-theme="light"] .landing-dial-controls button[data-dial-step]:hover {
   background: #e2e7f4 !important;
 }
 
+/* Light theme: Show a visible focus cue so keyboard users can locate the active control. */
 html[data-theme="light"] .landing-dial-controls button:focus-visible {
   outline-color: var(--nc-focus) !important;
 }
@@ -523,26 +600,31 @@ html[data-theme="light"] #app-view .reader-ratings {
   box-shadow: 0 14px 32px rgba(48, 38, 21, .08);
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view .reader-ratings h3,
 html[data-theme="light"] #app-view .rating-entry h4,
 html[data-theme="light"] #app-view .rating-summary-label {
   color: var(--nc-ink) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view .rating-summary strong,
 html[data-theme="light"] #app-view .rating-stars label.is-selected,
 html[data-theme="light"] #app-view .rating-stars label:has(~ label.is-selected) {
   color: var(--nc-gold) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view .rating-stars label:not(.is-selected):not(:has(~ label.is-selected)) {
   color: var(--nc-muted) !important;
 }
 
+/* Light theme: Apply these visual adjustments to the selected elements in this state. */
 html[data-theme="light"] #app-view .rating-entry {
   border-color: #c6bfb2 !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view .rating-entry p,
 html[data-theme="light"] #app-view .rating-summary p,
 html[data-theme="light"] #app-view .rating-distribution > div,
@@ -550,16 +632,19 @@ html[data-theme="light"] #app-view .rating-entry .rating-feedback {
   color: var(--nc-muted) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view .rating-distribution meter,
 html[data-theme="light"] #app-view .rating-distribution meter::-webkit-meter-bar {
   background: #d7d1c6 !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view .rating-distribution meter::-webkit-meter-optimum-value,
 html[data-theme="light"] #app-view .rating-distribution meter::-moz-meter-bar {
   background: var(--nc-accent) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view .rating-signin,
 html[data-theme="light"] #app-view .rating-retry {
   color: var(--nc-accent) !important;
@@ -575,6 +660,7 @@ html[data-theme="light"] #reader-pdf-status-bar {
   box-shadow: 0 12px 32px rgba(48, 38, 21, .1) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] .reader-shell > div:first-child > div:first-child button,
 html[data-theme="light"] #reader-page-turn-nav > button {
   color: var(--nc-ink) !important;
@@ -582,6 +668,7 @@ html[data-theme="light"] #reader-page-turn-nav > button {
   border-color: #c2baad !important;
 }
 
+/* Light theme: Provide pointer-hover feedback without changing the underlying action. */
 html[data-theme="light"] .reader-shell > div:first-child > div:first-child button:hover,
 html[data-theme="light"] #reader-page-turn-nav > button:hover {
   color: var(--nc-accent) !important;
@@ -589,6 +676,7 @@ html[data-theme="light"] #reader-page-turn-nav > button:hover {
   border-color: var(--nc-accent) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #reader-book-title,
 html[data-theme="light"] #reader-book-subtitle,
 html[data-theme="light"] #reader-nav-middle,
@@ -600,55 +688,66 @@ html[data-theme="light"] #reader-pdf-status-bar > div:first-child {
   color: var(--nc-ink) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #reader-mode-toggle {
   background: #e3ddd2 !important;
   border-color: #c2baad !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #reader-mode-toggle .reader-mode-btn {
   color: var(--nc-muted) !important;
 }
 
+/* Light theme: Add depth or glow to distinguish the element from its background. */
 html[data-theme="light"] #reader-mode-toggle .reader-mode-btn.bg-\[\#110D0A\] {
   color: var(--nc-accent) !important;
   background: var(--nc-sheet) !important;
   box-shadow: 0 1px 4px rgba(48, 38, 21, .12) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #reader-book-container > div:first-child {
   background: #e3d9c8 !important;
   border-color: #c6b89f !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #book-scroll-canvas {
   background: #f8f5ef !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #book-scroll-canvas > div {
   color: #25221e !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #reader-pdf-container .bg-\[\#10151F\],
 html[data-theme="light"] #reader-pdf-container .bg-\[\#111621\],
 html[data-theme="light"] #reader-pdf-status-bar .bg-\[\#111621\] {
   background: #e8e2d8 !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #reader-pdf-container [class~="bg-[#10151F]/90"] {
   color: var(--nc-ink) !important;
   background: #e8e2d8 !important;
   border-color: #c6bfb2 !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #reader-pdf-container [class~="text-[#CBD5E1]/95"] {
   color: #25221e !important;
 }
 
+/* Light theme: Apply these visual adjustments to the selected elements in this state. */
 html[data-theme="light"] #reader-pdf-container .border-\[\#1F2735\],
 html[data-theme="light"] #reader-pdf-container .border-\[\#222B3A\] {
   border-color: #c6bfb2 !important;
 }
 
+/* Light theme: Show a visible focus cue so keyboard users can locate the active control. */
 html[data-theme="light"] .reader-shell button:focus-visible,
 html[data-theme="light"] .reader-shell a:focus-visible,
 html[data-theme="light"] #app-view button:focus-visible,
@@ -663,14 +762,17 @@ html[data-theme="light"] #app-view > .bg-obsidian-950 {
   background-image: none !important;
 }
 
+/* Light theme: Apply these visual adjustments to the selected elements in this state. */
 html[data-theme="light"] #app-view > .bg-obsidian-950 > .fixed[aria-hidden="true"] {
   opacity: .12 !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view .sanctuary-glass {
   background: rgba(243, 240, 234, .94) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view [data-purpose="top-navigation-bar"],
 html[data-theme="light"] #app-view [data-purpose="site-footer"] {
   color: var(--nc-ink) !important;
@@ -678,30 +780,36 @@ html[data-theme="light"] #app-view [data-purpose="site-footer"] {
   border-color: #c6bfb2 !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view [data-purpose="site-footer"] > div {
   color: var(--nc-muted) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view .gold-pill-active {
   color: #fff !important;
   background: var(--nc-accent) !important;
 }
 
+/* Light theme: Add depth or glow to distinguish the element from its background. */
 html[data-theme="light"] #app-view .gold-cta-btn {
   color: #fff !important;
   background: var(--nc-accent) !important;
   box-shadow: 0 6px 18px rgba(31, 63, 176, .18) !important;
 }
 
+/* Light theme: Provide pointer-hover feedback without changing the underlying action. */
 html[data-theme="light"] #app-view .gold-cta-btn:hover {
   background: #18358f !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view #tab-signin,
 html[data-theme="light"] #app-view #tab-signup {
   color: var(--nc-muted);
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] #app-view #tab-signin[aria-selected="true"],
 html[data-theme="light"] #app-view #tab-signup[aria-selected="true"] {
   color: var(--nc-accent-ink) !important;
@@ -715,30 +823,36 @@ html[data-theme="light"] .nc-audio-player {
   box-shadow: 0 12px 36px rgba(48, 38, 21, .2) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] .nc-audio-player .nc-audio-copy p {
   color: var(--nc-muted) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] .nc-audio-player .nc-audio-meta #player-voice {
   color: var(--nc-gold) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] .nc-audio-actions button {
   color: var(--nc-accent) !important;
   border-color: rgba(31, 63, 176, .35) !important;
   background: transparent !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] .nc-audio-actions #player-play-btn {
   color: #fff !important;
   background: var(--nc-accent) !important;
   border-color: var(--nc-accent) !important;
 }
 
+/* Light theme: Show a visible focus cue so keyboard users can locate the active control. */
 html[data-theme="light"] .nc-audio-actions button:focus-visible {
   outline-color: var(--nc-focus) !important;
 }
 
+/* Light theme: Add depth or glow to distinguish the element from its background. */
 html[data-theme="light"] #app-view .nc-toast,
 html[data-theme="light"] #app-view [role="status"].toast,
 html[data-theme="light"] body > .nc-toast {
@@ -748,6 +862,7 @@ html[data-theme="light"] body > .nc-toast {
   box-shadow: 0 10px 28px rgba(48, 38, 21, .16) !important;
 }
 
+/* Light theme: Apply the foreground and surface colors for this component state. */
 html[data-theme="light"] ::selection {
   color: #141414;
   background: rgba(31, 63, 176, .22);

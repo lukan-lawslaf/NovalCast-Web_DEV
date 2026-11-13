@@ -69,6 +69,7 @@ const path = require('path');
   await page.screenshot({ path: screenshotPath });
   console.log('Saved screenshot to:', screenshotPath);
 
+  // Release this browser or server resource so later checks start cleanly.
   await browser.close();
   console.log('Environment and Logo verification completed successfully!');
 })();

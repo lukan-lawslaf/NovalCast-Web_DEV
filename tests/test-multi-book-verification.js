@@ -12,6 +12,7 @@ const TEST_SLUGS = [
   { slug: 'the-war-of-the-worlds', expectedAuthor: 'H. G. Wells', minCh: 20 }
 ];
 
+// Check that navigation and displayed content remain associated with the selected book.
 async function verifyMultiBook() {
   console.log('--- Multi-Book Automated Verification Test ---');
   const browser = await chromium.launch({ headless: true });
@@ -61,6 +62,7 @@ async function verifyMultiBook() {
     }
     process.exit(1);
   } finally {
+    // Release this browser or server resource so later checks start cleanly.
     await browser.close();
   }
 }

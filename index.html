@@ -4,15 +4,18 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- The meta redirect is a fallback when JavaScript does not execute. -->
   <meta http-equiv="refresh" content="0; url=frontend/index.html"/>
   <title>NovelCast — Curated Audiobooks & Readers</title>
   <link rel="icon" type="image/svg+xml" href="frontend/logo.svg"/>
   <script>
     // Preserve hash routes (e.g. #/reader?book=ikigai) when redirecting from root
+    // replace avoids leaving the redirect shell in browser history; query and hash preserve the selected view.
     window.location.replace("frontend/index.html" + window.location.search + window.location.hash);
   </script>
 </head>
 <body style="background:#06080b; color:#dfe2eb; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; font-family:'Plus Jakarta Sans',sans-serif;">
+  <!-- A visible link gives the visitor a manual path if automatic redirection fails. -->
   <p style="letter-spacing:0.1em; font-size:14px; opacity:0.8;">
     Entering NovelCast Sanctuary... <a href="frontend/index.html" style="color:#f3d182; text-decoration:none; margin-left:8px;">Click here if not redirected</a>
   </p>

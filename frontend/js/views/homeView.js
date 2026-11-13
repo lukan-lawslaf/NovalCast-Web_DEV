@@ -114,6 +114,7 @@ window.NovelCastViews.home = {
     }
 
     // Refresh if live catalog loads while on home view
+    // Refresh the home display when the catalog finishes loading, unless the view has been removed.
     const onRefresh = () => {
       const container = document.getElementById('app-view');
       const hash = location.hash.replace(/^#\/?/, '').split('?')[0];
@@ -125,6 +126,7 @@ window.NovelCastViews.home = {
       }
     };
 
+    // Listen once for the initial catalog update and remove the listener with the view’s controller.
     document.addEventListener('novelcast:books-loaded', onRefresh, { once: true, signal: controller.signal });
   }
 };

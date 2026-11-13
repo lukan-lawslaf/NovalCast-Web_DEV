@@ -28,9 +28,11 @@ function createHarness({
     <button id="fixed-dark" data-theme-toggle="dark"></button>
   </body></html>`, { url: 'https://novelcast.example/', runScripts: 'outside-only' });
   const { window } = dom;
+  // Model the browser motion preference and its listeners so tests can change it on demand.
   const mediaListeners = new Set();
   const media = {
     matches: reducedMotion,
+    // Support modern and legacy media-query listeners so preference changes can be dispatched.
     addEventListener(type, listener) { if (type === 'change') mediaListeners.add(listener); },
     removeEventListener(type, listener) { if (type === 'change') mediaListeners.delete(listener); },
     addListener(listener) { mediaListeners.add(listener); },
@@ -49,6 +51,7 @@ function createHarness({
     get: () => isHidden ? 'hidden' : 'visible',
   });
 
+  // Keep transition promises under test control to reproduce overlapping updates and cleanup.
   const transitions = [];
   if (viewTransitions) {
     window.document.startViewTransition = (update) => {
@@ -62,7 +65,9 @@ function createHarness({
         callbackDone,
         updateCalled: false,
         skipped: false,
+        // Record cancellation without requiring the browser view-transition API.
         skipTransition() { this.skipped = true; },
+        // Run the captured update on demand and settle its promise even if it throws.
         runUpdate() {
           transition.updateCalled = true;
           try {
@@ -88,20 +93,24 @@ function createHarness({
 
   window.eval(themeSource);
 
+  // Click the theme control and allow the resulting asynchronous work to progress.
   function clickToggle(id = 'toggle') {
     window.document.getElementById(id).click();
     return Promise.resolve().then(() => Promise.resolve());
   }
 
+  // Click the theme control immediately to exercise rapid or overlapping interactions.
   function clickToggleNow(id = 'toggle') {
     window.document.getElementById(id).click();
   }
 
+  // Simulate a document visibility change so hidden-page behavior can be tested.
   function setHidden(next) {
     isHidden = next;
     window.document.dispatchEvent(new window.Event('visibilitychange'));
   }
 
+  // Change the simulated reduced-motion preference and notify registered listeners.
   function changeMotion(matches) {
     media.matches = matches;
     for (const listener of mediaListeners) listener({ matches });
@@ -113,13 +122,17 @@ function createHarness({
   };
 }
 
+// Build a controlled ink renderer for checking animation behavior without relying on real drawing.
 function makeInkRenderer() {
   const calls = { prepare: 0, start: [], cleanup: 0 };
   const ink = {
+    // Record preparation and return controls that capture animation callbacks and cleanup.
     prepare() {
       calls.prepare += 1;
       return {
+        // Preserve callbacks for tests to trigger cancellation or failure explicitly.
         start(onCancel, onError) { calls.start.push({ onCancel, onError }); },
+        // Count cleanup calls so tests can detect leaked animation resources.
         cleanup() { calls.cleanup += 1; },
       };
     },
@@ -127,15 +140,16 @@ function makeInkRenderer() {
   return { ink, calls };
 }
 
+// Let queued promise callbacks run before the test inspects their effects.
 async function flushMicrotasks() {
   for (let i = 0; i < 4; i += 1) await Promise.resolve();
 }
 
+// Scenario: setTheme stays synchronous, persists, updates every toggle, and emits the theme change. The checks below exercise this behavior as one independent case.
 test('setTheme stays synchronous, persists, updates every toggle, and emits the theme change', () => {
   const h = createHarness();
   const changes = [];
   h.document.addEventListener('novelcast:themechange', (event) => changes.push(event.detail));
-
   assert.equal(h.window.NovelCastTheme.setTheme('light'), 'light');
   assert.equal(h.window.NovelCastTheme.getTheme(), 'light');
   assert.equal(h.document.documentElement.dataset.theme, 'light');
@@ -152,10 +166,10 @@ test('setTheme stays synchronous, persists, updates every toggle, and emits the 
   h.dom.window.close();
 });
 
+// Scenario: theme toggle animates its delegated click and clears the marker when finished. The checks below exercise this behavior as one independent case.
 test('theme toggle animates its delegated click and clears the marker when finished', async () => {
   const h = createHarness();
   await h.clickToggle();
-
   assert.equal(h.transitions.length, 1);
   assert.equal(h.transitions[0].updateCalled, true);
   assert.equal(h.window.NovelCastTheme.getTheme(), 'light');
@@ -168,11 +182,11 @@ test('theme toggle animates its delegated click and clears the marker when finis
   h.dom.window.close();
 });
 
+// Scenario: ink renderer starts only after readiness and cleans up once on normal finish. The checks below exercise this behavior as one independent case.
 test('ink renderer starts only after readiness and cleans up once on normal finish', async () => {
   const { ink, calls } = makeInkRenderer();
   const h = createHarness({ ink });
   h.clickToggleNow();
-
   assert.equal(calls.prepare, 1);
   assert.equal(calls.start.length, 0, 'renderer waits for the transition ready signal');
   assert.equal(calls.cleanup, 0);
@@ -187,6 +201,7 @@ test('ink renderer starts only after readiness and cleans up once on normal fini
   h.dom.window.close();
 });
 
+// Scenario: cancellation before readiness cleans the renderer once and prevents it from starting. The checks below exercise this behavior as one independent case.
 test('cancellation before readiness cleans the renderer once and prevents it from starting', async () => {
   const { ink, calls } = makeInkRenderer();
   const h = createHarness({ ink });
@@ -201,18 +216,17 @@ test('cancellation before readiness cleans the renderer once and prevents it fro
   await flushMicrotasks();
   transition.finished.resolve();
   await flushMicrotasks();
-
   assert.equal(calls.start.length, 0);
   assert.equal(calls.cleanup, 1, 'late readiness and finish must not clean up a second time');
   assert.equal(h.document.documentElement.hasAttribute('data-theme-transition'), false);
   h.dom.window.close();
 });
 
+// Scenario: a renderer preparation failure falls back to an immediate theme change. The checks below exercise this behavior as one independent case.
 test('a renderer preparation failure falls back to an immediate theme change', () => {
   let prepareCalls = 0;
   const h = createHarness({ ink: { prepare() { prepareCalls += 1; throw new Error('canvas unavailable'); } } });
   h.clickToggleNow();
-
   assert.equal(prepareCalls, 1);
   assert.equal(h.transitions.length, 0);
   assert.equal(h.window.NovelCastTheme.getTheme(), 'light');
@@ -220,6 +234,7 @@ test('a renderer preparation failure falls back to an immediate theme change', (
   h.dom.window.close();
 });
 
+// Scenario: renderer failure callback settles the theme and cleans up once. The checks below exercise this behavior as one independent case.
 test('renderer failure callback settles the theme and cleans up once', async () => {
   const { ink, calls } = makeInkRenderer();
   const h = createHarness({ ink });
@@ -241,16 +256,17 @@ test('renderer failure callback settles the theme and cleans up once', async () 
   h.dom.window.close();
 });
 
+// Scenario: a missing ink renderer uses the immediate theme switch. The checks below exercise this behavior as one independent case.
 test('a missing ink renderer uses the immediate theme switch', async () => {
   const h = createHarness({ ink: false });
   await h.clickToggle();
-
   assert.equal(h.transitions.length, 0);
   assert.equal(h.window.NovelCastTheme.getTheme(), 'light');
   assert.equal(h.document.documentElement.hasAttribute('data-theme-transition'), false);
   h.dom.window.close();
 });
 
+// Scenario: reduced motion, hidden pages, and active book openings switch immediately. The checks below exercise this behavior as one independent case.
 test('reduced motion, hidden pages, and active book openings switch immediately', async (t) => {
   const cases = [
     ['reduced motion', { reducedMotion: true }],
@@ -276,6 +292,7 @@ test('reduced motion, hidden pages, and active book openings switch immediately'
   });
 });
 
+// Scenario: switches immediately when view transitions are unavailable or throw. The checks below exercise this behavior as one independent case.
 test('switches immediately when view transitions are unavailable or throw', async (t) => {
   await t.test('unsupported browser', async () => {
     const h = createHarness({ viewTransitions: false });
@@ -294,6 +311,7 @@ test('switches immediately when view transitions are unavailable or throw', asyn
   });
 });
 
+// Scenario: cleans up when the transition rejects. The checks below exercise this behavior as one independent case.
 test('cleans up when the transition rejects', async () => {
   const h = createHarness();
   await h.clickToggle();
@@ -307,6 +325,7 @@ test('cleans up when the transition rejects', async () => {
   h.dom.window.close();
 });
 
+// Scenario: settling the page before the update callback prevents a stale callback. The checks below exercise this behavior as one independent case.
 test('settling the page before the update callback prevents a stale callback', async (t) => {
   const cases = [
     ['hash navigation', (h) => h.window.dispatchEvent(new h.window.HashChangeEvent('hashchange'))],
@@ -333,6 +352,7 @@ test('settling the page before the update callback prevents a stale callback', a
   }
 });
 
+// Scenario: a ready rejection before the update callback applies the requested theme and ignores the late callback. The checks below exercise this behavior as one independent case.
 test('a ready rejection before the update callback applies the requested theme and ignores the late callback', async () => {
   const h = createHarness({ autoUpdate: false });
   h.clickToggleNow();
@@ -340,7 +360,6 @@ test('a ready rejection before the update callback applies the requested theme a
   transition.ready.reject(new Error('snapshot unavailable'));
   await Promise.resolve();
   await Promise.resolve();
-
   assert.equal(transition.skipped, true);
   assert.equal(h.window.NovelCastTheme.getTheme(), 'light');
   assert.equal(h.document.documentElement.hasAttribute('data-theme-transition'), false);
@@ -350,13 +369,13 @@ test('a ready rejection before the update callback applies the requested theme a
   h.dom.window.close();
 });
 
+// Scenario: a synchronous programmatic setter overrides a pending click before its callback. The checks below exercise this behavior as one independent case.
 test('a synchronous programmatic setter overrides a pending click before its callback', async () => {
   const h = createHarness({ autoUpdate: false });
   const changes = [];
   h.document.addEventListener('novelcast:themechange', (event) => changes.push(event.detail.theme));
   h.clickToggleNow();
   const transition = h.transitions[0];
-
   assert.equal(h.window.NovelCastTheme.setTheme('dark'), 'dark');
   assert.equal(transition.skipped, true);
   assert.equal(h.window.NovelCastTheme.getTheme(), 'dark');
@@ -367,13 +386,13 @@ test('a synchronous programmatic setter overrides a pending click before its cal
   h.dom.window.close();
 });
 
+// Scenario: rapid clicks keep the newest transition and theme intent in control. The checks below exercise this behavior as one independent case.
 test('rapid clicks keep the newest transition and theme intent in control', async () => {
   const h = createHarness();
   await h.clickToggle();
   const first = h.transitions[0];
   await h.clickToggle();
   const second = h.transitions[1];
-
   assert.equal(first.skipped, true);
   assert.equal(h.window.NovelCastTheme.getTheme(), 'dark', 'two rapid toggles return to the original theme');
   assert.equal(h.document.documentElement.hasAttribute('data-theme-transition'), true);
@@ -390,6 +409,7 @@ test('rapid clicks keep the newest transition and theme intent in control', asyn
   h.dom.window.close();
 });
 
+// Scenario: a stale callback from a cancelled transition cannot override the newest click. The checks below exercise this behavior as one independent case.
 test('a stale callback from a cancelled transition cannot override the newest click', async () => {
   const h = createHarness();
   const changes = [];
@@ -399,7 +419,6 @@ test('a stale callback from a cancelled transition cannot override the newest cl
   await Promise.resolve();
   await Promise.resolve();
   await Promise.resolve();
-
   assert.equal(h.transitions.length, 1, 'returning to the already active theme cancels the pending wipe');
   assert.equal(h.transitions[0].skipped, true);
   assert.equal(h.window.NovelCastTheme.getTheme(), 'dark');
@@ -413,6 +432,7 @@ test('a stale callback from a cancelled transition cannot override the newest cl
   h.dom.window.close();
 });
 
+// Scenario: a programmatic theme change cancels an in-flight animation. The checks below exercise this behavior as one independent case.
 test('a programmatic theme change cancels an in-flight animation', async () => {
   const h = createHarness();
   await h.clickToggle();
@@ -427,6 +447,7 @@ test('a programmatic theme change cancels an in-flight animation', async () => {
   h.dom.window.close();
 });
 
+// Scenario: navigation, page hide, and enabling reduced motion stop an in-flight animation. The checks below exercise this behavior as one independent case.
 test('navigation, page hide, and enabling reduced motion stop an in-flight animation', async (t) => {
   for (const [label, cancel] of [
     ['hash navigation', (h) => h.window.dispatchEvent(new h.window.HashChangeEvent('hashchange'))],

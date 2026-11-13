@@ -39,6 +39,7 @@ function readableDescription(raw) {
     .trim();
 }
 
+// Remove accents and punctuation so title and author comparisons ignore formatting differences.
 function normalizeWords(value) {
   return typeof value === 'string'
     ? value.normalize('NFKD').replace(/\p{M}/gu, '').replace(/[’‘']/g, '').toLowerCase()
@@ -114,6 +115,7 @@ async function enrich({ title, author } = {}) {
       retries: 1,
     });
 
+    // Keep only candidates whose author and title both match the requested book.
     const matches = (Array.isArray(payload.docs) ? payload.docs : []).flatMap(candidate => {
       if (!candidate || !Array.isArray(candidate.author_name) ||
           !candidate.author_name.some(name => authorKeys(name).some(key => authors.has(key)))) return [];

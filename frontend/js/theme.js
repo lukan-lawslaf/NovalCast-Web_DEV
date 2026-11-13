@@ -13,6 +13,7 @@
     return typeof theme === 'string' && THEMES.has(theme) ? theme : null;
   }
 
+  // Use the saved preference when available, with a safe default if storage cannot be read.
   function readSavedTheme() {
     try {
       return normalizeTheme(window.localStorage.getItem(STORAGE_KEY));
@@ -22,6 +23,7 @@
   }
 
   // Keep all theme buttons, labels and pressed states consistent with the active theme.
+  // Update every theme toggle after a theme change so labels and pressed state stay consistent.
   function syncToggles(theme) {
     document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
       const fixedTarget = normalizeTheme(button.dataset.themeToggle);
@@ -71,11 +73,13 @@
     return nextTheme;
   }
 
+  // Return the theme currently applied to the document.
   function getTheme() {
     return normalizeTheme(root.dataset.theme) || 'dark';
   }
 
   // Release the previous transition mask and optionally finish its pending theme change.
+  // Stop the current visual transition and optionally apply its pending theme immediately.
   function cancelTransition(commitPending = false) {
     const active = activeTransition;
     if (!active) return;
@@ -93,11 +97,13 @@
     return applyTheme(theme, options);
   }
 
+  // Switch from the current theme to its opposite.
   function toggle() {
     return setTheme(getTheme() === 'light' ? 'dark' : 'light');
   }
 
   // Use the ink reveal only when supported and allowed; otherwise apply the theme immediately.
+  // Use the animated reveal when supported; otherwise apply the selected theme directly.
   function transitionTo(theme) {
     if (typeof document.startViewTransition !== 'function' || typeof window.NovelCastThemeInk?.prepare !== 'function' || reducedMotion?.matches ||
         document.visibilityState === 'hidden' || root.hasAttribute('data-book-opening')) {
@@ -126,6 +132,7 @@
       return setTheme(theme);
     }
 
+    // Only the active transition may commit its pending theme and remove the temporary mask.
     const finish = () => {
       if (activeTransition === active) {
         if (!active.applied) applyTheme(theme);
@@ -160,6 +167,7 @@
   // Settle before another route's cover animation or a backgrounded page takes over.
   window.addEventListener('hashchange', () => cancelTransition(true));
   window.addEventListener('pagehide', () => cancelTransition(true));
+  // Finish transitions when the page becomes hidden so a paused animation cannot leave stale state.
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') cancelTransition(true);
   });
@@ -172,6 +180,7 @@
     getTheme,
     setTheme,
     toggle,
+    // Newly rendered controls need the theme that is already applied to the document.
     syncToggles: () => syncToggles(getTheme()),
   });
 

@@ -6,6 +6,7 @@ const { chromium } = require('playwright');
   const page = await browser.newPage({ viewport: { width: 1440, height: 950 } });
   
   console.log('Navigating to http://localhost:3000/ ...');
+  // Open the page before checking the interface in its rendered state.
   await page.goto('http://localhost:3000/', { waitUntil: 'networkidle' });
   
   // Verify all books bottom positions & featured book
@@ -28,6 +29,7 @@ const { chromium } = require('playwright');
   // Hover over the middle book (book-featured) to test mousemove cursor tilt
   console.log('Hovering over middle book (book-featured)...');
   const featuredBook = page.locator('.book-featured');
+  // Perform the hover action as a user would, then observe the resulting behavior.
   await featuredBook.hover();
   await page.mouse.move(100, 100);
   await page.waitForTimeout(400);
@@ -39,5 +41,6 @@ const { chromium } = require('playwright');
   await page.screenshot({ path: 'Referance/landing_updated_verified.png' });
   console.log('Screenshot saved to Referance/landing_updated_verified.png');
 
+  // Release this browser or server resource so later checks start cleanly.
   await browser.close();
 })();

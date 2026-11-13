@@ -24,6 +24,7 @@
     const height = Math.max(2, Math.round(viewHeight * resolution));
     const unit = Math.min(width, height);
     const layers = [];
+    // Build several grids of vortices at different scales; their seeded positions stay stable across frames.
     for (const [layer, spacing] of [.14, .065, .03].entries()) {
       const rows = Math.ceil(height / unit / spacing) + 4;
       const cols = Math.ceil(width / unit / spacing) + 4;
@@ -45,12 +46,14 @@
     const boundary = new Float32Array(count);
     let min = Infinity;
     let max = -Infinity;
+    // Trace each sample through nearby vortices, then store its position along the reveal boundary.
     for (let y = 0, index = 0; y < height; y++) {
       for (let x = 0; x < width; x++, index++) {
         const startX = x / unit;
         const startY = y / unit;
         let px = startX;
         let py = startY;
+        // Each successive layer bends the sample again, adding fine detail to the larger swirls.
         for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
           const layer = layers[layerIndex];
           const cellX = Math.floor(px / layer.spacing) + 2;
@@ -61,6 +64,7 @@
               const dx = px - vortex.x;
               const dy = py - vortex.y;
               const distance = (dx * dx + dy * dy) / (vortex.radius * vortex.radius);
+              // Distant vortices have negligible influence, so avoid calculating their rotation.
               if (distance > 4) continue;
               const angle = vortex.spin * Math.exp(-distance * 1.7);
               const cosine = Math.cos(angle);
@@ -89,6 +93,7 @@
     const columns = field.width + 2;
     const rows = field.height + 2;
     const values = new Float32Array(columns * rows).fill(-2);
+    // Normalize field values into a padded grid; the border closes contours at the viewport edge.
     for (let y = 0; y < field.height; y++) {
       for (let x = 0; x < field.width; x++) {
         values[(y + 1) * columns + x + 1] = (field.boundary[y * field.width + x] - field.min) / (field.max - field.min);
@@ -103,6 +108,7 @@
     // Convert the field threshold into closed curves that define the moving reveal edge.
     function contour(front) {
       const nodes = new Map();
+      // Find where the threshold crosses a cell edge; shared IDs join adjacent cells into one curve.
       function edge(x, y, side, a, b, c, d) {
         let column = x;
         let row = y;
@@ -124,6 +130,7 @@
         }
         return id;
       }
+      // Classify each square by its four corners, then connect the corresponding crossing points.
       for (let y = 0; y < rows - 1; y++) {
         for (let x = 0; x < columns - 1; x++) {
           const index = y * columns + x;
@@ -142,7 +149,9 @@
       }
       const visited = new Set();
       const paths = [];
+      // Midpoints between adjacent samples join the quadratic curves smoothly.
       const coordinate = (a, b) => `${((a.x + b.x) / 2).toFixed(1)} ${((a.y + b.y) / 2).toFixed(1)}`;
+      // Walk each unvisited chain once and turn its points into a smooth closed clipping path.
       for (const [start] of nodes) {
         if (visited.has(start)) continue;
         const points = [];
@@ -192,6 +201,7 @@
       start(complete, fail) {
         const clock = document.getAnimations?.().find(animation => animation.animationName === 'nc-theme-ink-sweep');
         let previousProgress = -1;
+        // Keep drawing until the reveal finishes; use frame time if the transition clock is unavailable.
         const tick = time => {
           if (stopped) return;
           startedAt ??= time;
@@ -211,6 +221,7 @@
   }
 
   window.NovelCastThemeInk = Object.freeze({ prepare });
+  // Precompute the field during idle time only when the animated transition can be used.
   const warm = () => {
     if (!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches && typeof document.startViewTransition === 'function') createField();
   };

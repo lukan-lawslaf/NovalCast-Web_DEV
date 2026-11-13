@@ -12,11 +12,14 @@ const root = path.resolve(__dirname, '..');
 // Gather source files while excluding dependency, Git, and archive folders.
 function getFilesRecursively(dir, extensions) {
   let files = [];
+  // Optional source directories may be absent; return an empty list instead of failing.
   if (!fs.existsSync(dir)) return files;
   const entries = fs.readdirSync(dir, { withFileTypes: true });
+  // Recurse into source folders and collect files matching the requested extensions.
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
+      // Avoid scanning installed libraries, Git internals, and archived snapshots.
       if (entry.name !== 'node_modules' && entry.name !== '.git' && entry.name !== 'archive') {
         files = files.concat(getFilesRecursively(fullPath, extensions));
       }
@@ -29,23 +32,28 @@ function getFilesRecursively(dir, extensions) {
 
 // Read the shell configuration, compile used utility classes, and write the generated stylesheet.
 function build() {
+  // Tailwind receives raw source strings so it can discover utility classes in HTML and templates.
   const content = [];
   const scannedFiles = [
     ...getFilesRecursively(path.join(root, 'frontend'), ['.html', '.js']),
     ...getFilesRecursively(path.join(root, 'components'), ['.tsx', '.jsx', '.js'])
   ];
 
+  // Deduplicate paths before reading them; a file should contribute content only once.
   const uniqueFiles = [...new Set(scannedFiles)];
   for (const file of uniqueFiles) {
     const ext = path.extname(file).replace('.', '');
+    // Keep the extension with each source so the processor can interpret its syntax.
     content.push({ raw: fs.readFileSync(file, 'utf8'), extension: ext });
   }
 
+  // This build-time design configuration extends Tailwind rather than replacing its defaults.
   const config = {
     content,
     darkMode: 'class',
     theme: {
       extend: {
+        // Semantic color names become utilities used across the catalog and reader interface.
         colors: {
           'primary-container': '#f5d77f',
           'on-tertiary-fixed': '#241a00',
@@ -93,6 +101,7 @@ function build() {
           lightMuted: '#ADB5BD',
         },
         borderRadius: { DEFAULT: '1rem', lg: '2rem', xl: '3rem', full: '9999px' },
+        // Named spacing values keep margins, padding, and shell dimensions consistent.
         spacing: {
           'space-3xl': '4rem',
           'space-sm': '0.75rem',
@@ -105,6 +114,7 @@ function build() {
           'space-xs': '0.5rem',
           'space-md': '1rem',
         },
+        // Map component typography roles to the project font families and fallbacks.
         fontFamily: {
           'body-sm': ['"Plus Jakarta Sans"'],
           'label-badge': ['"Plus Jakarta Sans"'],
@@ -122,6 +132,7 @@ function build() {
           serif: ['"Playfair Display"', '"Bodoni Moda"', 'Didot', 'serif'],
           cinzel: ['"Cinzel"', 'serif'],
         },
+        // Pair text sizes with their line height, weight, and letter spacing.
         fontSize: {
           'body-sm': ['12px', { lineHeight: '18px', fontWeight: '400' }],
           'label-badge': ['11px', { lineHeight: '14px', letterSpacing: '0.02em', fontWeight: '700' }],
@@ -137,10 +148,12 @@ function build() {
         },
       },
     },
+    // Extend form/control utilities and include browser-normalizing base rules.
     plugins: [forms, containerQueries],
     corePlugins: { preflight: true },
   };
 
+  // Ask Tailwind for its layers, then append the shared link reset before compilation.
   const inputCss = `
     @tailwind base;
     @tailwind components;
@@ -153,8 +166,10 @@ function build() {
     }
   `;
 
+  // Compile utilities and add vendor prefixes; callers await the returned Promise.
   return postcss([tailwind(config), autoprefixer()])
     .process(inputCss, { from: undefined })
+    // Write the completed stylesheet only after processing has finished successfully.
     .then((result) => {
       const outputBanner = '/* Compiled from Tailwind CSS for NovelCast; preflight + components + utilities */\n';
       const finalCss = outputBanner + result.css;
@@ -163,6 +178,7 @@ function build() {
         path.join(root, 'frontend/css/site.css')
       ];
 
+      // Ensure the output directory exists before writing the generated CSS file.
       for (const target of targets) {
         fs.mkdirSync(path.dirname(target), { recursive: true });
         fs.writeFileSync(target, finalCss);
@@ -171,6 +187,7 @@ function build() {
     });
 }
 
+// The immediately invoked async function waits for the stylesheet build to complete.
 (async () => {
   await build();
 })();

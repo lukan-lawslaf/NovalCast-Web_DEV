@@ -14,6 +14,7 @@ const path = require('path');
 
   // 1. Visit Reader Page
   console.log('Navigating to http://localhost:3000/#/reader?book=ikigai...');
+  // Open the page before checking the interface in its rendered state.
   await page.goto('http://localhost:3000/#/reader?book=ikigai', { waitUntil: 'networkidle' });
   await page.waitForTimeout(1000);
 
@@ -50,6 +51,7 @@ const path = require('path');
 
   // 4. Click PDF Mode toggle
   console.log('Clicking PDF mode toggle...');
+  // Perform the click action as a user would, then observe the resulting behavior.
   await page.click('#btn-mode-pdf');
   await page.waitForTimeout(600);
 
@@ -94,6 +96,7 @@ const path = require('path');
 
   // 7. Toggle back to Book Mode
   console.log('Toggling back to Book mode...');
+  // Perform the click action as a user would, then observe the resulting behavior.
   await page.click('#btn-mode-book');
   await page.waitForTimeout(400);
 
@@ -103,6 +106,7 @@ const path = require('path');
     console.log('PASS: Toggled back to Book mode seamlessly.');
   }
 
+  // Release this browser or server resource so later checks start cleanly.
   await browser.close();
   console.log('All tests passed successfully!');
 })();

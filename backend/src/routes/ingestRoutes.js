@@ -13,11 +13,16 @@ const MAX_TOKEN_LENGTH = 512;
 const MAX_SEARCH_LENGTH = 160;
 const MAX_SLUG_LENGTH = 80;
 
+// Hash tokens to a fixed size so the comparison can use constant-time byte comparison.
 const digest = (token) => createHash('sha256').update(token, 'utf8').digest();
+// Only positive safe integer IDs identify a source book.
 const isBookId = (value) => Number.isSafeInteger(value) && value > 0;
+// Reject blank, non-string, and oversized operator-provided text.
 const isBoundedText = (value, max) => typeof value === 'string' && value.length <= max && Boolean(value.trim());
+// Accept a missing body or a plain object-shaped JSON value, not an array.
 const isObjectBody = (value) => value === undefined || (value !== null && typeof value === 'object' && !Array.isArray(value));
 
+// Build an ingestion router with injectable dependencies for isolated checks.
 function createIngestRouter({
   adminToken = env.INGEST_ADMIN_TOKEN,
   ingestOne = ingestBook,
@@ -37,6 +42,7 @@ function createIngestRouter({
     if (!expectedDigest) {
       return res.status(503).json({ error: 'HTTP catalog ingestion is disabled.' });
     }
+    // Extract the bearer token and compare its digest without exposing the configured token.
     const token = /^Bearer (\S{1,512})$/i.exec(req.get('Authorization') || '')?.[1];
     if (!token || !timingSafeEqual(digest(token), expectedDigest)) {
       res.set('WWW-Authenticate', 'Bearer realm="NovelCast ingestion"');
@@ -63,6 +69,7 @@ function createIngestRouter({
     const { gutendexId, search, slug, featured } = req.body || {};
     const hasId = gutendexId !== undefined;
     const hasSearch = search !== undefined;
+    // Require exactly one source selector and validate it before starting an import.
     if (hasId === hasSearch || (hasId && !isBookId(gutendexId)) || (hasSearch && !isBoundedText(search, MAX_SEARCH_LENGTH))) {
       return res.status(400).json({ error: 'Provide either a positive integer gutendexId or a search of at most 160 characters.' });
     }
@@ -89,6 +96,7 @@ function createIngestRouter({
     if (!isObjectBody(req.body)) return res.status(400).json({ error: 'Provide a JSON object.' });
     const { only } = req.body || {};
     let books = CURATED_BOOKS;
+    // Resolve an optional subset against the curated IDs and reject unknown entries.
     if (only !== undefined) {
       if (!Array.isArray(only) || !only.length || only.length > CURATED_BOOKS.length || !only.every(isBookId)) {
         return res.status(400).json({ error: 'Only must be a nonempty array of curated Gutendex IDs.' });

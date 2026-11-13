@@ -1,29 +1,51 @@
 /* Ratings appearance: summary, distribution meters, accessible star inputs, and feedback. */
 .reader-ratings { border: 1px solid #e7cd9325; border-radius: 24px; padding: clamp(22px,3vw,36px); background: linear-gradient(145deg,#1c222c,#141922); }
+/* Reader: Set readable typography and spacing for this text role. */
 .reader-ratings h3 { font: 500 28px 'Newsreader',serif; color: #f3e9d9; margin-bottom: 25px; }
+/* Ratings: Align child controls along a row or column and manage wrapping/spacing. */
 .rating-summary { display:flex; align-items:center; gap:20px; }
+/* Ratings: Set readable typography and spacing for this text role. */
 .rating-summary strong { font: 400 58px 'Newsreader',serif; color:#f1d391; }
+/* Ratings: Set readable typography and spacing for this text role. */
 .rating-summary-label { color:#f0e7d7; font-weight:600; }
+/* Ratings: Set readable typography and spacing for this text role. */
 .rating-summary p,.rating-entry p { color:#a8afba; font-size:13px; line-height:1.7; }
 /* Each row aligns a star label, vote meter, and percentage. */
 .rating-distribution { display:grid; gap:10px; margin:26px 0; }
+/* Ratings: Use grid tracks to align content and control the number of columns. */
 .rating-distribution>div { display:grid; grid-template-columns:28px 1fr 36px; gap:12px; align-items:center; font-size:12px; color:#bdc2ca; }
+/* Ratings: Set readable typography and spacing for this text role. */
 .rating-distribution>div>span:last-child { text-align:right; font-variant-numeric:tabular-nums; }
+/* Ratings: Control overflowing content so long labels or artwork stay inside their container. */
 .rating-distribution meter { width:100%; height:7px; border:0; border-radius:8px; overflow:hidden; background:#303641; }
+/* Ratings: Set the element dimensions so content fits the available space. */
 .rating-distribution meter::-webkit-meter-bar { background:#303641; border:0; height:7px; }
+/* Ratings: Apply the foreground and surface colors for this component state. */
 .rating-distribution meter::-webkit-meter-optimum-value { background:#e4c980; }
+/* Ratings: Apply the foreground and surface colors for this component state. */
 .rating-distribution meter::-moz-meter-bar { background:#e4c980; }
+/* Ratings: Apply these visual adjustments to the selected elements in this state. */
 .rating-entry { padding-top:24px; border-top:1px solid #ffffff12; }
+/* Ratings: Set readable typography and spacing for this text role. */
 .rating-entry h4 { color:#f3e9d9; font:500 22px 'Newsreader',serif; margin-bottom:6px; }
 /* Native radio inputs remain interactive while their labels display the stars. */
 .rating-stars { display:flex; gap:9px; margin:16px 0 10px; }
+/* Ratings: Use grid tracks to align content and control the number of columns. */
 .rating-stars label { position:relative; display:grid; place-items:center; width:44px; height:48px; cursor:pointer; color:#687181; font-size:35px; transition:color .2s,transform .2s; }
+/* Ratings: Position this layer relative to its container or viewport without disturbing nearby content. */
 .rating-stars input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+/* Ratings: Show a visible focus cue so keyboard users can locate the active control. */
 .rating-stars label.is-selected,.rating-stars label:hover,.rating-stars label:has(~ label:hover),.rating-stars label:focus-within { color:#f2d48b; }
+/* Ratings: Provide pointer-hover feedback without changing the underlying action. */
 .rating-stars label:hover { transform:translateY(-3px); }
+/* Ratings: Show a visible focus cue so keyboard users can locate the active control. */
 .rating-stars label:focus-within { outline:2px solid #f2d48b; outline-offset:3px; border-radius:6px; }
+/* Ratings: Visually distinguish unavailable controls from actions that can be used. */
 .rating-stars:disabled label { opacity:.45; cursor:wait; }
+/* Ratings: Set the element dimensions so content fits the available space. */
 .rating-entry .rating-feedback { min-height:23px; color:#dec58d; }
+/* Ratings: Set readable typography and spacing for this text role. */
 .rating-signin,.rating-retry { display:inline-block; margin-top:10px; color:#e8d09c; font-size:13px; padding:8px 0; }
 /* Honor reduced-motion preferences without changing the rating controls. */
-@media(prefers-reduced-motion:reduce) { .rating-stars label { transition:none; } }
+@media(prefers-reduced-motion:reduce) { /* Ratings: Set how visual changes animate between UI states. */
+.rating-stars label { transition:none; } }

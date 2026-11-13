@@ -60,6 +60,7 @@ const TYPOGRAPHY_RULES = [
   [/ﬂ/g, 'fl'],
 ];
 
+// Count whitespace-separated words, returning zero for missing or empty text.
 const countWords = (text) => (text ? text.split(/\s+/).filter(Boolean).length : 0);
 
 /** Strip a bracketed heading wrapper, e.g. Pride and Prejudice's "[Chapter I.]". */
@@ -93,6 +94,8 @@ function isNarrative(line) {
   return text.length >= 25 && /[.!?]["')\]]?$/.test(text);
 }
 
+// Look past blank lines after this position to inspect the next piece of content.
+// An empty result means there is no later content to examine.
 function nextNonBlankLine(lines, index) {
   for (let i = index + 1; i < lines.length; i += 1) {
     if (lines[i].trim()) return lines[i];
@@ -156,6 +159,7 @@ function stripFrontMatter(text) {
   let skippedIllustrations = false;
   let seenProse = false;
 
+  // Scan front matter carefully, skipping identified listings and notices before preserving body lines.
   while (cursor < lines.length) {
     const line = lines[cursor];
 
@@ -403,6 +407,7 @@ function reflowParagraphs(text) {
   const paragraphs = [];
   let buffer = [];
 
+  // Join the buffered hard-wrapped lines into one paragraph before beginning another.
   const flush = () => {
     if (buffer.length) {
       paragraphs.push(buffer.join(' '));
@@ -459,6 +464,7 @@ function normalizeWhitespace(text) {
  * @returns {{text: string, wordCount: number, stats: object}}
  */
 function cleanGutenbergText(raw) {
+  // Run structural cleanup before typography and whitespace normalization, then count the result.
   const body = sliceGutenbergBody(raw);
   const withoutFrontMatter = stripFrontMatter(body);
   const withoutPreface = stripShortPreface(withoutFrontMatter);

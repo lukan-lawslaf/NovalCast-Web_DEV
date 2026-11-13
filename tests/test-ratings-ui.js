@@ -3,8 +3,10 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const { JSDOM } = require('jsdom');
+// Allow queued asynchronous work to run before checking the player state.
 const settle = () => new Promise(resolve => setImmediate(resolve));
 
+// Scenario: rating form saves, edits, rolls back errors, redirects guests, and cleans up. The checks below exercise this behavior as one independent case.
 test('rating form saves, edits, rolls back errors, redirects guests, and cleans up', async () => {
   const dom = new JSDOM('<section id="book-ratings"><div data-rating-content>Loading</div></section>', {
     url: 'http://127.0.0.1:3000/#/book?book=dracula', runScripts: 'outside-only',

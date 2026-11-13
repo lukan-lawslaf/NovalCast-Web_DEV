@@ -244,6 +244,7 @@ window.NovelCastViews.login = {
     let disposed = false;
     let submitting = false;
     // This closure remembers this screen's resources so leaving the route can release them.
+    // Mark the view as disposed so late authentication responses do not update a different page.
     this.destroy = () => { disposed = true; };
     const auth = window.NovelCastAuth;
     const user = auth && auth.isAuthenticated() ? auth.getUser() : null;
@@ -283,6 +284,7 @@ window.NovelCastViews.login = {
     }
 
     // Select the sign-in tab and hide fields that are only needed for registration.
+    // Show the sign-in fields and update the selected tab and accessible state.
     function activateSignIn() {
       isSignUp = false;
       tabSignIn.classList.add('gold-pill-active');
@@ -303,6 +305,7 @@ window.NovelCastViews.login = {
     }
 
     // Select registration and reveal the optional name field.
+    // Show account-creation fields and update the selected tab and accessible state.
     function activateSignUp() {
       isSignUp = true;
       tabSignUp.classList.add('gold-pill-active');
@@ -354,6 +357,7 @@ window.NovelCastViews.login = {
     const iconEyeClosed = document.getElementById('icon-eye-closed');
 
     if (togglePasswordBtn && passwordInput) {
+      // Switch password visibility while keeping the control’s label in sync.
       togglePasswordBtn.addEventListener('click', () => {
         const isPassword = passwordInput.type === 'password';
         passwordInput.type = isPassword ? 'text' : 'password';
@@ -385,6 +389,7 @@ window.NovelCastViews.login = {
     }
 
     // Display plain text or a deliberately constructed DOM message, not arbitrary error HTML.
+    // Present authentication feedback in the view’s alert area.
     function showAlert(content) {
       if (!alertBox || disposed) return;
       if (typeof content === 'string') {
@@ -395,6 +400,7 @@ window.NovelCastViews.login = {
       }
       alertBox.classList.remove('hidden');
     }
+    // Clear the visible authentication feedback when changing forms or retrying.
     function hideAlert() {
       if (!alertBox) return;
       alertBox.classList.add('hidden');
@@ -402,6 +408,7 @@ window.NovelCastViews.login = {
 
     if (form) {
       // Read validated fields, block duplicate requests, call auth and restore controls in finally.
+      // Prevent the normal page reload and submit the chosen authentication action asynchronously.
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (submitting || disposed) return;

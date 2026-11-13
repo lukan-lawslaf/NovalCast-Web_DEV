@@ -8,14 +8,17 @@ const {
   chooseNarrationVoice,
 } = require('../backend/src/services/narrationVoiceService');
 
+// Copy test data so mutations do not accidentally change the original fixture.
 function copy(value) {
   return value == null ? value : structuredClone(value);
 }
 
+// Provide a query-like wrapper for in-memory book data in place of the database.
 function query(value) {
   return { lean: async () => copy(value) };
 }
 
+// Use in-memory book records and query behavior to exercise voice selection without writing to Atlas.
 function createMemoryBooks(initialBooks, { synchronizeInitialLookups = false } = {}) {
   const records = new Map(initialBooks.map(book => [String(book._id), copy(book)]));
   const writes = [];
@@ -24,9 +27,11 @@ function createMemoryBooks(initialBooks, { synchronizeInitialLookups = false } =
   const bothInitialLookups = new Promise(resolve => { initialLookupRelease = resolve; });
 
   const BookModel = {
+    // Return a query-shaped lookup; optionally synchronize two initial reads to test a race.
     findOne(filter) {
       const isInitialSlugLookup = Boolean(filter && filter.slug);
       return {
+        // Wait until both lookups have begun before either can observe the shared record.
         lean: async () => {
           if (isInitialSlugLookup && synchronizeInitialLookups) {
             initialLookupCount += 1;
@@ -40,6 +45,7 @@ function createMemoryBooks(initialBooks, { synchronizeInitialLookups = false } =
         },
       };
     },
+    // Record writes and mimic the atomic absence guard, allowing only the first voice assignment.
     findOneAndUpdate(filter, update, options) {
       writes.push({ filter: copy(filter), update: copy(update), options: copy(options) });
       const record = records.get(String(filter._id));
@@ -65,6 +71,7 @@ const testVoices = {
   classic: { referenceId: 'voice-classic', name: 'Classic Reader' },
 };
 
+// Build a sample book record, allowing individual tests to override selected fields.
 function clockmaker(overrides = {}) {
   return {
     _id: 'book-clockmaker',
@@ -77,6 +84,7 @@ function clockmaker(overrides = {}) {
   };
 }
 
+// Scenario: voice profile reflects book synopsis and chooses a configured profile voice. The checks below exercise this behavior as one independent case.
 test('voice profile reflects book synopsis and chooses a configured profile voice', () => {
   const book = clockmaker();
   const selection = selectNarrationProfile(book);
@@ -93,6 +101,7 @@ test('voice profile reflects book synopsis and chooses a configured profile voic
     'a known book title should not be assigned an incidental pirate or adventure profile');
 });
 
+// Scenario: a saved voice survives changed catalog descriptions and a fresh resolver instance. The checks below exercise this behavior as one independent case.
 test('a saved voice survives changed catalog descriptions and a fresh resolver instance', async () => {
   const initial = clockmaker();
   const memory = createMemoryBooks([initial]);
@@ -121,7 +130,6 @@ test('a saved voice survives changed catalog descriptions and a fresh resolver i
     now: () => new Date('2030-01-01T00:00:00.000Z'),
   });
   const reused = await afterRestart(initial.slug);
-
   assert.equal(reused.referenceId, selected.referenceId);
   assert.equal(reused.name, selected.name);
   assert.equal(reused.profile, 'detective');
@@ -129,6 +137,7 @@ test('a saved voice survives changed catalog descriptions and a fresh resolver i
   assert.equal(memory.writes.length, 1, 'a restart must read the stored voice without selecting or saving another one');
 });
 
+// Scenario: concurrent first listens return the single voice that won the conditional database write. The checks below exercise this behavior as one independent case.
 test('concurrent first listens return the single voice that won the conditional database write', async () => {
   const book = clockmaker();
   const memory = createMemoryBooks([book], { synchronizeInitialLookups: true });
@@ -143,7 +152,6 @@ test('concurrent first listens return the single voice that won the conditional 
     resolverTwo(book.slug),
   ]);
   const saved = memory.records.get(book._id).narrationVoice;
-
   assert.equal(memory.writes.length, 2, 'both processes may calculate a candidate before either write completes');
   assert.ok(memory.writes.every(write => write.filter.$or && write.options.returnDocument === 'after'),
     'each candidate must use an atomic absent-voice condition');
@@ -154,6 +162,7 @@ test('concurrent first listens return the single voice that won the conditional 
   assert.equal(second.name, saved.name, 'the losing process must return the persisted winner');
 });
 
+// Scenario: missing books and unavailable storage fail without inventing a default voice. The checks below exercise this behavior as one independent case.
 test('missing books and unavailable storage fail without inventing a default voice', async () => {
   const memory = createMemoryBooks([]);
   const resolver = createNarrationVoiceResolver({
@@ -172,6 +181,7 @@ test('missing books and unavailable storage fail without inventing a default voi
   assert.equal(memory.writes.length, 0);
 });
 
+// Scenario: offline snapshots apply only to exact known catalog slugs, never database IDs or unknown books. The checks below exercise this behavior as one independent case.
 test('offline snapshots apply only to exact known catalog slugs, never database IDs or unknown books', async () => {
   let reads = 0;
   const resolver = createNarrationVoiceResolver({
@@ -188,6 +198,7 @@ test('offline snapshots apply only to exact known catalog slugs, never database 
   assert.equal(reads, 0, 'known offline snapshots do not query Atlas when it is disconnected');
 });
 
+// Scenario: a cold snapshot can bridge a database read failure but is not cached after Atlas recovers. The checks below exercise this behavior as one independent case.
 test('a cold snapshot can bridge a database read failure but is not cached after Atlas recovers', async () => {
   let atlasAvailable = false;
   let reads = 0;
@@ -232,6 +243,7 @@ test('a cold snapshot can bridge a database read failure but is not cached after
   assert.equal(reads, 2, 'a confirmed book voice remains cached for this process');
 });
 
+// Scenario: a healthy Atlas not-found result cannot be hidden by a catalog snapshot. The checks below exercise this behavior as one independent case.
 test('a healthy Atlas not-found result cannot be hidden by a catalog snapshot', async () => {
   const resolver = createNarrationVoiceResolver({
     BookModel: { findOne: () => query(null) },
@@ -241,6 +253,7 @@ test('a healthy Atlas not-found result cannot be hidden by a catalog snapshot', 
   await assert.rejects(resolver('dracula'), error => error.status === 404 && error.code === 'TTS_BOOK_NOT_FOUND');
 });
 
+// Scenario: Book schema stores the selected narration voice as persisted book metadata. The checks below exercise this behavior as one independent case.
 test('Book schema stores the selected narration voice as persisted book metadata', () => {
   const narrationVoice = Book.schema.path('narrationVoice');
   assert.ok(narrationVoice, 'the book record must have a narrationVoice field');

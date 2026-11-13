@@ -6,6 +6,7 @@
   color: #a6afbf;
 }
 
+/* Shared navigation: Use grid tracks to align content and control the number of columns. */
 .nc-nav-link,
 .nc-profile-button {
   display: grid;
@@ -26,6 +27,7 @@
   border-color: #d7b47e40;
 }
 
+/* Shared navigation: Set the element dimensions so content fits the available space. */
 .nc-nav-link svg {
   width: 18px;
   height: 18px;
@@ -39,6 +41,7 @@
   gap: .75rem;
 }
 
+/* Shared navigation: Use grid tracks to align content and control the number of columns. */
 .nc-header-notifications {
   display: grid;
   place-items: center;
@@ -50,11 +53,13 @@
   color: #b0bac8;
 }
 
+/* Shared navigation: Provide pointer-hover feedback without changing the underlying action. */
 .nc-header-notifications:hover {
   color: #fff;
   border-color: #354054;
 }
 
+/* Shared navigation: Control overflowing content so long labels or artwork stay inside their container. */
 .nc-profile-button {
   width: var(--nc-icon-button-size);
   height: var(--nc-icon-button-size);
@@ -68,6 +73,7 @@
   line-height: 1;
 }
 
+/* Shared navigation: Set the element dimensions so content fits the available space. */
 .nc-header-notifications svg,
 .nc-profile-button svg {
   display: block;
@@ -75,14 +81,17 @@
   height: 16px;
 }
 
+/* Shared navigation: Fit image or video content within its box without stretching its proportions. */
 .nc-profile-button img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
+/* Shared navigation: Keep hidden controls out of the layout until JavaScript enables them. */
 .nc-profile-button [hidden] { display: none; }
 
+/* Page appearance: Position this layer relative to its container or viewport without disturbing nearby content. */
 .nc-account-theme {
   position: absolute;
   inset-block-start: 1rem;
@@ -90,8 +99,10 @@
   z-index: 1;
 }
 
+/* Shared navigation: Provide pointer-hover feedback without changing the underlying action. */
 .nc-profile-button:hover { border-color: currentColor; }
 
+/* Shared navigation: Show a visible focus cue so keyboard users can locate the active control. */
 .nc-nav-link:focus-visible,
 .nc-header-notifications:focus-visible,
 .nc-profile-button:focus-visible {
@@ -99,9 +110,14 @@
   outline-offset: 3px;
 }
 
+/* Responsive layout: these rules apply only at or below this viewport width. */
 @media (max-width: 480px) {
+  /* Page appearance: Set the element dimensions so content fits the available space. */
   #app-sidebar { width: 52px; }
+  /* Shared navigation: Apply these visual adjustments to the selected elements in this state. */
   #app-header > a { gap: .375rem; }
+  /* Shared navigation: Set readable typography and spacing for this text role. */
   #app-header > a span { font-size: 1rem; }
+  /* Shared navigation: Apply these visual adjustments to the selected elements in this state. */
   .nc-header-actions { gap: .375rem; }
 }

@@ -3,6 +3,7 @@
 (function () {
   const NC = window.NovelCast;
   const PREFIX = 'novelcast.library.v1.';
+  // Copies prevent callers from mutating the stored document without going through change().
   const clone = value => JSON.parse(JSON.stringify(value));
   const object = value => value && typeof value === 'object' && !Array.isArray(value);
   // Compare data recursively so object-key ordering does not create a false pending change.
@@ -13,6 +14,7 @@
     const keys = Object.keys(a);
     return keys.length === Object.keys(b).length && keys.every(key => Object.hasOwn(b, key) && equal(a[key], b[key]));
   }
+  // New accounts and missing caches begin with this versioned, valid library document.
   const empty = () => ({ schemaVersion: 1, revision: 0, state: { library: {}, collections: [] },
     uploads: [], settings: {}, readingPlan: { dailyMinutes: 20, favoriteGenre: '' } });
   // Check the expected document shape before trusting a browser cache or server response.
@@ -35,6 +37,7 @@
     if (equal(base, local)) return remote === undefined ? undefined : clone(remote);
     if (object(local) && object(remote)) {
       const result = Object.create(null);
+      // Visit keys from all three versions so deletions and edits are both included in the merge.
       for (const key of new Set([...Object.keys(base || {}), ...Object.keys(local), ...Object.keys(remote)])) {
         if (['__proto__', 'prototype', 'constructor'].includes(key)) continue;
         const value = merge(base?.[key], local[key], remote[key]);
@@ -47,13 +50,16 @@
   // Merge uploads by book ID and adopt the latest server revision.
   function combine(base, local, remote) {
     const result = merge(base, local, remote);
+    // Index uploads by stable ID so edits and deletions merge per book instead of per array.
     const byId = rows => Object.fromEntries((rows || []).map(row => [row.id, row]));
     result.uploads = Object.values(merge(byId(base.uploads), byId(local.uploads), byId(remote.uploads)));
     result.schemaVersion = 1;
     result.revision = remote.revision;
     return result;
   }
+  // Ignore revision numbers when deciding whether the actual saved content differs.
   function sameData(a, b) { return equal({ ...a, revision: 0 }, { ...b, revision: 0 }); }
+  // Broadcast sync status so visible library controls can update independently.
   function publish(phase, message) {
     status = { phase, message };
     document.dispatchEvent(new CustomEvent('novelcast:library-sync', { detail: status }));
@@ -101,6 +107,7 @@
     } catch { /* Malformed old caches cannot select a different account or replace server records. */ }
     return { document: blank, base: empty(), pending: !sameData(blank, empty()) };
   }
+  // Tell views to refresh after the account cache has been replaced or merged.
   function loaded() {
     document.dispatchEvent(new CustomEvent('novelcast:state'));
     document.dispatchEvent(new CustomEvent('novelcast:library-loaded'));
@@ -150,14 +157,17 @@
     try {
       publish('loading', 'Checking your saved library…');
       const response = await request('GET', null, context);
+      // Merge the latest server document with changes made since the last acknowledged copy.
       const remote = response.document;
       envelope.document = combine(envelope.base, envelope.document, remote);
       envelope.base = clone(remote);
       envelope.pending = !sameData(envelope.document, remote);
       persist();
       loaded();
+      // Retry a limited number of revision conflicts while preserving edits made during each request.
       for (let attempt = 0; envelope.pending && attempt < 4; attempt++) {
         const sent = clone(envelope.document);
+        // Remember the local edit counter so a response cannot silently overwrite newer changes.
         const sentMutation = mutation;
         publish('saving', 'Saving your library…');
         const result = await request('PUT', sent, context);
@@ -207,15 +217,22 @@
         schedule();
       });
     },
+    // Return a copy so changes must be explicitly saved and marked pending.
     getSection(section) { return clone(envelope.document[section]); },
+    // Allow only known sections to enter the revisioned document.
     setSection(section, value) {
       if (!['state', 'settings', 'readingPlan'].includes(section)) return false;
       return change(section, value);
     },
+    // Only expose uploads belonging to the currently selected account or guest.
     getUploads(userId) { return userId === owner || (!owner && !userId) ? clone(envelope.document.uploads) : []; },
+    // Reject upload changes for any other account.
     setUploads(userId, rows) { return userId === owner && change('uploads', rows); },
+    // Give the UI a snapshot of the latest sync message without exposing mutable state.
     getStatus() { return { ...status }; },
+    // Supply the current plan as a copy for the reading-plan form.
     getReadingPlan() { return clone(envelope.document.readingPlan); },
+    // Offer import only if the guest cache has books missing from this account.
     hasDeviceBookmarks() {
       if (!owner) return false;
       const guest = loadCache(null).document.state.library;
@@ -240,6 +257,7 @@
       return change('readingPlan', { dailyMinutes: plan.dailyMinutes, favoriteGenre: plan.favoriteGenre.trim() });
     },
     sync,
+    // Export the current device copy as JSON, then release its temporary download URL.
     async download() {
       // An export is a device snapshot; it includes pending edits even when the API is offline.
       const snapshot = clone(envelope.document);

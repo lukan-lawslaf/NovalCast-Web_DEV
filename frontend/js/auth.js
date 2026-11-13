@@ -5,6 +5,7 @@
  */
 (function () {
   // Retrieve Supabase credentials dynamically from environment (never hardcode in source)
+  // Read public browser configuration used to initialize the authentication client.
   function getEnvCredentials() {
     const env = window.__ENV__ || {};
     return {
@@ -28,9 +29,11 @@
   }
 
   // Abort the actual network request after the timeout and remove temporary signal listeners.
+  // Combine cancellation and a timeout so stalled authentication requests can be stopped.
   async function authFetch(url, options = {}) {
     const controller = new AbortController();
     const originalSignal = options.signal;
+    // Propagate caller cancellation to the timeout-controlled request.
     const onAbort = () => controller.abort();
     if (originalSignal) {
       if (originalSignal.aborted) controller.abort();
@@ -59,6 +62,7 @@
   }
 
   // Local fallback storage for fast synchronous state check
+  // Recover the cached display identity; server-verified authentication remains authoritative.
   function getStoredUser() {
     try {
       const raw = localStorage.getItem(LOCAL_USER_KEY);
@@ -72,6 +76,7 @@
   let initPromise;
   let authVersion = 0;
   let signingOut = false;
+  // Create the authentication client only when its public configuration and library are available.
   function getClient() {
     if (!client) {
       const { url, key } = getEnvCredentials();
@@ -107,6 +112,7 @@
 
   const listeners = [];
   // Notify service callbacks first, then send the account-change event to the app.
+  // Notify registered callbacks and the rest of the page when the signed-in identity changes.
   function dispatchAuthChange(user) {
     listeners.forEach(cb => {
       try { cb(user); } catch (err) { console.error(err); }
@@ -143,6 +149,7 @@
 
       try {
         // Subscribe before reading the initial session so an intervening sign-out wins.
+        // Reflect sign-in, sign-out and session changes in the local user state.
         sb.auth.onAuthStateChange((event, session) => {
           if (event === 'SIGNED_OUT' || !session?.user) setStoredUser(null);
           else setStoredUser(session.user);
@@ -171,10 +178,12 @@
       return data.session ? data.session.access_token : null;
     },
 
+    // Expose the current cached identity to views; protected API requests still need a token.
     getUser: function () {
       return currentUser;
     },
 
+    // Treat anonymous and explicitly unconfirmed identities as signed out in the interface.
     isAuthenticated: function () {
       const u = this.getUser();
       if (!u || !u.id || u.is_anonymous) return false;
@@ -185,6 +194,7 @@
       return true;
     },
 
+    // Register a listener and immediately give it the current identity for initial rendering.
     onAuthStateChange: function (callback) {
       if (typeof callback === 'function') {
         listeners.push(callback);
@@ -215,6 +225,8 @@
       return data;
     },
 
+    // Sign in with a trimmed email, and give unconfirmed accounts a specific recoverable error.
+    // Only publish a signed-in user after the provider returns both a user and a session.
     signIn: async function (email, password) {
       let data;
       try {
@@ -238,6 +250,7 @@
       return data;
     },
 
+    // Ask the provider to resend the signup confirmation link back to this application's login route.
     resendConfirmation: async function (email) {
       const data = await authRequest('resend', {
         type: 'signup',

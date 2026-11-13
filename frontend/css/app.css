@@ -5,6 +5,7 @@ body {
   padding: 0;
 }
 
+/* Page appearance: Apply these visual adjustments to the selected elements in this state. */
 body {
   overscroll-behavior: none;
 }
@@ -14,6 +15,7 @@ main > :first-child {
   margin-top: 0 !important;
 }
 
+/* Page appearance: Apply these visual adjustments to the selected elements in this state. */
 main > :last-child {
   margin-bottom: 0 !important;
 }

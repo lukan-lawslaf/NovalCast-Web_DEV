@@ -4,6 +4,7 @@
   mask-image: radial-gradient(ellipse at 50% 54%, #000 28%, transparent 84%);
 }
 
+/* Landing: Fit image or video content within its box without stretching its proportions. */
 .landing-ascii-video {
   display: block;
   width: 100%;
@@ -14,6 +15,7 @@
   mix-blend-mode: screen;
 }
 
+/* Landing: Draw a decorative pseudo-element without adding extra HTML markup. */
 .landing-ascii::after {
   content: '';
   position: absolute;
@@ -21,24 +23,30 @@
   background: linear-gradient(to bottom, var(--ascii-paper), transparent 37%, transparent 78%, var(--ascii-paper));
 }
 
+/* Light theme: Define reusable CSS values that related components read with var(). */
 html[data-theme="light"] .landing-ascii {
   --ascii-paper: var(--nc-paper);
   mix-blend-mode: multiply;
 }
 
+/* Light theme: Apply these visual adjustments to the selected elements in this state. */
 html[data-theme="light"] .landing-ascii-video {
   opacity: .46;
   filter: grayscale(1) invert(1) contrast(1.3);
   mix-blend-mode: normal;
 }
 
+/* Light theme: Apply these visual adjustments to the selected elements in this state. */
 html[data-theme="light"] .landing-brand-mark {
   filter: grayscale(1) brightness(.59) contrast(1.12);
 }
 
+/* Landing: Apply these visual adjustments to the selected elements in this state. */
 .landing-header-actions { gap: clamp(.375rem, 1.5vw, 1.25rem); }
 
+/* Responsive layout: these rules apply only at or below this viewport width. */
 @media (max-width: 639px) {
+  /* Landing: Apply these visual adjustments to the selected elements in this state. */
   .landing-header { padding-inline: clamp(.75rem, 4vw, 1.5rem); }
 }
 
@@ -52,6 +60,7 @@ html[data-theme="light"] .landing-brand-mark {
   padding-top: clamp(.5rem, 1.5vw, .875rem);
 }
 
+/* Landing: Position this layer relative to its container or viewport without disturbing nearby content. */
 .landing-hero-title {
   position: relative;
   z-index: 30;
@@ -63,6 +72,7 @@ html[data-theme="light"] .landing-brand-mark {
   white-space: nowrap;
 }
 
+/* Page appearance: Position this layer relative to its container or viewport without disturbing nearby content. */
 .parade-stage {
   position: relative;
   z-index: 20;
@@ -70,6 +80,7 @@ html[data-theme="light"] .landing-brand-mark {
   padding-block: clamp(1rem, 4svh, 2.75rem) 1.5rem;
 }
 
+/* Landing: Align child controls along a row or column and manage wrapping/spacing. */
 .landing-original-row {
   --book-height: clamp(12rem, min(44svh, 63vw), 21.5rem);
   --book-depth: clamp(1.5rem, 4vw, 2.6rem);
@@ -78,6 +89,7 @@ html[data-theme="light"] .landing-brand-mark {
   width: 100%;
 }
 
+/* Landing: Use grid tracks to align content and control the number of columns. */
 .landing-original-row[data-dial-ready] {
   display: grid;
   grid-template-areas: 'book';
@@ -86,11 +98,13 @@ html[data-theme="light"] .landing-brand-mark {
   cursor: grab;
 }
 
+/* Landing: Apply these visual adjustments to the selected elements in this state. */
 .landing-original-row.is-dragging,
 .landing-original-row.is-dragging > .book-3d-wrapper {
   cursor: grabbing;
 }
 
+/* Landing: Set how visual changes animate between UI states. */
 .book-3d-wrapper {
   --dial-scale: 1;
   position: relative;
@@ -103,28 +117,35 @@ html[data-theme="light"] .landing-brand-mark {
   transition: transform .26s ease;
 }
 
+/* Landing: Apply these visual adjustments to the selected elements in this state. */
 .landing-original-row[data-dial-ready] > .book-3d-wrapper {
   grid-area: book;
   translate: var(--dial-x, 0px) var(--dial-height, 0px);
 }
 
+/* Landing: Set how visual changes animate between UI states. */
 .landing-original-row.is-turning > .book-3d-wrapper {
   transition: none;
 }
 
+/* Apply hover effects only when the input device supports hovering. */
 @media (hover: hover) {
+  /* Landing: Provide pointer-hover feedback without changing the underlying action. */
   .landing-original-row:not(.is-turning) > .book-3d-wrapper:hover {
     transform: perspective(1200px) translateY(-7px) rotateY(var(--dial-yaw, 0deg)) scale3d(var(--dial-scale), var(--dial-scale), var(--dial-scale));
   }
 }
 
+/* Landing: Apply these visual adjustments to the selected elements in this state. */
 .book-3d-wrapper.is-opening { z-index: 42; }
 
+/* Landing: Show a visible focus cue so keyboard users can locate the active control. */
 .book-3d-wrapper:focus-visible {
   outline: 2px solid var(--nc-focus);
   outline-offset: 6px;
 }
 
+/* Landing: Hide the reverse face when this surface rotates away from the viewer. */
 .book-3d-wrapper > .book-cover-art,
 .book-3d-wrapper::before {
   position: absolute;
@@ -133,6 +154,7 @@ html[data-theme="light"] .landing-brand-mark {
   backface-visibility: hidden;
 }
 
+/* Landing: Position or rotate the element to create the intended visual placement. */
 .book-3d-wrapper > .book-cover-art {
   overflow: hidden;
   transform: translateZ(calc(var(--book-depth) / 2));
@@ -140,17 +162,20 @@ html[data-theme="light"] .landing-brand-mark {
   box-shadow: 0 16px 35px #0009;
 }
 
+/* Landing: Fit image or video content within its box without stretching its proportions. */
 .book-3d-wrapper > .book-cover-art img {
   object-fit: contain;
   filter: none;
 }
 
+/* Landing: Draw a decorative pseudo-element without adding extra HTML markup. */
 .book-3d-wrapper::before {
   content: '';
   transform: translateZ(calc(var(--book-depth) / -2)) rotateY(180deg);
   background: #27241f;
 }
 
+/* Landing: Hide the reverse face when this surface rotates away from the viewer. */
 .book-3d-wrapper > .book-spine {
   position: absolute;
   left: 0;
@@ -167,6 +192,7 @@ html[data-theme="light"] .landing-brand-mark {
   color: #e7d8b5;
 }
 
+/* Landing: Control overflowing content so long labels or artwork stay inside their container. */
 .book-3d-wrapper > .book-spine > span {
   max-height: 84%;
   overflow: hidden;
@@ -178,6 +204,7 @@ html[data-theme="light"] .landing-brand-mark {
   letter-spacing: .04em;
 }
 
+/* Page appearance: Position this layer relative to its container or viewport without disturbing nearby content. */
 .book-edge-right,
 .book-edge-top {
   position: absolute;
@@ -185,6 +212,7 @@ html[data-theme="light"] .landing-brand-mark {
   box-shadow: inset 0 0 6px #58432980;
 }
 
+/* Page appearance: Position or rotate the element to create the intended visual placement. */
 .book-edge-right {
   top: 3px;
   left: 100%;
@@ -193,6 +221,7 @@ html[data-theme="light"] .landing-brand-mark {
   transform: translateX(-50%) rotateY(90deg);
 }
 
+/* Page appearance: Position or rotate the element to create the intended visual placement. */
 .book-edge-top {
   top: 0;
   left: 2px;
@@ -214,8 +243,10 @@ html[data-theme="light"] .landing-brand-mark {
   text-align: center;
 }
 
+/* Landing: Keep hidden controls out of the layout until JavaScript enables them. */
 .landing-dial-controls[hidden] { display: none; }
 
+/* Landing: Use grid tracks to align content and control the number of columns. */
 .landing-dial-controls button {
   display: grid;
   place-items: center;
@@ -226,13 +257,16 @@ html[data-theme="light"] .landing-brand-mark {
   color: #e0c070;
 }
 
+/* Landing: Provide pointer-hover feedback without changing the underlying action. */
 .landing-dial-controls button:hover { background: #26211a; }
 
+/* Landing: Show a visible focus cue so keyboard users can locate the active control. */
 .landing-dial-controls button:focus-visible {
   outline: 2px solid #e0c070;
   outline-offset: 3px;
 }
 
+/* Landing: Control overflowing content so long labels or artwork stay inside their container. */
 .landing-dial-caption [data-dial-title] {
   overflow: hidden;
   color: #f6ecd9;
@@ -242,13 +276,16 @@ html[data-theme="light"] .landing-brand-mark {
   white-space: nowrap;
 }
 
+/* Landing: Set readable typography and spacing for this text role. */
 #landing-dial-hint {
   margin-top: 3px;
   color: #b9b3a8;
   font-size: .72rem;
 }
 
+/* Accessibility: remove motion effects when the visitor requests reduced motion. */
 @media (prefers-reduced-motion: reduce) {
+  /* Landing: Set how visual changes animate between UI states. */
   .book-3d-wrapper { transition: none; }
 }
 
@@ -258,44 +295,57 @@ html[data-theme="light"] .landing-brand-mark {
   view-transition-name: nc-editorial-cover;
 }
 
+/* Theme snapshot: Set how visual changes animate between UI states. */
 :root[data-book-opening]::view-transition-group(root),
 :root[data-book-opening]::view-transition-old(root) {
   animation: none;
 }
 
+/* Theme snapshot: Set how visual changes animate between UI states. */
 :root[data-book-opening]::view-transition-new(root) {
   mix-blend-mode: normal;
   animation: book-sheet-open .8s cubic-bezier(.76, 0, .18, 1) both;
 }
 
+/* Theme snapshot: Apply these visual adjustments to the selected elements in this state. */
 :root[data-book-opening]::view-transition-group(nc-editorial-cover) {
   z-index: 1;
   animation-duration: .8s;
   animation-timing-function: cubic-bezier(.38, .04, .22, 1);
 }
 
+/* Theme snapshot: Set how visual changes animate between UI states. */
 :root[data-book-opening]::view-transition-old(nc-editorial-cover),
 :root[data-book-opening]::view-transition-new(nc-editorial-cover) {
   animation: none;
   mix-blend-mode: normal;
 }
 
+/* Theme snapshot: Apply these visual adjustments to the selected elements in this state. */
 :root[data-book-opening]::view-transition-old(nc-editorial-cover) {
   /* Both views use the same illustration. The destination image stays visible as it moves. */
   opacity: 0;
 }
 
+/* Theme snapshot: Set how visual changes animate between UI states. */
 :root[data-book-opening]::view-transition-new(nc-editorial-cover) {
   animation: book-cover-settle .8s cubic-bezier(.3, .1, .2, 1) both;
 }
 
+/* Animation timeline: child blocks define the visual state at each stage. */
 @keyframes book-sheet-open {
+  /* Page appearance: Define the appearance at this animation step; the browser interpolates between steps. */
   from { clip-path: inset(var(--book-opening-inset) round 4px); }
+  /* Page appearance: Define the appearance at this animation step; the browser interpolates between steps. */
   to { clip-path: inset(0); }
 }
 
+/* Animation timeline: child blocks define the visual state at each stage. */
 @keyframes book-cover-settle {
+  /* Page appearance: Define the appearance at this animation step; the browser interpolates between steps. */
   from { transform: perspective(1050px) rotateY(0) rotateX(0) rotateZ(0); }
+  /* Page appearance: Define the appearance at this animation step; the browser interpolates between steps. */
   46% { transform: perspective(1050px) rotateY(18deg) rotateX(5deg) rotateZ(2deg); }
+  /* Page appearance: Define the appearance at this animation step; the browser interpolates between steps. */
   to { transform: perspective(1050px) rotateY(0) rotateX(0) rotateZ(0); }
 }

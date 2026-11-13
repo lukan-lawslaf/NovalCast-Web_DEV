@@ -19,9 +19,11 @@ const { parseChapters } = require('../services/chapterParser');
 
 const router = express.Router();
 
+// Forward rejected asynchronous route handlers to Express error middleware.
 const asyncHandler = (handler) => (req, res, next) =>
   Promise.resolve(handler(req, res, next)).catch(next);
 
+// Treat search input as literal text when constructing a regular expression.
 const escapeRegExp = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const SORT_OPTIONS = {
@@ -71,10 +73,12 @@ const CURATED_BY_KEY = new Map(CURATED_CATALOG.flatMap(book => [
   [String(book.gutendexId), book],
 ]));
 
+// Build the public cover URL for this exact Gutenberg edition.
 function gutenbergCover(id) {
   return `https://www.gutenberg.org/cache/epub/${id}/pg${id}.cover.medium.jpg`;
 }
 
+// Correct known legacy Alice metadata in the response while leaving storage untouched.
 function normalizeCatalogBook(book) {
   if (book.gutendexId !== ALICE_EDITION.gutendexId) return book;
   // Legacy ingestion paired Gutenberg #11 with a different work about Alice.
@@ -91,10 +95,12 @@ function normalizeBookId(value) {
   return typeof value === 'string' && /^[a-z0-9][a-z0-9_-]{0,199}$/i.test(value) ? value.toLowerCase() : null;
 }
 
+// Choose the Atlas ID field for ObjectId-shaped keys and slug otherwise.
 function idQuery(key) {
   return /^[a-f0-9]{24}$/.test(key) ? { _id: key } : { slug: key };
 }
 
+// Accept only safe positive integer strings; use the supplied default when absent.
 function positiveInteger(value, fallback = null) {
   if (value === undefined) return fallback;
   if (typeof value !== 'string' || !/^\d{1,16}$/.test(value)) return null;
@@ -102,6 +108,7 @@ function positiveInteger(value, fallback = null) {
   return Number.isSafeInteger(number) && number > 0 ? number : null;
 }
 
+// Trim optional search text and reject values of the wrong type or excessive length.
 function boundedFilter(value, max) {
   if (value === undefined) return '';
   return typeof value === 'string' && value.length <= max ? value.trim() : null;
@@ -117,6 +124,7 @@ function toChapterSummary(chapter) {
   };
 }
 
+// Package normalized books with pagination facts for the browsing interface.
 function toCatalogPage(books, total, page, limit) {
   return {
     books: books.map(normalizeCatalogBook),
@@ -124,20 +132,24 @@ function toCatalogPage(books, total, page, limit) {
   };
 }
 
+// Distinguish unavailable storage from a confirmed missing book.
 function bookLookupError(res, storageUnavailable) {
   return storageUnavailable
     ? res.status(503).json({ error: 'Book storage is temporarily unavailable.' })
     : res.status(404).json({ error: 'Book not found.' });
 }
 
+// Return a consistent response for a chapter that does not exist.
 function chapterNotFound(res) {
   return res.status(404).json({ error: 'Chapter not found.' });
 }
 
+// Tell the reader when chapter text could not be obtained from either source.
 function chapterUnavailable(res) {
   return res.status(503).json({ error: 'The chapter text is temporarily unavailable.' });
 }
 
+// Find the curated edition matching the requested key or stored Gutenberg ID.
 function getBundledBook(key, storedBook) {
   // If Atlas provided the book, its Gutenberg ID is the identity that allows
   // borrowing the same public-domain edition, even after a slug change.
@@ -152,6 +164,7 @@ async function loadGutenbergChapters(book) {
     `https://www.gutenberg.org/files/${id}/${id}-0.txt`,
   ];
 
+  // Try both known text locations and reject short or HTML responses before parsing.
   for (const url of urls) {
     try {
       const raw = await fetchText(url, { timeout: 8000, retries: 0 });
@@ -172,6 +185,7 @@ function fetchGutenbergChapters(book) {
   if (gutenbergChaptersCache.has(key)) return Promise.resolve(gutenbergChaptersCache.get(key));
   if (Date.now() < (gutenbergRetryAfter.get(key) || 0)) return Promise.resolve(null);
   if (!gutenbergInFlight.has(key)) {
+    // Share one download and remember success or briefly delay retries after failure.
     const pending = loadGutenbergChapters(book).then(chapters => {
       if (chapters) {
         gutenbergChaptersCache.set(key, chapters);
@@ -188,6 +202,7 @@ function fetchGutenbergChapters(book) {
 
 /** GET /api/books?search=&genre=&page=&limit=&sort=popular|newest|title */
 router.get('/books', asyncHandler(async (req, res) => {
+  // Validate and bound all query parameters before using them in Atlas or the bundled shelf.
   const search = boundedFilter(req.query.search, 160);
   const genre = boundedFilter(req.query.genre, 80);
   const sort = req.query.sort ?? 'popular';
@@ -204,6 +219,7 @@ router.get('/books', asyncHandler(async (req, res) => {
 
   if (connectionState() === 'connected') {
     try {
+      // Escape user filters before building case-insensitive Atlas search expressions.
       const filter = {};
       if (search) {
         const pattern = new RegExp(escapeRegExp(search), 'i');
@@ -224,6 +240,7 @@ router.get('/books', asyncHandler(async (req, res) => {
     }
   }
 
+  // If Atlas is unavailable or empty, apply the same filters to the bundled catalog.
   const query = search.toLowerCase();
   const selectedGenre = genre.toLowerCase();
   const books = CURATED_CATALOG.filter(book =>
@@ -239,6 +256,7 @@ router.get('/books/:id', asyncHandler(async (req, res) => {
   const key = normalizeBookId(req.params.id);
   if (!key) return res.status(400).json({ error: 'Invalid book ID.' });
 
+  // Try Atlas first; a missing or unavailable text may still use the matching public edition.
   let storedBook;
   let storageUnavailable = connectionState() !== 'connected';
   if (!storageUnavailable) {
@@ -260,6 +278,7 @@ router.get('/books/:id', asyncHandler(async (req, res) => {
     if (storedBook && !storageUnavailable) return res.json({ book: normalizeCatalogBook(storedBook), chapters: [] });
     return bookLookupError(res, storageUnavailable);
   }
+  // Fetch only the matching curated edition and derive its navigation from parsed chapters.
   const chapters = await fetchGutenbergChapters(bundledBook);
   const book = normalizeCatalogBook(storedBook || bundledBook);
   return res.json({
@@ -275,6 +294,7 @@ router.get('/books/:id/chapters/:chapterNum', asyncHandler(async (req, res) => {
   const chapterNumber = positiveInteger(req.params.chapterNum);
   if (chapterNumber === null) return res.status(400).json({ error: 'chapterNum must be a positive integer.' });
 
+  // Try Atlas first; a missing or unavailable text may still use the matching public edition.
   let storedBook;
   let storageUnavailable = connectionState() !== 'connected';
   if (!storageUnavailable) {
@@ -307,6 +327,7 @@ router.get('/books/:id/chapters/:chapterNum', asyncHandler(async (req, res) => {
     return storageUnavailable ? chapterUnavailable(res) : chapterNotFound(res);
   }
 
+  // Fetch only the matching curated edition and derive its navigation from parsed chapters.
   const chapters = await fetchGutenbergChapters(bundledBook);
   if (!chapters) return chapterUnavailable(res);
   const index = chapters.findIndex(chapter => chapter.chapterNumber === chapterNumber);

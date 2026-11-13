@@ -37,6 +37,7 @@ window.NovelCastViews.bookDetails = {
   init: function () {
     const controller = new AbortController();
     // This closure remembers this screen's resources so leaving the route can release them.
+    // Abort work and unmount the rating widget when navigating away from this book.
     this.destroy = () => { controller.abort(); if (this.unmountRatings) this.unmountRatings(); };
     const NC = window.NovelCast;
     const NCPage = window.NCPage;
@@ -66,6 +67,7 @@ window.NovelCastViews.bookDetails = {
     // Fetch full verified table of contents from MongoDB Atlas if not fully populated
     const targetSlug = book.slug || book.id;
     if (NC.fetchBookDetails) {
+      // Refresh the displayed details when fuller catalog metadata arrives.
       NC.fetchBookDetails(targetSlug).then(updatedBook => {
         if (controller.signal.aborted) return;
         if (!updatedBook || !updatedBook.chaptersList) return;

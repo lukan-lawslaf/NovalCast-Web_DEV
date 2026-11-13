@@ -5,6 +5,7 @@
  */
 (function () {
   class Pixel {
+    // Store one pixel’s position and animation settings so it can animate independently on the canvas.
     constructor(canvas, context, x, y, color, speed, delay) {
       this.width = canvas.width;
       this.height = canvas.height;
@@ -26,16 +27,19 @@
       this.isShimmer = false;
     }
 
+    // Vary each pixel's speed and maximum size within the requested range.
     getRandomValue(min, max) {
       return Math.random() * (max - min) + min;
     }
 
+    // Center the current square at its grid position and paint it in the pixel's color.
     draw() {
       const centerOffset = this.maxSizeInteger * 0.5 - this.size * 0.5;
       this.ctx.fillStyle = this.color;
       this.ctx.fillRect(this.x + centerOffset, this.y + centerOffset, this.size, this.size);
     }
 
+    // Wait for this pixel's delay, grow it, then switch to the repeating shimmer.
     appear() {
       this.isIdle = false;
       if (this.counter <= this.delay) {
@@ -53,6 +57,7 @@
       this.draw();
     }
 
+    // Shrink the square until it is invisible, then mark it idle so animation can stop.
     disappear() {
       this.isShimmer = false;
       this.counter = 0;
@@ -65,6 +70,7 @@
       this.draw();
     }
 
+    // Reverse the size change at each bound to make the visible pixel pulse.
     shimmer() {
       if (this.size >= this.maxSize) {
         this.isReverse = true;
@@ -80,6 +86,7 @@
   }
 
   // Scale animation speed, stopping motion when the visitor requests reduced motion.
+  // Respect reduced-motion preferences when choosing the animation speed.
   function getEffectiveSpeed(value, reducedMotion) {
     const min = 0;
     const max = 100;
@@ -119,6 +126,7 @@
   };
 
   class PixelCardInstance {
+    // Keep the card’s canvas, options and animation resources together for later cleanup.
     constructor(container, options = {}) {
       this.container = container;
       this.variant = options.variant || 'gold';
@@ -148,6 +156,7 @@
       }
       this.canvas = canvas;
 
+      // Populate the canvas with pixels positioned according to the current card dimensions.
       this.initPixels();
 
       this.onMouseEnter = () => this.handleAnimation('appear');
@@ -169,6 +178,7 @@
         this.container.addEventListener('blur', this.onBlur);
       }
 
+      // Rebuild the pixel grid when the card changes size.
       this.resizeObserver = new ResizeObserver(() => {
         this.initPixels();
       });
@@ -194,6 +204,7 @@
       const pxs = [];
       const gapVal = parseInt(this.gap, 10);
 
+      // Place pixels on a grid; distance from the center controls their staggered start.
       for (let x = 0; x < width; x += gapVal) {
         for (let y = 0; y < height; y += gapVal) {
           const color = colorsArray[Math.floor(Math.random() * colorsArray.length)];
@@ -209,6 +220,7 @@
     }
 
     // Draw active pixels at a bounded frame rate and stop once every pixel is idle.
+    // Advance each pixel on animation frames until the requested effect settles.
     doAnimate(fnName) {
       this.animationFrame = requestAnimationFrame(() => this.doAnimate(fnName));
       const timeNow = performance.now();
@@ -236,12 +248,14 @@
       }
     }
 
+    // Replace any running frame loop with the requested appear or disappear effect.
     handleAnimation(name) {
       cancelAnimationFrame(this.animationFrame);
       this.animationFrame = requestAnimationFrame(() => this.doAnimate(name));
     }
 
     // Release the animation, observer and handlers when the library view is replaced.
+    // Disconnect observers and listeners and cancel animation work when the card is removed.
     destroy() {
       cancelAnimationFrame(this.animationFrame);
       if (this.resizeObserver) this.resizeObserver.disconnect();
@@ -253,9 +267,11 @@
   }
 
   window.PixelCard = {
+    // Create an independently managed card for a caller-supplied container.
     init: function (container, options) {
       return new PixelCardInstance(container, options);
     },
+    // Find cards in a rendered scope and initialize each element at most once.
     autoInit: function (scope = document) {
       const elements = scope.querySelectorAll('.pixel-card');
       elements.forEach(el => {

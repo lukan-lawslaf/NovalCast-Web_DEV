@@ -150,6 +150,7 @@ async function ingestBook(input = {}) {
     source.gutendexId
   );
 
+  // Assemble catalog metadata separately from the full chapter text.
   const bookFields = {
     slug,
     gutendexId: source.gutendexId,
@@ -170,6 +171,7 @@ async function ingestBook(input = {}) {
     { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true }
   );
 
+  // Replace existing chapters with the newly parsed edition, then update book totals.
   await Chapter.deleteMany({ bookId: book._id });
   await Chapter.insertMany(
     chapters.map((chapter) => ({
@@ -221,6 +223,7 @@ async function ingestBook(input = {}) {
  */
 const POLITE_DELAY_MS = 1500;
 
+// Wait between imports to reduce pressure on volunteer-run providers.
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
@@ -231,6 +234,7 @@ async function ingestCurated({ books = CURATED_BOOKS, onProgress } = {}) {
   const results = [];
   const failures = [];
 
+  // Import sequentially, record individual failures, and continue with the remaining books.
   for (const [index, entry] of books.entries()) {
     try {
       const result = await ingestBook(entry);

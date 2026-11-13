@@ -68,6 +68,7 @@ function fromGutendex(payload) {
   };
 }
 
+// Decode common HTML entities in fallback metadata into readable characters.
 const decodeEntities = (text) =>
   text
     .replace(/&amp;/g, '&')
@@ -106,6 +107,7 @@ async function getBookFromGutenberg(gutendexId) {
     author = authorSplit[2].trim();
   }
 
+  // Collect distinct subject labels from the Gutenberg page when Gutendex is unavailable.
   const subjects = [];
   for (const match of html.matchAll(/href="\/ebooks\/subject\/[^"]*"[^>]*>([^<]+)<\/a>/gi)) {
     const subject = decodeEntities(match[1]).trim();
@@ -172,6 +174,7 @@ async function searchBooks(query, { limit = 8 } = {}) {
     { timeout: GUTENBERG_TIMEOUT_MS, retries: 1 }
   );
 
+  // Extract unique search result IDs before fetching their metadata individually.
   const ids = [];
   for (const match of html.matchAll(/href="\/ebooks\/(\d+)"/g)) {
     const id = Number(match[1]);
@@ -179,6 +182,7 @@ async function searchBooks(query, { limit = 8 } = {}) {
     if (ids.length >= limit) break;
   }
 
+  // Skip individual fallback pages that fail instead of losing other search results.
   const books = [];
   for (const id of ids) {
     try {

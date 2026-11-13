@@ -3,6 +3,7 @@ window.NovelCastView = (function () {
   let coverSequence = 0;
 
   // Return five icon slots reflecting the displayed numeric rating.
+  // Turn a numeric rating into display markup for its filled and empty stars.
   function stars(value) {
     const full = Math.floor(value);
     const half = value - full >= 0.5;
@@ -25,6 +26,7 @@ window.NovelCastView = (function () {
   }
 
   // Reject unsafe protocols and URLs containing credentials before building image markup.
+  // Accept only suitable cover URLs before placing them into image markup.
   function safeCoverUrl(value) {
     if (typeof value !== 'string' || !value.trim()) return '';
     try {
@@ -38,6 +40,7 @@ window.NovelCastView = (function () {
   }
 
   // Create an escaped book cover with unique gradient IDs so repeated cards do not clash.
+  // Generate a local placeholder cover when a book has no usable image.
   function fallbackCoverSvg(book) {
     const coverId = ++coverSequence;
     const initials = (book.title || 'Novel').replace(/[^A-Z0-9 ]/gi, '').split(' ').filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('') || 'NC';
@@ -87,6 +90,7 @@ window.NovelCastView = (function () {
       <text x="100" y="258" fill="url(#gold-foil-${coverId})" font-size="8" text-anchor="middle" opacity="0.7">✦ NOVELCAST ✦</text>
     </svg>`;
   }
+  // Resolve a book through the shared catalog lookup.
   function findBook(id) { return window.NovelCast.getBook(id); }
   return { stars, cover, findBook };
 })();

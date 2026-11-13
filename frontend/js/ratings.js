@@ -2,6 +2,7 @@
 (function () {
   const base = ((window.__ENV__ || {}).API_BASE || 'http://127.0.0.1:4000/api').replace(/\/$/, '');
   // GET the summary or PUT a score, including the session token when one is available.
+  // Send a read or update for this book’s rating and allow the mounted view to cancel the request.
   async function request(book, score, signal) {
     const token = window.NovelCastAuth && await window.NovelCastAuth.getAccessToken();
     const headers = { 'Content-Type': 'application/json' };
@@ -29,8 +30,10 @@
       let summary = null;
       let saving = false;
       const isPrivate = String(book.id).startsWith('upload-');
+      // Recheck identity when painting or submitting, since sign-in can change while mounted.
       const signedIn = () => window.NovelCastAuth && window.NovelCastAuth.isAuthenticated();
       // Rebuild the summary, distribution and score inputs from the latest confirmed rating data.
+      // Replace the rating display from the latest summary, including any loading or error message.
       function paint(message) {
         if (controller.signal.aborted) return;
         const count = summary ? summary.count : 0;
@@ -56,10 +59,12 @@
         if (heroCount && summary) heroCount.textContent = count ? `(${count.toLocaleString()} ${count === 1 ? 'rating' : 'ratings'})` : '(no ratings yet)';
       }
       // Refresh the summary and keep failures visible without inventing a rating.
+      // Refresh the rating summary when the widget mounts or authentication changes.
       async function load() {
         try { summary = await request(book, undefined, controller.signal); paint(); }
         catch (error) { if (error.name !== 'AbortError') paint(error.message); }
       }
+      // Submit the selected score and repaint only while this widget is still mounted.
       host.addEventListener('change', async event => {
         if (!event.target.matches('input[name="book-rating"]') || saving) return;
         if (!signedIn()) {

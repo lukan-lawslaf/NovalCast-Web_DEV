@@ -7,7 +7,9 @@ const env = require('../config/env');
 const Book = require('../models/Book');
 const Rating = require('../models/Rating');
 const router = express.Router();
+// Send rejected route promises to the central Express error handler.
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res)).catch(next);
+// Mark only intentional service-unavailable messages as safe to show to readers.
 const publicError = (message, status) => Object.assign(new Error(message), { status, expose: status === 503 });
 
 // Verify the token with Supabase, distinguishing expired sessions from unavailable auth service.
@@ -17,6 +19,7 @@ async function verifiedUser(req) {
   if (!env.SUPABASE_URL || !env.SUPABASE_ANON_KEY) {
     throw publicError('Account verification is unavailable.', 503);
   }
+  // Ask Supabase to verify the bearer token with a bounded wait.
   let response;
   try {
     response = await fetch(`${env.SUPABASE_URL.replace(/\/$/, '')}/auth/v1/user`, {
@@ -30,6 +33,7 @@ async function verifiedUser(req) {
     throw publicError('Account verification is temporarily unavailable. Please try again.', 503);
   }
   if (!response.ok) throw publicError('Your session expired. Please sign in again.', 401);
+  // Validate the returned identity and reject unconfirmed or anonymous accounts.
   let user;
   try { user = await response.json(); }
   catch { throw publicError('Account verification is temporarily unavailable. Please try again.', 503); }
@@ -55,10 +59,12 @@ async function findBook(req) {
 
 // Count votes at each star level and optionally include this account's own score.
 async function summary(slug, userId) {
+  // Fetch grouped votes and the current account’s vote together when signed in.
   const [groups, own] = await Promise.all([
     Rating.aggregate([{ $match: { bookSlug: slug } }, { $group: { _id: '$score', count: { $sum: 1 } } }]),
     userId ? Rating.findOne({ bookSlug: slug, userId }).lean() : null,
   ]);
+  // Convert grouped star counts into the fixed 1-to-5 distribution and weighted average.
   const distribution = [0, 0, 0, 0, 0];
   groups.forEach(group => { distribution[group._id - 1] = group.count; });
   const count = distribution.reduce((sum, value) => sum + value, 0);

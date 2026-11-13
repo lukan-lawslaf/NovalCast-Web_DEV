@@ -14,6 +14,7 @@ const path = require('path');
 
   // 1. Visit Login Page
   console.log('Navigating to #/login...');
+  // Open the page before checking the interface in its rendered state.
   await page.goto('http://localhost:3000/#/home', { waitUntil: 'networkidle' });
   await page.evaluate(() => {
     localStorage.removeItem('novelcast.auth.user.v1');
@@ -82,6 +83,7 @@ const path = require('path');
 
   // 3. Click uploaded book card to navigate to book details page
   console.log('Clicking on uploaded book card to verify navigation to book details...');
+  // Perform the click action as a user would, then observe the resulting behavior.
   await page.click('a[href="#/book?book=upload-business-comm"]');
   await page.waitForTimeout(1200);
 
@@ -101,6 +103,7 @@ const path = require('path');
   await page.screenshot({ path: path.join(__dirname, '../archive/uploaded_book_details_verified.png') });
   console.log('Saved uploaded_book_details_verified.png');
 
+  // Release this browser or server resource so later checks start cleanly.
   await browser.close();
   console.log('All verification checks completed successfully!');
 })();

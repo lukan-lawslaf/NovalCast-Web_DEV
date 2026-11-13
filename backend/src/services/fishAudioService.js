@@ -12,6 +12,7 @@ const TTS_TIMEOUT_MS = 60_000;
 const MAX_CONCURRENT_TTS_REQUESTS = 4;
 
 class TtsError extends Error {
+  // Carry a safe HTTP status and stable error code back to the narration route.
   constructor(status, code, message) {
     super(message);
     this.name = 'TtsError';
@@ -56,6 +57,7 @@ function upstreamError(status) {
   return new TtsError(502, 'TTS_UPSTREAM_ERROR', 'Fish Audio could not generate this narration. Please try again later.');
 }
 
+// Cancel an unusable provider body so its network resources can be released.
 function discardResponse(response) {
   // Do not read or expose upstream error bodies: they can contain request data.
   if (response && response.body && typeof response.body.cancel === 'function') {
@@ -73,6 +75,7 @@ async function requestFishAudio(text, { apiKey, referenceId, signal, fetchImpl =
   // A reference is mandatory: omitting it lets Fish Audio vary the voice.
   const body = { text: passage, format: 'mp3', latency: 'balanced', reference_id: validateReferenceId(referenceId) };
 
+  // Send the server key, fixed free model, saved reference, and cancellation signal to Fish Audio.
   let response;
   try {
     response = await fetchImpl(FISH_AUDIO_URL, {
@@ -97,6 +100,7 @@ async function requestFishAudio(text, { apiKey, referenceId, signal, fetchImpl =
     throw upstreamError(response.status);
   }
 
+  // Check the returned media type, body, and declared size before allowing streaming.
   const contentType = (response.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
   const contentLength = response.headers.get('content-length');
   if (!['audio/mpeg', 'audio/mp3', 'application/octet-stream'].includes(contentType) || !response.body || contentLength === '0') {

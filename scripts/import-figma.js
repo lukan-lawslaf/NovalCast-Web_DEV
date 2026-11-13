@@ -7,6 +7,7 @@ function loadEnv() {
   const envPath = path.resolve(__dirname, '..', '.env');
   if (fs.existsSync(envPath)) {
     const lines = fs.readFileSync(envPath, 'utf8').split('\n');
+    // Accept matching assignments from the local file for this development process.
     lines.forEach(line => {
       const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
       if (match) {
@@ -22,11 +23,13 @@ const TOKEN = process.env.FIGMA_ACCESS_TOKEN || '';
 const FILE_KEY = process.env.FIGMA_FILE_KEY || '0WW7OwtWFVtYtIXQGuPdk2';
 const outDir = path.resolve(__dirname, '..', 'Referance', 'Figma');
 
+// Create the local reference folder before any metadata or image writes.
 fs.mkdirSync(outDir, { recursive: true });
 
 // Fetch design JSON from Figma; credentials stay in the request headers.
 function figmaGet(endpoint) {
   return new Promise((resolve, reject) => {
+    // Issue an authenticated Figma request and collect its response asynchronously.
     const req = https.request({
       hostname: 'api.figma.com',
       path: endpoint,
@@ -36,7 +39,9 @@ function figmaGet(endpoint) {
       }
     }, (res) => {
       let data = '';
+      // Join streamed text chunks before attempting to parse JSON.
       res.on('data', chunk => data += chunk);
+      // Resolve only successful HTTP responses; propagate parse and API errors to the caller.
       res.on('end', () => {
         try {
           const parsed = JSON.parse(data);
@@ -59,11 +64,14 @@ function figmaGet(endpoint) {
 function downloadBinary(url, dest) {
   return new Promise((resolve, reject) => {
     https.get(url, (res) => {
+      // Export links may redirect; follow the new location before opening the destination file.
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
         return downloadBinary(res.headers.location, dest).then(resolve).catch(reject);
       }
+      // Pipe bytes directly to disk instead of keeping the whole image in memory.
       const fileStream = fs.createWriteStream(dest);
       res.pipe(fileStream);
+      // Wait for the write to finish, then close the stream and report the saved size.
       fileStream.on('finish', () => {
         fileStream.close();
         resolve(fs.statSync(dest).size);
@@ -113,8 +121,10 @@ async function run() {
   const imageUrls = imagesRes.images || {};
 
   // Download each frame render & save individual frame JSON
+  // Record each exported frame so the final manifest and preview can link to it.
   const framesManifest = [];
   for (const f of frames) {
+    // Replace unsupported filename characters and cap the length before creating local paths.
     const safeName = f.name.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 50);
     const cleanId = f.id.replace(':', '-');
     const imgFilename = `${safeName}_${cleanId}.png`;
@@ -128,6 +138,7 @@ async function run() {
       console.warn(`   Could not fetch node details for ${f.id}:`, e.message);
     }
 
+    // A missing or failed render must not prevent the other frames from being recorded.
     let imgBytes = 0;
     if (imageUrls[f.id]) {
       try {
@@ -138,6 +149,7 @@ async function run() {
       }
     }
 
+    // Keep local filenames alongside source metadata for the generated reference browser.
     framesManifest.push({
       id: f.id,
       name: f.name,
@@ -172,6 +184,7 @@ async function run() {
   fs.writeFileSync(path.join(outDir, 'manifest.json'), JSON.stringify(manifest, null, 2), 'utf8');
 
   // 5. Generate an index preview HTML file in Referance/Figma
+  // Generate a standalone reference gallery; this is not the active NovelCast SPA shell.
   const previewHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -219,4 +232,5 @@ async function run() {
   console.log(`\nImport complete! Saved Figma assets and index.html to ${outDir}`);
 }
 
+// Run the import and report a top-level failure rather than silently losing it.
 run().catch(console.error);

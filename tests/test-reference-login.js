@@ -17,6 +17,7 @@ const path = require('path');
 
   // 1. Visit Login Page in unauthenticated state
   console.log('Navigating to http://localhost:3000/#/login...');
+  // Open the page before checking the interface in its rendered state.
   await page.goto('http://localhost:3000/#/home', { waitUntil: 'networkidle' });
   await page.evaluate(() => {
     localStorage.removeItem('novelcast.auth.user.v1');
@@ -50,6 +51,7 @@ const path = require('path');
 
   // 4. Test Tab Switch to "Request Access"
   console.log('Switching to "Request Access" tab...');
+  // Perform the click action as a user would, then observe the resulting behavior.
   await page.click('#tab-signup');
   await page.waitForTimeout(500);
 
@@ -73,6 +75,7 @@ const path = require('path');
   let inputType = await cipherInput.getAttribute('type');
   console.log('Initial type:', inputType);
 
+  // Perform the click action as a user would, then observe the resulting behavior.
   await page.click('#toggle-password');
   inputType = await cipherInput.getAttribute('type');
   console.log('Type after 1 click:', inputType);
@@ -82,6 +85,7 @@ const path = require('path');
     console.error('FAIL: Cipher toggle did not reveal text.');
   }
 
+  // Perform the click action as a user would, then observe the resulting behavior.
   await page.click('#toggle-password');
   inputType = await cipherInput.getAttribute('type');
   console.log('Type after 2nd click:', inputType);
@@ -108,6 +112,7 @@ const path = require('path');
   console.log('Testing Catalog link navigation...');
   const catalogLink = await page.$('a:has-text("Catalog")');
   if (catalogLink) {
+    // Perform the click action as a user would, then observe the resulting behavior.
     await catalogLink.click();
     await page.waitForTimeout(800);
     const afterCatalogHash = await page.evaluate(() => location.hash);
@@ -117,6 +122,7 @@ const path = require('path');
     }
   }
 
+  // Release this browser or server resource so later checks start cleanly.
   await browser.close();
   console.log('All reference login page verifications passed!');
 })();

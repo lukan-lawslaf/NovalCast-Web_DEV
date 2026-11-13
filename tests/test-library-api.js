@@ -10,10 +10,12 @@ const env = require('../backend/src/config/env');
 const { createLibraryJsonStore, emptyDocument } = require('../backend/src/services/libraryJsonStore');
 const { createLibraryRouter } = require('../backend/src/routes/libraryRoutes');
 
+// Create an isolated temporary directory and remove only that test directory during cleanup.
 async function directory(t) {
   const root = path.resolve(__dirname, '../outputs');
   await fs.mkdir(root, { recursive: true });
   const target = await fs.mkdtemp(path.join(root, 'novelcast-library-test-'));
+  // Restore or release the test resources even if an assertion fails.
   t.after(async () => {
     assert.equal(path.dirname(path.resolve(target)), root);
     assert.ok(path.basename(target).startsWith('novelcast-library-test-'));
@@ -22,14 +24,17 @@ async function directory(t) {
   return target;
 }
 
+// Start a local test server and arrange for its resources to be released after the test.
 async function listen(t, app) {
   const server = await new Promise(resolve => {
     const instance = app.listen(0, '127.0.0.1', () => resolve(instance));
   });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => new Promise(resolve => server.close(resolve)));
   return `http://127.0.0.1:${server.address().port}`;
 }
 
+// Provide a representative library document with progress, uploads, settings, and a reading plan.
 function changedDocument() {
   return {
     ...emptyDocument(),
@@ -40,11 +45,14 @@ function changedDocument() {
   };
 }
 
+// Scenario: library API verifies Supabase identity, isolates accounts and saves actual JSON. The checks below exercise this behavior as one independent case.
 test('library API verifies Supabase identity, isolates accounts and saves actual JSON', async t => {
   const original = { url: env.SUPABASE_URL, key: env.SUPABASE_ANON_KEY };
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => { env.SUPABASE_URL = original.url; env.SUPABASE_ANON_KEY = original.key; });
   const auth = express();
   let authMode = 'normal';
+  // This local authentication endpoint models confirmed, rejected, and unavailable identity checks.
   auth.get('/auth/v1/user', (req, res) => {
     assert.equal(req.headers.apikey, 'test-public-key');
     if (authMode === 'unavailable') return res.status(503).json({ error: 'down' });
@@ -61,11 +69,13 @@ test('library API verifies Supabase identity, isolates accounts and saves actual
   app.use(express.json());
   app.use('/api', createLibraryRouter({ store: createLibraryJsonStore({ directory: target }) }));
   const base = await listen(t, app) + '/api/me/library';
+  // Helper: request. This keeps the test setup or interaction consistent across the scenario.
   const request = (token, data) => fetch(base, {
     method: data ? 'PUT' : 'GET',
     headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), 'Content-Type': 'application/json' },
     ...(data ? { body: JSON.stringify(data) } : {}),
   });
+  // Reject missing, forged, unconfirmed, and anonymous credentials before reading any library data.
   for (const token of [null, 'forged', 'unconfirmed', 'anonymous']) assert.equal((await request(token)).status, 401);
   assert.deepEqual(await (await request('reader-one')).json(), emptyDocument());
   const value = changedDocument();
@@ -78,12 +88,14 @@ test('library API verifies Supabase identity, isolates accounts and saves actual
   assert.equal(saved.state.library.dracula.favorite, true);
   assert.deepEqual(await (await request('reader-two')).json(), emptyDocument());
   assert.deepEqual(await (await request('reader-one')).json(), saved);
+  // Inspect the stored file as well as the API response: it must contain data without identity secrets.
   const filenames = await fs.readdir(target);
   assert.equal(filenames.length, 1);
   assert.match(filenames[0], /^[a-f0-9]{64}\.json$/);
   const raw = await fs.readFile(path.join(target, filenames[0]), 'utf8');
   assert.deepEqual(JSON.parse(raw), saved);
   assert.equal(/reader-one|test-public-key|Bearer|password|@/.test(raw), false);
+  // A stale revision must conflict, and an unavailable identity service must not overwrite saved data.
   const conflict = await request('reader-one', value);
   assert.equal(conflict.status, 409);
   assert.deepEqual((await conflict.json()).document, saved);
@@ -92,6 +104,7 @@ test('library API verifies Supabase identity, isolates accounts and saves actual
   assert.deepEqual(JSON.parse(await fs.readFile(path.join(target, filenames[0]), 'utf8')), saved);
 });
 
+// Scenario: library API rejects invalid fields, forged ownership and unsafe record keys. The checks below exercise this behavior as one independent case.
 test('library API rejects invalid fields, forged ownership and unsafe record keys', async t => {
   const target = await directory(t);
   const app = express();
@@ -118,11 +131,13 @@ test('library API rejects invalid fields, forged ownership and unsafe record key
   assert.deepEqual(await fs.readdir(target), []);
 });
 
+// Scenario: JSON store survives a new instance and serializes concurrent revision checks. The checks below exercise this behavior as one independent case.
 test('JSON store survives a new instance and serializes concurrent revision checks', async t => {
   const target = await directory(t);
   const one = createLibraryJsonStore({ directory: target });
   const two = createLibraryJsonStore({ directory: target });
   const initial = changedDocument();
+  // Competing saves start from the same revision; exactly one may win.
   const results = await Promise.allSettled([one.save('reader', initial), two.save('reader', initial)]);
   assert.equal(results.filter(result => result.status === 'fulfilled').length, 1);
   const conflict = results.find(result => result.status === 'rejected').reason;
@@ -136,6 +151,7 @@ test('JSON store survives a new instance and serializes concurrent revision chec
   assert.equal((await fs.readdir(target)).length, 1);
 });
 
+// Scenario: corrupt JSON is reported unavailable and never overwritten. The checks below exercise this behavior as one independent case.
 test('corrupt JSON is reported unavailable and never overwritten', async t => {
   const target = await directory(t);
   const store = createLibraryJsonStore({ directory: target });

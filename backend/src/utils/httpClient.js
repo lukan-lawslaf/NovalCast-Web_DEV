@@ -15,6 +15,7 @@ const USER_AGENT =
 const DEFAULT_TIMEOUT_MS = 15000;
 const DEFAULT_RETRIES = 2;
 
+// Pause between attempts while allowing the event loop to serve other requests.
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Timeouts, throttling and server failures may be temporary.
@@ -23,6 +24,7 @@ function isRetryableStatus(status) {
 }
 
 class HttpError extends Error {
+  // Keep the failed URL and optional HTTP status alongside the error message.
   constructor(message, { status, url } = {}) {
     super(message);
     this.name = 'HttpError';
@@ -48,6 +50,7 @@ async function request(url, options = {}) {
 
   let lastError;
 
+  // Each attempt has its own abort timer so a stalled provider cannot wait indefinitely.
   for (let attempt = 1; attempt <= retries + 1; attempt += 1) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeout);
@@ -61,6 +64,7 @@ async function request(url, options = {}) {
         headers: { 'user-agent': USER_AGENT, accept: '*/*', ...headers },
       });
 
+      // Retry temporary HTTP failures within the limit; turn other failures into HttpError.
       if (!response.ok) {
         if (isRetryableStatus(response.status) && attempt <= retries) {
           lastError = new HttpError(`HTTP ${response.status} for ${url}`, {
@@ -74,10 +78,12 @@ async function request(url, options = {}) {
       }
 
       return response;
+    // Remember network or abort failures and retry only while attempts remain.
     } catch (error) {
       lastError = error;
       if (attempt > retries) break;
       await sleep(400 * attempt);
+    // Always cancel this attempt’s timer, including on success or retry.
     } finally {
       clearTimeout(timer);
     }
@@ -91,6 +97,7 @@ async function request(url, options = {}) {
 
 /** Decode a response body respecting the charset the server declared. */
 async function readText(response) {
+  // Read bytes first so the declared character set can determine how text is decoded.
   const buffer = Buffer.from(await response.arrayBuffer());
   const contentType = response.headers.get('content-type') || '';
   const match = /charset=["']?([\w-]+)/i.exec(contentType);

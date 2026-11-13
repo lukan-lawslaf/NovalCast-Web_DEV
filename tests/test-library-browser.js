@@ -28,10 +28,12 @@ const sdk = `(() => {
   } }) };
 })();`;
 
+// Scenario: desktop and mobile library submits to disk, restores accounts, handles offline saves and downloads JSON. The checks below exercise this behavior as one independent case.
 test('desktop and mobile library submits to disk, restores accounts, handles offline saves and downloads JSON', { timeout: 90000 }, async t => {
   const root = path.resolve(__dirname, '../outputs');
   await fs.mkdir(root, { recursive: true });
   const directory = await fs.mkdtemp(path.join(root, 'library-browser-'));
+  // Restore or release the test resources even if an assertion fails.
   t.after(async () => {
     assert.equal(path.dirname(directory), root);
     await fs.rm(directory, { recursive: true, force: true });
@@ -53,8 +55,10 @@ test('desktop and mobile library submits to disk, restores accounts, handles off
   app.use(express.static(path.resolve(__dirname, '../frontend')));
   const server = await new Promise(resolve => { const instance = app.listen(0, '127.0.0.1', () => resolve(instance)); });
   base = `http://127.0.0.1:${server.address().port}`;
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => new Promise(resolve => server.close(resolve)));
   const browser = await chromium.launch({ channel: 'chrome', headless: true });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => browser.close());
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce', acceptDownloads: true });
   await context.addInitScript(() => {
@@ -73,20 +77,29 @@ test('desktop and mobile library submits to disk, restores accounts, handles off
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   const login = async email => {
+    // Open the page before checking the interface in its rendered state.
     await page.goto(base + '/#/login?redirect=library');
+    // Perform the fill action as a user would, then observe the resulting behavior.
     await page.locator('#sanctuary-id').fill(email);
+    // Perform the fill action as a user would, then observe the resulting behavior.
     await page.locator('#master-cipher').fill('test-password');
+    // Perform the click action as a user would, then observe the resulting behavior.
     await page.locator('#btn-submit').click();
     await page.waitForSelector('#reading-plan-form');
     await page.waitForFunction(() => window.NovelCastLibrary.getStatus().phase === 'synced');
   };
   await login('one@example.test');
+  // Perform the fill action as a user would, then observe the resulting behavior.
   await page.locator('#daily-minutes').fill('4');
+  // Perform the click action as a user would, then observe the resulting behavior.
   await page.locator('#reading-plan-form button[type=submit]').click();
   assert.equal(await page.locator('#daily-minutes').evaluate(el => el.validity.rangeUnderflow), true);
   assert.equal((await store.read('reader-one')).revision, 0);
+  // Perform the fill action as a user would, then observe the resulting behavior.
   await page.locator('#daily-minutes').fill('35');
+  // Perform the fill action as a user would, then observe the resulting behavior.
   await page.locator('#favorite-genre').fill('Mystery');
+  // Perform the click action as a user would, then observe the resulting behavior.
   await page.locator('#reading-plan-form button[type=submit]').click();
   await page.waitForFunction(() => window.NovelCastLibrary.getStatus().phase === 'synced');
   assert.equal((await store.read('reader-one')).readingPlan.dailyMinutes, 35);
@@ -94,6 +107,7 @@ test('desktop and mobile library submits to disk, restores accounts, handles off
   await page.waitForFunction(() => window.NovelCastLibrary.getStatus().phase === 'synced');
   assert.equal((await store.read('reader-one')).state.library['pride-and-prejudice'].favorite, true);
   assert.equal((await store.read('reader-one')).state.library.dracula, undefined);
+  // Perform the click action as a user would, then observe the resulting behavior.
   await page.locator('#import-device-bookmarks').click();
   await page.waitForFunction(() => window.NovelCastLibrary.getStatus().phase === 'synced');
   assert.equal((await store.read('reader-one')).state.library.dracula.favorite, true);
@@ -111,7 +125,9 @@ test('desktop and mobile library submits to disk, restores accounts, handles off
   assert.equal(await page.locator('[data-library-remove="pride-and-prejudice"]').count(), 1);
   await page.screenshot({ path: path.join(root, 'library-sync-desktop.png'), fullPage: true });
   offline = true;
+  // Perform the fill action as a user would, then observe the resulting behavior.
   await page.locator('#daily-minutes').fill('45');
+  // Perform the click action as a user would, then observe the resulting behavior.
   await page.locator('#reading-plan-form button[type=submit]').click();
   await page.waitForFunction(() => /offline/.test(window.NovelCastLibrary.getStatus().message));
   assert.equal((await store.read('reader-one')).readingPlan.dailyMinutes, 35);
@@ -119,25 +135,31 @@ test('desktop and mobile library submits to disk, restores accounts, handles off
   await page.waitForSelector('#daily-minutes');
   assert.equal(await page.locator('#daily-minutes').inputValue(), '45');
   offline = false;
+  // Perform the click action as a user would, then observe the resulting behavior.
   await page.locator('#retry-sync').click();
   await page.waitForFunction(() => window.NovelCastLibrary.getStatus().phase === 'synced');
   assert.equal((await store.read('reader-one')).readingPlan.dailyMinutes, 45);
   await page.setViewportSize({ width: 390, height: 844 });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   await page.locator('#daily-minutes').focus();
+  // Perform the press action as a user would, then observe the resulting behavior.
   await page.keyboard.press('Tab');
   assert.equal(await page.locator('#favorite-genre').evaluate(el => el === document.activeElement), true);
   await page.screenshot({ path: path.join(root, 'library-sync-mobile.png'), fullPage: true });
   const second = await context.newPage();
+  // Open the page before checking the interface in its rendered state.
   await second.goto(base + '/#/library');
   await second.waitForSelector('#reading-plan-form');
+  // Perform the click action as a user would, then observe the resulting behavior.
   await page.locator('#btn-lib-signout').click();
   await second.waitForURL('**/#/login?redirect=library');
   assert.equal(await second.locator('#reading-plan-form').count(), 0);
+  // Release this browser or server resource so later checks start cleanly.
   await second.close();
   await login('two@example.test');
   assert.equal(await page.locator('#daily-minutes').inputValue(), '20');
   assert.equal(await page.locator('[data-library-remove]').count(), 0);
+  // Perform the click action as a user would, then observe the resulting behavior.
   await page.locator('#btn-lib-signout').click();
   await login('one@example.test');
   assert.equal(await page.locator('#daily-minutes').inputValue(), '45');

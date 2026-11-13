@@ -7,6 +7,7 @@ const { chromium } = require('playwright');
   
   // Test #/home
   console.log('Navigating to http://localhost:3000/#/home ...');
+  // Open the page before checking the interface in its rendered state.
   await page.goto('http://localhost:3000/#/home', { waitUntil: 'networkidle' });
   await page.waitForTimeout(500);
 
@@ -27,10 +28,12 @@ const { chromium } = require('playwright');
 
   // Test #/landing
   console.log('Navigating to http://localhost:3000/#/landing ...');
+  // Open the page before checking the interface in its rendered state.
   await page.goto('http://localhost:3000/#/landing', { waitUntil: 'networkidle' });
   await page.waitForTimeout(500);
   await page.screenshot({ path: 'Referance/landing_luxury_logo_verified.png' });
   console.log('Captured Referance/landing_luxury_logo_verified.png');
 
+  // Release this browser or server resource so later checks start cleanly.
   await browser.close();
 })();

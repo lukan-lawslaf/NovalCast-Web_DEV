@@ -68,6 +68,7 @@ function romanToInt(roman) {
   if (!/^[IVXLCDM]+$/.test(text)) return null;
 
   let total = 0;
+  // Add numeral values, subtracting a smaller symbol when it precedes a larger one.
   for (let i = 0; i < text.length; i += 1) {
     const value = ROMAN_VALUES[text[i]];
     const next = ROMAN_VALUES[text[i + 1]];
@@ -213,6 +214,7 @@ function splitWith(matcher, text) {
   const preamble = [];
   let current = null;
 
+  // Walk paragraph blocks in order, starting a section whenever the matcher finds a heading.
   for (const block of blocks) {
     const firstLine = block.split('\n')[0];
     const match = matcher(firstLine);
@@ -239,6 +241,7 @@ function splitWith(matcher, text) {
 
   // A heading with no inline title often has it on the next line
   // ("CHAPTER I." / "Down the Rabbit-Hole", "CHAPTER I" / "JONATHAN HARKER'S JOURNAL").
+  // Promote a plausible first content line to the chapter title when needed.
   for (const section of sections) {
     if (section.title || !section.content) continue;
 
@@ -267,6 +270,7 @@ function splitIntoWordSections(text, wordsPerSection) {
   let buffer = [];
   let bufferWords = 0;
 
+  // Move the accumulated paragraphs into one fallback section and reset the buffer.
   const flush = () => {
     if (!buffer.length) return;
     sections.push({
@@ -279,6 +283,7 @@ function splitIntoWordSections(text, wordsPerSection) {
     bufferWords = 0;
   };
 
+  // Add whole paragraphs until the fallback section reaches its word target.
   for (const block of blocks) {
     buffer.push(block);
     bufferWords += countWords(block);
@@ -289,6 +294,7 @@ function splitIntoWordSections(text, wordsPerSection) {
   return { sections, preamble: [] };
 }
 
+// Collapse extra spaces and remove punctuation at the edges of a chapter title.
 function cleanTitle(title) {
   return String(title || '')
     .replace(/\s+/g, ' ')
@@ -302,6 +308,7 @@ function mergeTinySections(sections) {
   const output = [];
   let pending = [];
 
+  // Carry tiny heading fragments forward so they do not become empty chapters.
   for (const section of sections) {
     if (countWords(section.content) < MIN_SECTION_WORDS) {
       pending.push(section);
@@ -416,6 +423,7 @@ function parseChapters(text, options = {}) {
     sections.unshift(buildPreambleSection(preambleText));
   }
 
+  // Clean titles and content, discard empty sections, and assign sequential chapter numbers.
   const chapters = sections
     .map((section) => {
       const title = cleanTitle(section.title) || synthesizeTitle(section);

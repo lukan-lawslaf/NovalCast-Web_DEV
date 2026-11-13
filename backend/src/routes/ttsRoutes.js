@@ -30,6 +30,7 @@ function createTtsRouter({
   const router = express.Router();
   let activeRequests = 0;
 
+  // Validate a single passage and book before consuming a narration slot.
   router.post('/tts', async (req, res) => {
     res.set('Cache-Control', 'no-store');
 
@@ -38,6 +39,7 @@ function createTtsRouter({
     try {
       text = validateTtsText(req.body && req.body.text);
       bookId = validateBookId(req.body && req.body.bookId);
+    // Reject invalid passage or book input before contacting the provider.
     } catch (error) {
       return res.status(error.status).json({ error: error.message, code: error.code });
     }
@@ -63,6 +65,7 @@ function createTtsRouter({
     };
     req.once('aborted', abortClient);
     res.once('close', abortClient);
+    // Abort provider work when the time limit expires, even if the client remains connected.
     const timer = setTimeout(() => {
       timedOut = true;
       controller.abort();
@@ -70,6 +73,7 @@ function createTtsRouter({
     timer.unref?.();
 
     try {
+      // Resolve the book’s saved voice before requesting this passage from the fixed free model.
       const voice = await voiceResolver(bookId, { signal: controller.signal });
       controller.signal.throwIfAborted();
       const voiceId = validateReferenceId(voice && voice.referenceId);
@@ -101,6 +105,7 @@ function createTtsRouter({
         }
       })(), { objectMode: false });
 
+      // Send audio metadata only after the first playable bytes have arrived.
       res.status(200).set({
         'Content-Type': 'audio/mpeg',
         'X-TTS-Model': FISH_AUDIO_MODEL,
@@ -108,6 +113,7 @@ function createTtsRouter({
         'X-TTS-Voice-Name': encodeURIComponent(voice.name.trim()),
       });
       await pipeline(limitedAudio, res, { signal: controller.signal });
+    // Return a safe error before streaming starts, or terminate an incomplete stream afterward.
     } catch (error) {
       if (disconnected || res.destroyed) return;
       const failure = timedOut
@@ -125,6 +131,7 @@ function createTtsRouter({
         res.removeHeader('X-TTS-Voice-Name');
         res.status(failure.status).json({ error: failure.message, code: failure.code });
       }
+    // Release the slot and remove timers, listeners, and streams on every exit path.
     } finally {
       clearTimeout(timer);
       req.removeListener('aborted', abortClient);

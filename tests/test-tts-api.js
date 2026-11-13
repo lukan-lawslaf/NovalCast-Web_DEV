@@ -8,6 +8,7 @@ const { createTtsRouter } = require('../backend/src/routes/ttsRoutes');
 const MODEL = 's2.1-pro-free';
 const FISH_URL = 'https://api.fish.audio/v1/tts';
 
+// Create a promise whose completion the test controls, so timing and pending requests can be checked.
 function deferred() {
   let resolve;
   let reject;
@@ -15,6 +16,7 @@ function deferred() {
   return { promise, resolve, reject };
 }
 
+// Put a time limit around an asynchronous operation so a stalled request fails clearly.
 function within(promise, milliseconds, message) {
   let timer;
   return Promise.race([
@@ -23,6 +25,7 @@ function within(promise, milliseconds, message) {
   ]).finally(() => clearTimeout(timer));
 }
 
+// Start a local test server and arrange for its resources to be released after the test.
 function startServer(app) {
   return new Promise((resolve, reject) => {
     const server = app.listen(0, '127.0.0.1', () => resolve(server));
@@ -30,6 +33,7 @@ function startServer(app) {
   });
 }
 
+// Send a JSON request to the local server and collect its response for assertions.
 function sendJson(port, pathname, payload) {
   const body = JSON.stringify(payload);
   return new Promise((resolve, reject) => {
@@ -51,6 +55,7 @@ function sendJson(port, pathname, payload) {
   });
 }
 
+// Start a streaming JSON request so the test can control what happens while it is in flight.
 function beginJsonStream(port, pathname, payload) {
   const body = JSON.stringify(payload);
   const responseReady = deferred();
@@ -76,10 +81,12 @@ function beginJsonStream(port, pathname, payload) {
   return { request, response: responseReady.promise };
 }
 
+// Build a controlled response so the caller can exercise the same boundary without a live service.
 function audioResponse(bytes = Buffer.from([0x49, 0x44, 0x33, 0x01])) {
   return new Response(bytes, { status: 200, headers: { 'Content-Type': 'audio/mpeg' } });
 }
 
+// Scenario: POST /api/tts validates passages, fixes the model, streams audio, and aborts on disconnect. The checks below exercise this behavior as one independent case.
 test('POST /api/tts validates passages, fixes the model, streams audio, and aborts on disconnect', async t => {
   const originalFetch = global.fetch;
   const providerCalls = [];
@@ -110,6 +117,7 @@ test('POST /api/tts validates passages, fixes the model, streams audio, and abor
   app.use('/unvoiced', createTtsRouter({ apiKey: 'fake-test-key', voiceResolver: async () => null, timeoutMs: 2000 }));
   app.use((error, req, res, next) => res.status(error.status || 500).json({ error: 'test app error' }));
   let server;
+  // Restore or release the test resources even if an assertion fails.
   t.after(async () => {
     global.fetch = originalFetch;
     if (server) await new Promise(resolve => server.close(resolve));

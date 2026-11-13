@@ -27,6 +27,7 @@ function dominantColorFraction({ data, width, height }) {
   return largest / sampled;
 }
 
+// Compare screenshot pixels with both theme baselines to measure their visible mixture during the transition.
 function themeMixture(image, before, after) {
   assert.equal(image.width, before.width);
   assert.equal(image.height, before.height);
@@ -47,6 +48,7 @@ function themeMixture(image, before, after) {
   return { old: oldPixels / eligible, new: newPixels / eligible };
 }
 
+// Build the fixture colors used by these scenarios, with controlled dependencies and observable state.
 function fixtureColors({ data, width, height }) {
   let red = 0;
   let blue = 0;
@@ -62,6 +64,7 @@ function fixtureColors({ data, width, height }) {
   return { red: red / count, blue: blue / count };
 }
 
+// Locate a system Firefox installation when available so the same transition can be checked in that browser.
 function systemFirefoxPath() {
   if (process.env.NOVELCAST_FIREFOX_PATH) return process.env.NOVELCAST_FIREFOX_PATH;
   if (process.platform !== 'win32') return '';
@@ -88,7 +91,9 @@ const viewports = [
   { name: 'mobile', width: 390, height: 844 },
 ].filter(viewport => !process.env.NOVELCAST_THEME_SMOKE || viewport.name === 'desktop');
 
+// Scenario: theme changes keep page content visible during the transition. The checks below exercise this behavior as one independent case.
 test('theme changes keep page content visible during the transition', { timeout: 300000 }, async t => {
+  // Serve the real frontend locally with empty public configuration for a self-contained visual check.
   const app = express();
   app.get('/js/env.js', (req, res) => res.type('js').send('window.__ENV__ = {};'));
   app.get('/env.json', (req, res) => res.json({}));
@@ -96,7 +101,9 @@ test('theme changes keep page content visible during the transition', { timeout:
   const server = await new Promise(resolve => {
     const instance = app.listen(0, '127.0.0.1', () => resolve(instance));
   });
+  // Restore or release the test resources even if an assertion fails.
   t.after(() => new Promise(resolve => server.close(resolve)));
+  // The browser matrix and viewport matrix below expose differences between engines and screen sizes.
   const origin = `http://127.0.0.1:${server.address().port}`;
   const response = await fetch(origin);
   assert.equal(response.status, 200, 'the isolated frontend server must respond');
@@ -108,6 +115,7 @@ test('theme changes keep page content visible during the transition', { timeout:
     }
     await t.test(config.name, async t => {
       const browser = await config.engine.launch({ executablePath: config.executablePath, ...(config.channel ? { channel: config.channel } : {}), headless: true });
+      // Restore or release the test resources even if an assertion fails.
       t.after(() => browser.close());
       for (const viewport of viewports) {
         await t.test(viewport.name, async t => {
@@ -129,6 +137,7 @@ test('theme changes keep page content visible during the transition', { timeout:
               t.diagnostic('Firefox screenshots capture the final DOM during native view transitions (Mozilla bug 2008417); native lifecycle and clip values are checked separately, and the same clip is rendered on an ordinary DOM fixture. Native Firefox compositor output remains unverified by screenshots.');
             }
             for (const route of process.env.NOVELCAST_THEME_SMOKE ? ['home'] : ['home', 'landing']) {
+              // Open the page before checking the interface in its rendered state.
               await page.goto(`${origin}/#/${route}`, { waitUntil: 'networkidle' });
               const toggle = page.locator('[data-theme-toggle]:visible').first();
               await toggle.waitFor();
@@ -138,6 +147,7 @@ test('theme changes keep page content visible during the transition', { timeout:
                 await page.waitForTimeout(250);
                 const before = PNG.sync.read(await page.screenshot({ animations: 'allow' }));
                 const clickStarted = await page.evaluate(() => performance.now());
+                // Perform the click action as a user would, then observe the resulting behavior.
                 await toggle.click();
                 const clickFinished = await page.evaluate(() => performance.now());
                 const samples = [];
@@ -220,6 +230,7 @@ test('theme changes keep page content visible during the transition', { timeout:
               assert.ok(renderedMixture, `${config.name}/${viewport.name}: no active production clip visibly revealed both fixture layers`);
             }
           } finally {
+            // Release this browser or server resource so later checks start cleanly.
             await context.close();
           }
         });

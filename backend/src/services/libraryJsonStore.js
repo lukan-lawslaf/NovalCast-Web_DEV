@@ -8,8 +8,11 @@ const { createHash, randomUUID } = require('node:crypto');
 
 const queues = new Map();
 const MAX_BYTES = 1024 * 1024;
+// Recognize JSON objects while excluding null and arrays.
 const record = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+// Tag validation failures for the route’s 400 response.
 const invalid = message => Object.assign(new Error(message), { status: 400 });
+// Report unreadable storage without replacing an existing library.
 const unavailable = () => Object.assign(new Error('Your library file is unavailable. Your existing data has not been replaced.'), { status: 503 });
 
 // Allowlisted fields keep passwords, tokens and arbitrary extra data out of library records.
@@ -17,26 +20,31 @@ function keys(value, allowed, name) {
   if (!record(value) || Object.keys(value).some(key => !allowed.includes(key))) throw invalid(`Invalid ${name} fields.`);
 }
 
+// Bound text and reject control characters before it reaches a saved file.
 function text(value, max, name) {
   if (typeof value !== 'string' || value.length > max || /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(value)) throw invalid(`Invalid ${name}.`);
   return value;
 }
 
+// Require an integer within the allowed range for this field.
 function integer(value, min, max, name) {
   if (!Number.isSafeInteger(value) || value < min || value > max) throw invalid(`Invalid ${name}.`);
   return value;
 }
 
+// Restrict IDs and reject special object-property names before using them as keys.
 function identifier(value) {
   if (typeof value !== 'string' || !/^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,159}$/.test(value) || ['__proto__', 'constructor', 'prototype'].includes(value)) throw invalid('Invalid book identifier.');
   return value;
 }
 
+// Limit collection size and validate every element with its normalizer.
 function boundedArray(value, max, name, normalize) {
   if (!Array.isArray(value) || value.length > max) throw invalid(`Invalid ${name}.`);
   return value.map(normalize);
 }
 
+// Accept either an older numeric bookmark or a validated chapter/page record.
 function bookmark(value) {
   if (Number.isSafeInteger(value)) return integer(value, 0, 1000000, 'bookmark');
   keys(value, ['chapter', 'page', 'label'], 'bookmark');
@@ -62,6 +70,7 @@ function libraryEntry(value) {
   };
 }
 
+// Normalize a simple collection name or a structured collection with book IDs.
 function collection(value) {
   if (typeof value === 'string') return text(value, 80, 'collection name');
   keys(value, ['id', 'name', 'bookIds'], 'collection');
@@ -75,9 +84,11 @@ function upload(value) {
   keys(value, ['id', ...Object.keys(UPLOAD_STRINGS), 'progress', 'chapters', 'rating', 'reviews', 'chaptersList'], 'upload');
   const result = { id: identifier(value.id), title: text(value.title, 300, 'book title') };
   if (!result.title.trim()) throw invalid('A book title is required.');
+  // Copy only allowed metadata fields, checking each field’s individual size limit.
   for (const [key, max] of Object.entries(UPLOAD_STRINGS)) {
     if (value[key] !== undefined) result[key] = text(value[key], max, `upload ${key}`);
   }
+  // Accept only HTTP(S) cover URLs without embedded credentials.
   for (const key of ['cover', 'coverUrl']) {
     if (!result[key]) continue;
     let url;
@@ -91,6 +102,7 @@ function upload(value) {
     if (typeof value.rating !== 'number' || !Number.isFinite(value.rating) || value.rating < 0 || value.rating > 5) throw invalid('Invalid book rating.');
     result.rating = value.rating;
   }
+  // Validate each chapter summary without storing the manuscript text itself.
   if (value.chaptersList !== undefined) result.chaptersList = boundedArray(value.chaptersList, 2000, 'chapter list', chapter => {
     keys(chapter, ['title', 'theme', 'chapterNumber', 'wordCount'], 'chapter summary');
     return {
@@ -103,6 +115,7 @@ function upload(value) {
   return result;
 }
 
+// Allow only known reader settings and bound their values.
 function settings(value) {
   keys(value, ['font', 'fontSize', 'palette', 'lineSpacing', 'focus', 'layout'], 'settings');
   const result = {};
@@ -124,6 +137,7 @@ function normalizeDocument(value) {
   if (!record(inputLibrary) || Object.keys(inputLibrary).length > 1000) throw invalid('Invalid library books.');
   const library = {};
   for (const [id, entry] of Object.entries(inputLibrary)) library[identifier(id)] = libraryEntry(entry);
+  // Normalize uploads and reject duplicate IDs before assembling the saved document.
   const uploads = boundedArray(value.uploads ?? [], 500, 'uploads', upload);
   if (new Set(uploads.map(book => book.id)).size !== uploads.length) throw invalid('Duplicate uploaded book identifiers.');
   const plan = value.readingPlan ?? { dailyMinutes: 20, favoriteGenre: '' };
@@ -141,6 +155,7 @@ function normalizeDocument(value) {
   return result;
 }
 
+// Create the same validated defaults used for a new account’s library.
 function emptyDocument() {
   return normalizeDocument({ revision: 0 });
 }
@@ -173,16 +188,20 @@ function createLibraryJsonStore({ directory = path.resolve(__dirname, '../../dat
     const document = normalizeDocument(value);
     const target = filename(userId);
     const previous = queues.get(target) || Promise.resolve();
+    // Queue this save after the previous one, even if the previous save failed.
     const pending = previous.catch(() => {}).then(async () => {
+      // Compare the submitted revision with the latest file to detect another client’s changes.
       const current = await read(userId);
       if (current.revision !== document.revision) {
         throw Object.assign(new Error('Your library changed elsewhere. Refresh and merge before saving.'), { status: 409, document: current });
       }
       if (current.revision === Number.MAX_SAFE_INTEGER) throw unavailable();
       const next = { ...document, revision: current.revision + 1 };
+      // Write a private temporary file first so a failed write cannot partially replace the library.
       const temporary = target + '.' + randomUUID() + '.tmp';
       try {
         await fs.mkdir(root, { recursive: true, mode: 0o700 });
+        // Create a new private file, flush its contents, and close it before replacement.
         const handle = await fs.open(temporary, 'wx', 0o600);
         try {
           await handle.writeFile(JSON.stringify(next, null, 2) + '\n', 'utf8');
@@ -195,10 +214,12 @@ function createLibraryJsonStore({ directory = path.resolve(__dirname, '../../dat
         return next;
       } catch {
         throw unavailable();
+      // Remove any leftover temporary file whether writing or replacement succeeds or fails.
       } finally {
         await fs.unlink(temporary).catch(() => {});
       }
     });
+    // Remove the queue entry only if no newer save has replaced it.
     queues.set(target, pending);
     try { return await pending; }
     finally { if (queues.get(target) === pending) queues.delete(target); }

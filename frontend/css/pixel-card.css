@@ -26,6 +26,7 @@
   user-select: none;
 }
 
+/* Upload card: Draw a decorative pseudo-element without adding extra HTML markup. */
 .pixel-card::before {
   content: '';
   position: absolute;
@@ -39,15 +40,18 @@
   z-index: 1;
 }
 
+/* Upload card: Show a visible focus cue so keyboard users can locate the active control. */
 .pixel-card:hover::before,
 .pixel-card:focus-within::before {
   opacity: 1;
 }
 
+/* Upload card: Provide pointer-hover feedback without changing the underlying action. */
 .pixel-card:hover {
   border-color: rgba(243, 209, 130, 0.45);
 }
 
+/* Upload card: Add depth or glow to distinguish the element from its background. */
 .pixel-card.is-dragover {
   border-color: #F3D182 !important;
   background: #151C2B !important;

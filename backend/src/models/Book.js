@@ -58,6 +58,7 @@ const BookSchema = new Schema(
     versionKey: false,
     toJSON: {
       virtuals: true,
+      // Return the serialized book unchanged after Mongoose includes its virtual fields.
       transform(doc, ret) {
         return ret;
       },

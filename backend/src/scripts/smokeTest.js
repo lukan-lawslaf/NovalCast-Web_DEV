@@ -40,6 +40,7 @@ async function main() {
   const base = `http://127.0.0.1:${server.address().port}`;
   console.log(`[smoke] Testing ${base}\n`);
 
+  // Fetch a local API response and tolerate a non-JSON body when recording a failure.
   const get = async (path) => {
     const response = await fetch(`${base}${path}`);
     const body = await response.json().catch(() => null);
@@ -91,6 +92,7 @@ async function main() {
   let totalChapters = 0;
   let totalWords = 0;
 
+  // Check every catalog book’s table of contents and first chapter against its metadata.
   for (const book of allBooks) {
     const detail = await get(`/api/books/${book.slug}`);
     const toc = (detail.body && detail.body.chapters) || [];
@@ -132,6 +134,7 @@ async function main() {
   const badRequest = await get('/api/books/frankenstein/chapters/abc');
   record('400 on non-numeric chapter', badRequest.status === 400, `status=${badRequest.status}`);
 
+  // Close the temporary server and database connection before reporting the final result.
   server.close();
   await disconnectDB();
 
@@ -140,6 +143,7 @@ async function main() {
   process.exit(failed.length ? 1 : 0);
 }
 
+// Attempt database cleanup even when a fatal smoke-check error occurs.
 main().catch(async (error) => {
   console.error('[smoke] Fatal:', error);
   await disconnectDB().catch(() => {});
