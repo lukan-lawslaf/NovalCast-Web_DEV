@@ -1,3 +1,4 @@
+// Check catalog fallback and import authorization with local HTTP and mocked dependencies.
 'use strict';
 
 const test = require('node:test');
@@ -11,6 +12,7 @@ const Chapter = require('../backend/src/models/Chapter');
 
 const localFetch = global.fetch;
 
+// Start a local test server on a free port and close it when the test ends.
 async function open(t, app) {
   const server = await new Promise((resolve, reject) => {
     const listener = app.listen(0, '127.0.0.1', () => resolve(listener));

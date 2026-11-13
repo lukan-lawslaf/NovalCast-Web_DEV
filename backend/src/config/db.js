@@ -32,6 +32,7 @@ let dnsFallbackApplied = false;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Failed attempts wait progressively longer, up to the configured maximum delay.
 function backoffDelay(attempt) {
   return Math.min(BASE_DELAY_MS * 2 ** (attempt - 1), MAX_DELAY_MS);
 }
@@ -63,6 +64,7 @@ function applyDnsFallback() {
   return true;
 }
 
+// Attach connection logging only once, even when connectDB retries.
 function attachListeners() {
   if (listenersAttached) return;
   listenersAttached = true;
@@ -123,6 +125,7 @@ async function connectDB(uri, { retries = DEFAULT_RETRIES } = {}) {
   throw lastError || new Error('connectDB: unknown failure');
 }
 
+// Graceful shutdown closes the existing connection instead of leaving sockets open.
 async function disconnectDB() {
   if (mongoose.connection.readyState === 0) return;
   await mongoose.disconnect();

@@ -1,3 +1,4 @@
+// Check rating interaction and error feedback using a fake server and isolated DOM.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');

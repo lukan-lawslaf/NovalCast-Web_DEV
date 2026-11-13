@@ -1,3 +1,4 @@
+// Check catalog cards and login styling in a browser; requires the local frontend server.
 const { chromium } = require('playwright');
 const path = require('path');
 

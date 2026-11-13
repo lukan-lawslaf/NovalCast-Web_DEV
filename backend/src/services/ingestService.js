@@ -67,6 +67,7 @@ function primaryTitle(title) {
   return (cut || title || '').trim();
 }
 
+// Convert a human title into a short URL-safe identifier.
 function slugify(value) {
   return String(value || '')
     .normalize('NFKD')
@@ -78,6 +79,7 @@ function slugify(value) {
     .slice(0, 80);
 }
 
+// Prefer an operator-provided slug, then the title, then a stable source-ID fallback.
 function buildSlug(title, gutendexId, override) {
   const base = slugify(override || primaryTitle(title)) || `book-${gutendexId}`;
   return base;

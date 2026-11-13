@@ -1,3 +1,4 @@
+// Exercise catalog, search and reader flows in a browser; requires the local app servers.
 const { chromium } = require('playwright');
 
 async function runIntegrationTests() {

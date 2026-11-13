@@ -1,3 +1,4 @@
+/* Landing appearance: background video, 3D book carousel, and cover-opening transitions. */
 .landing-ascii {
   --ascii-paper: #05070a;
   mask-image: radial-gradient(ellipse at 50% 54%, #000 28%, transparent 84%);
@@ -41,6 +42,7 @@ html[data-theme="light"] .landing-brand-mark {
   .landing-header { padding-inline: clamp(.75rem, 4vw, 1.5rem); }
 }
 
+/* Perspective and per-book CSS variables position the carousel covers in 3D. */
 .landing-book-showcase {
   display: flex;
   flex: 1 0 auto;
@@ -199,6 +201,7 @@ html[data-theme="light"] .landing-brand-mark {
   transform: translateY(-50%) rotateX(90deg);
 }
 
+/* Style the previous/next controls and the selected-book caption. */
 .landing-dial-controls {
   position: relative;
   z-index: 30;

@@ -18,7 +18,7 @@ const path = require('path');
 const BACKEND_ROOT = path.resolve(__dirname, '..', '..');
 const PROJECT_ROOT = path.resolve(BACKEND_ROOT, '..');
 
-/** Parse a dotenv-style file into a plain object. Never throws on bad input. */
+/** Read key/value lines, ignoring blank lines, comments and entries without an equals sign. */
 function parseEnvFile(filePath) {
   if (!fs.existsSync(filePath)) return {};
 
@@ -78,6 +78,7 @@ const SOURCES = [
   },
 ];
 
+// Accept the project's existing setting names while exposing one consistent server API.
 const KEY_ALIASES = {
   MONGODB_URI: ['MONGODB_URI', 'MONGODB_URL', 'MONGO_URI', 'MONGO_URL'],
   PORT: ['PORT', 'BACKEND_PORT'],

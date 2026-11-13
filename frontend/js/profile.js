@@ -1,4 +1,6 @@
+// Update the header account link, profile photo and fallback initials when sign-in state changes.
 (function () {
+  // Accept a provider photo only when it is a valid HTTPS URL without embedded credentials.
   function photoUrl(user) {
     const sources = [user.user_metadata, ...(Array.isArray(user.identities)
       ? user.identities.map(identity => identity?.identity_data) : [])];
@@ -16,6 +18,7 @@
     return '';
   }
 
+  // Choose letters from the account name or email prefix when no photo is available.
   function initials(user) {
     const metadata = user.user_metadata || {};
     const emailName = typeof user.email === 'string' ? user.email.split('@')[0] : '';
@@ -25,6 +28,7 @@
     return words.slice(0, 2).map(word => Array.from(word)[0]).join('').toLocaleUpperCase() || 'NC';
   }
 
+  // Listen for account changes and keep the header link/photo/initials in sync.
   function init() {
     const button = document.getElementById('header-user-btn');
     const auth = window.NovelCastAuth;

@@ -1,3 +1,4 @@
+// Startup utility: copy only public Supabase/API configuration into generated browser files.
 const fs = require('fs');
 const path = require('path');
 

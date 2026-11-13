@@ -1,3 +1,4 @@
+// Manage catalog objects, chapter API requests and library helpers used by all views.
 window.NovelCast = (function () {
   const STORE_KEY = 'novelcast.state.v1';
   const SETTINGS_KEY = 'novelcast.settings.v1';
@@ -176,6 +177,7 @@ window.NovelCast = (function () {
   // Transform backend MongoDB book object into canonical NovelCast book object
   let communityRatings = Object.create(null);
 
+  // Translate backend metadata into the fields expected by cards and reader views.
   function transformBackendBook(b) {
     if (!b) return null;
     const title = cleanTitle(b.title);
@@ -457,6 +459,7 @@ window.NovelCast = (function () {
     layout: 'book',
   };
 
+  // Read account settings with defaults; the library service handles caching and sync.
   function loadSettings() {
     if (window.NovelCastLibrary) return Object.assign({}, defaultSettings, window.NovelCastLibrary.getSection('settings'));
     try {
@@ -472,6 +475,7 @@ window.NovelCast = (function () {
   }
 
   // State
+  // Read the active shelf and use a key-safe object for its book entries.
   function loadState() {
     if (window.NovelCastLibrary) {
       const state = window.NovelCastLibrary.getSection('state');
@@ -492,12 +496,14 @@ window.NovelCast = (function () {
     }
   }
 
+  // Save through the account service and notify bookmark/shelf listeners.
   function saveState(s) {
     if (window.NovelCastLibrary) window.NovelCastLibrary.setSection('state', s);
     else localStorage.setItem(scopedKey(STORE_KEY), JSON.stringify(s));
     document.dispatchEvent(new CustomEvent('novelcast:state'));
   }
 
+  // Fill missing display metadata; generated chapter labels are not parsed manuscript text.
   function normalizeBook(match) {
     if (!match) return null;
     match.rating = typeof match.rating === 'number' ? match.rating : 0;
@@ -530,6 +536,7 @@ window.NovelCast = (function () {
     return id;
   }
 
+  // Find only the requested catalog book or current account upload; unknown IDs return null.
   function getExactBook(id) {
     const resolved = resolveId(id);
     if (byId[resolved]) return byId[resolved];
@@ -541,6 +548,7 @@ window.NovelCast = (function () {
     return match ? normalizeBook(match) : null;
   }
 
+  // Use the first catalog book only for callers that deliberately accept a fallback.
   function getBook(id) {
     return getExactBook(id) || books[0];
   }
@@ -553,10 +561,12 @@ window.NovelCast = (function () {
     return page + (q ? '?' + q : '');
   }
 
+  // Encode special characters before placing user/provider text inside HTML strings.
   function escapeHtml(s) {
     return String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
+  // Read book, chapter and filter values from the hash query, with normal-query fallback.
   function readQuery() {
     const searchParams = new URLSearchParams(location.search);
     const hashQuery = location.hash.includes('?') ? location.hash.split('?')[1] : '';
@@ -588,11 +598,13 @@ window.NovelCast = (function () {
     return `<span class="material-symbols-outlined icon-star${filled ? ' is-filled' : ''}" aria-hidden="true">star</span>`;
   }
 
+  // Create the default state fields before changing a book bookmark or saved status.
   function ensureEntry(state, id) {
     if (!state.library[id]) state.library[id] = { status: null, favorite: false, chapter: 1, page: 0, bookmarks: [] };
     return state.library[id];
   }
 
+  // Apply a partial update to one book, preserving the rest of its account state.
   function saveBookState(id, patch) {
     const state = loadState();
     const entry = ensureEntry(state, id);
@@ -638,6 +650,7 @@ window.NovelCast = (function () {
     }
   }
 
+  // Store manuscript details in the account list; the original file is not stored here.
   function addUserUpload(userId, book) {
     const list = getUserUploads(userId);
     normalizeBook(book);
@@ -683,6 +696,7 @@ window.NovelCast = (function () {
   // --- Live Backend API Client ---
   let isLoaded = false;
 
+  // Refresh catalog/ratings from the API while keeping cached metadata usable on failure.
   async function fetchCatalog(options = {}) {
     const limit = options.limit || 50;
     const sort = options.sort || 'popular';
@@ -726,6 +740,7 @@ window.NovelCast = (function () {
     return books;
   }
 
+  // Refresh only the requested book and convert its chapter summaries for the UI.
   async function fetchBookDetails(slugOrId) {
     const target = resolveId(slugOrId);
     if (String(target).startsWith('upload-')) return getExactBook(target);
@@ -761,6 +776,7 @@ window.NovelCast = (function () {
     return getExactBook(target);
   }
 
+  // Fetch original chapter text and reject previews or mismatched book/chapter identities.
   async function fetchChapter(slugOrId, chapterNumber = 1, { signal } = {}) {
     const target = resolveId(slugOrId);
     const num = Math.max(1, parseInt(chapterNumber || 1, 10));
@@ -779,6 +795,7 @@ window.NovelCast = (function () {
     }
   }
 
+  // Return backend matches, or null so the search view keeps its local results.
   async function searchCatalog(query = '', genre = '') {
     try {
       const url = new URL(`${API_BASE}/books`);

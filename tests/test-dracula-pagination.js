@@ -1,3 +1,4 @@
+// Check Dracula chapter pagination in a browser; requires the local app servers.
 const { chromium } = require('playwright');
 
 async function testDraculaPagination() {

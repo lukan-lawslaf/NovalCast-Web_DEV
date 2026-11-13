@@ -1,6 +1,8 @@
+// Show the account reading plan, saved books, manuscript metadata and JSON backup controls.
 window.NovelCastViews = window.NovelCastViews || {};
 
 window.NovelCastViews.library = {
+  // Build saved catalog cards from this account state, separate from private upload metadata.
   renderSavedBooks: function () {
     const NC = window.NovelCast;
     const saved = Object.entries(NC.loadState().library)
@@ -15,6 +17,7 @@ window.NovelCastViews.library = {
       </article>`).join('')}</div>` : '<p class="nc-library-hint">Save a catalog book or bookmark it to see it here.</p>';
   },
 
+  // Return screen HTML; the router inserts it before init runs.
   render: function () {
     const NC = window.NovelCast;
     const auth = window.NovelCastAuth;
@@ -265,6 +268,7 @@ window.NovelCastViews.library = {
     `;
   },
 
+  // Find the inserted elements, attach interactions and prepare cleanup for navigation.
   init: function () {
     const NC = window.NovelCast;
     const auth = window.NovelCastAuth;
@@ -284,6 +288,7 @@ window.NovelCastViews.library = {
     let disposed = false;
     const ownsView = () => !disposed && (auth.getUser()?.id || auth.getUser()?.email) === userId;
 
+    // This closure remembers this screen's resources so leaving the route can release them.
     this.destroy = () => {
       disposed = true;
       controller.abort();
@@ -292,6 +297,7 @@ window.NovelCastViews.library = {
       pixelCard?.destroy();
     };
 
+    // Rebuild the screen after sync while restoring any unsaved form draft and its focus.
     const refresh = () => {
       if (!ownsView() || !container || document.body.dataset.route !== 'library') return;
       const form = document.getElementById('reading-plan-form');
@@ -313,6 +319,7 @@ window.NovelCastViews.library = {
       window.NovelCastApp?.bindInteractiveElements(container);
     };
 
+    // Show the actual cache/sync result; a local save is not proof of a server save.
     const paintStatus = () => {
       if (!ownsView()) return;
       const status = service?.getStatus() || { phase: 'pending', message: 'Library sync is unavailable. Your changes remain on this device.' };
@@ -355,6 +362,7 @@ window.NovelCastViews.library = {
 
     const planForm = document.getElementById('reading-plan-form');
     planForm?.addEventListener('input', () => { planDirty = true; }, { signal });
+    // Intercept submission, run native constraints, convert the input values and save the plan.
     planForm?.addEventListener('submit', event => {
       event.preventDefault();
       if (!ownsView() || !planForm.reportValidity()) return;
@@ -377,6 +385,7 @@ window.NovelCastViews.library = {
       catch { if (ownsView()) NC.toast('Sync could not finish. Your changes remain on this device.'); }
       paintStatus();
     }, { signal });
+    // Export the latest device snapshot, including pending edits, without account credentials.
     document.getElementById('download-library-json')?.addEventListener('click', async event => {
       if (!ownsView()) return;
       const button = event.currentTarget;
@@ -452,6 +461,7 @@ window.NovelCastViews.library = {
       });
     }
 
+    // Validate the extension and record file metadata; the progress timer does not upload its contents.
     function handleFile(file) {
       if (!ownsView() || !file || uploadTimer || refreshTimer) return;
 

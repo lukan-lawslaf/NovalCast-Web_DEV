@@ -1,9 +1,11 @@
+// Keep each account cache separate, sync its JSON document, and export a user download.
 /* Account-scoped browser cache + authenticated, revisioned JSON-file persistence. */
 (function () {
   const NC = window.NovelCast;
   const PREFIX = 'novelcast.library.v1.';
   const clone = value => JSON.parse(JSON.stringify(value));
   const object = value => value && typeof value === 'object' && !Array.isArray(value);
+  // Compare data recursively so object-key ordering does not create a false pending change.
   function equal(a, b) {
     if (a === b) return true;
     if (Array.isArray(a) && Array.isArray(b)) return a.length === b.length && a.every((value, i) => equal(value, b[i]));
@@ -13,6 +15,7 @@
   }
   const empty = () => ({ schemaVersion: 1, revision: 0, state: { library: {}, collections: [] },
     uploads: [], settings: {}, readingPlan: { dailyMinutes: 20, favoriteGenre: '' } });
+  // Check the expected document shape before trusting a browser cache or server response.
   function validSnapshot(value) {
     return value?.schemaVersion === 1 && Number.isSafeInteger(value.revision) && value.revision >= 0 &&
       object(value.state?.library) && Object.values(value.state.library).every(object) &&
@@ -41,6 +44,7 @@
     }
     return local === undefined ? undefined : clone(local);
   }
+  // Merge uploads by book ID and adopt the latest server revision.
   function combine(base, local, remote) {
     const result = merge(base, local, remote);
     const byId = rows => Object.fromEntries((rows || []).map(row => [row.id, row]));
@@ -54,6 +58,7 @@
     status = { phase, message };
     document.dispatchEvent(new CustomEvent('novelcast:library-sync', { detail: status }));
   }
+  // Save the account cache locally; a storage error must not be reported as a successful cache save.
   function persist() {
     try {
       localStorage.setItem(PREFIX + (owner || 'guest'), JSON.stringify(envelope));
@@ -63,10 +68,12 @@
       return false;
     }
   }
+  // Wait briefly after edits so several quick changes can share one sync.
   function schedule() {
     clearTimeout(timer);
     if (owner) timer = setTimeout(() => sync(), 250);
   }
+  // Update one document section immediately, then schedule its remote save.
   function change(section, value) {
     envelope.document[section] = clone(value);
     envelope.pending = true;
@@ -77,6 +84,7 @@
     schedule();
     return saved;
   }
+  // Load this account only; old shared bookmarks remain separate until explicitly imported.
   function loadCache(id) {
     const blank = empty();
     try {
@@ -97,6 +105,7 @@
     document.dispatchEvent(new CustomEvent('novelcast:state'));
     document.dispatchEvent(new CustomEvent('novelcast:library-loaded'));
   }
+  // Cancel old work, select the new account cache and reject late responses using a generation number.
   function switchAccount(user) {
     const next = user?.id && window.NovelCastAuth.isAuthenticated() ? user.id : null;
     if (next === owner && initialized) { if (next) schedule(); return; }
@@ -112,6 +121,7 @@
     loaded();
     schedule(); // Outside Supabase's synchronous auth callback (avoids its session lock).
   }
+  // Send an authenticated, bounded API request and recognize a revision-conflict response.
   async function request(method, payload, context) {
     const token = await window.NovelCastAuth.getAccessToken();
     if (context.generation !== generation) throw new Error('Account changed.');
@@ -135,6 +145,7 @@
       return { document: data };
     } finally { clearTimeout(requestTimer); }
   }
+  // Fetch the newest document, merge local edits, then retry bounded revision conflicts.
   async function synchronize(context) {
     try {
       publish('loading', 'Checking your saved library…');
@@ -169,6 +180,7 @@
       return false;
     }
   }
+  // Reuse an in-progress sync rather than launching overlapping saves.
   function sync() {
     clearTimeout(timer);
     if (!owner) return Promise.resolve(false);
@@ -180,6 +192,7 @@
   }
   let initialized = false;
   window.NovelCastLibrary = {
+    // Account, browser-tab and connectivity events decide when to refresh this cache.
     init() {
       if (initialized) return;
       window.NovelCastAuth.onAuthStateChange(switchAccount);
@@ -208,6 +221,7 @@
       const guest = loadCache(null).document.state.library;
       return Object.keys(guest).some(id => !Object.hasOwn(envelope.document.state.library, id));
     },
+    // Copy only missing guest entries after the user explicitly claims the older bookmarks.
     importDeviceBookmarks() {
       if (!owner) return false;
       const state = clone(envelope.document.state);
@@ -219,6 +233,7 @@
       loaded();
       return saved;
     },
+    // Validate form values again before caching; remote sync happens separately.
     saveReadingPlan(plan) {
       if (!Number.isInteger(plan.dailyMinutes) || plan.dailyMinutes < 5 || plan.dailyMinutes > 240 ||
           typeof plan.favoriteGenre !== 'string' || plan.favoriteGenre.length > 80) return false;

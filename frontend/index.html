@@ -1,10 +1,12 @@
 <!DOCTYPE html>
+<!-- SPA shell: shared navigation and player remain mounted while router.js replaces #app-view. -->
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>NovelCast — Curated Audiobooks & Readers</title>
-  <script src="js/theme.js"></script>
+  <script src="js/themeInk.js?v=20261111-clip"></script>
+  <script src="js/theme.js?v=20261111-clip"></script>
   
   <!-- Preconnect & Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect"/>
@@ -229,7 +231,7 @@
   </style>
   <link rel="stylesheet" href="css/audio-player.css"/>
   <link rel="stylesheet" href="css/shell.css"/>
-  <link rel="stylesheet" href="css/theme.css"/>
+  <link rel="stylesheet" href="css/theme.css?v=20261111-clip"/>
   <link rel="stylesheet" href="css/library-sync.css"/>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-[#181E29] via-[#131722] to-[#0E1217] bg-fixed text-slate-200 antialiased selection:bg-goldAccent/30 selection:text-white">
@@ -319,7 +321,7 @@
   <!-- Environment Configuration (Generated from .env) -->
   <script src="js/env.js"></script>
 
-  <!-- Core Scripts in Order -->
+  <!-- Services load before views; the router needs both before it can mount a screen. -->
   <script src="js/data.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/librarySync.js"></script>
@@ -343,7 +345,7 @@
   <script src="js/app.js"></script>
   <script src="js/router.js"></script>
 
-  <!-- Boot SPA -->
+  <!-- Restore the session before choosing an account cache and rendering protected routes. -->
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
       window.NovelCastProfile.init();

@@ -1,4 +1,6 @@
 'use strict';
+
+// Atlas stores a verified account's 1-5 score for one catalog book.
 const mongoose = require('mongoose');
 
 const schema = new mongoose.Schema({

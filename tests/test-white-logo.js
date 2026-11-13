@@ -1,3 +1,4 @@
+// Generate logo variations and a visual comparison in Referance/; inspect output files before running.
 const fs = require('fs');
 const { chromium } = require('playwright');
 

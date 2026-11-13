@@ -1,3 +1,4 @@
+// Inspect the featured card tilt in a browser; requires the local frontend server.
 const { chromium } = require('playwright');
 
 (async () => {

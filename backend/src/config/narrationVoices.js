@@ -4,6 +4,7 @@
 // This fixed shortlist makes selection repeatable; saved book choices take
 // precedence if this shortlist is updated later. These are voice references,
 // not synthesis models: the synthesis model remains s2.1-pro-free.
+// Freeze the catalog so request handlers cannot accidentally change these voice choices.
 const NARRATION_VOICES = Object.freeze({
   gothic: Object.freeze({
     referenceId: '68f75cc070bc4989b91a5e865fb0c6a0',

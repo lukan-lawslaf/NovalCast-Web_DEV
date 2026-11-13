@@ -4,14 +4,15 @@
  * Chapter boundary detection.
  *
  * Different Gutenberg texts mark chapters differently, so the parser tries
- * strategies in order of confidence and uses the first one that finds at least
- * two chapters:
+ * heading strategies, then prefers a finer split when an earlier match only
+ * finds large book/part wrappers. With no usable headings, it uses word sections:
  *
  *   1. spec pattern      — "CHAPTER I", "Chapter 1", "ACT II", "BOOK III",
  *                          "LETTER 2", "SCENE 4", "PART I", "ADVENTURE I"
- *   2. roman numerals    — "I. A Scandal in Bohemia", "I Introduction"
- *   3. ALL-CAPS headings — standalone "STORY OF THE DOOR" (Dr Jekyll)
- *   4. ~2,500-word sections — last resort for texts with no markers at all
+ *   2. titled roman numerals — "I. A Scandal in Bohemia", "I Introduction"
+ *   3. roman numerals with optional titles
+ *   4. ALL-CAPS headings — standalone "STORY OF THE DOOR" (Dr Jekyll)
+ *   5. ~2,500-word sections — last resort for texts with no markers at all
  */
 
 const {
@@ -61,6 +62,7 @@ const SMALL_WORDS = new Set([
   'by', 'from', 'as', 'but', 'nor', 'per', 'via', 'vs',
 ]);
 
+// Convert a numeral such as IV by subtracting smaller symbols before larger ones.
 function romanToInt(roman) {
   const text = String(roman).toUpperCase();
   if (!/^[IVXLCDM]+$/.test(text)) return null;
@@ -258,7 +260,7 @@ function splitWith(matcher, text) {
   return { sections, preamble };
 }
 
-/** Strategy 4 — fixed-size reading sections. */
+/** Last resort: group whole paragraphs into roughly fixed-size reading sections. */
 function splitIntoWordSections(text, wordsPerSection) {
   const blocks = text.split(/\n{2,}/);
   const sections = [];

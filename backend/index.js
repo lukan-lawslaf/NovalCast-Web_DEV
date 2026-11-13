@@ -17,9 +17,11 @@ const { connectDB, disconnectDB, connectionState } = require('./src/config/db');
 const catalogRoutes = require('./src/routes/catalogRoutes');
 const ingestRoutes = require('./src/routes/ingestRoutes');
 const ttsRoutes = require('./src/routes/ttsRoutes');
+const errorHandler = require('./src/middleware/errorHandler');
 
 const app = express();
 
+// Middleware runs before routes: allow configured origins and record request timing.
 app.disable('x-powered-by');
 app.use(
   cors({
@@ -39,6 +41,7 @@ app.use((req, res, next) => {
 app.use('/api', ingestRoutes);
 app.use(express.json({ limit: '1mb' }));
 
+// A running HTTP server is not enough; health also checks the Atlas connection.
 app.get('/api/health', (req, res) => {
   const state = connectionState();
   const healthy = state === 'connected';
@@ -51,6 +54,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Each router owns one feature; the library router uses JSON files, not Atlas.
 app.use('/api', catalogRoutes);
 app.use('/api', require('./src/routes/ratingRoutes'));
 app.use('/api', require('./src/routes/libraryRoutes'));
@@ -60,17 +64,9 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Not found', path: req.originalUrl });
 });
 
-// eslint-disable-next-line no-unused-vars -- Express identifies error handlers by arity.
-app.use((error, req, res, next) => {
-  if (res.headersSent) return next(error);
-  const status = Number.isInteger(error.status) && error.status >= 400 && error.status <= 599 ? error.status : 500;
-  console.error(`[error] ${req.method} ${req.path}: ${error.name || 'Error'} (${status})`);
-  let message = status >= 500 ? 'Internal server error' : error.message || 'Request failed';
-  if (error.type === 'entity.parse.failed') message = 'Request body must be valid JSON.';
-  if (error.type === 'entity.too.large') message = 'Request body is too large.';
-  res.status(status).json({ error: message });
-});
+app.use(errorHandler);
 
+// Start HTTP first so the catalog can still report useful results while Atlas reconnects.
 async function start() {
   if (!env.MONGODB_URI) {
     console.error(
@@ -103,6 +99,7 @@ async function start() {
   process.on('SIGTERM', () => shutdown('SIGTERM'));
 }
 
+// Importing this app in a test does not open a server or connect to the live database.
 if (require.main === module) {
   start();
 }

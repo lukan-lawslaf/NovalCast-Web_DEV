@@ -1,3 +1,4 @@
+// Play book narration through the backend, preparing only one audio chunk ahead of the current chunk.
 (function () {
   'use strict';
 
@@ -5,6 +6,7 @@
   let session = null;
   let sequence = 0;
 
+  // Remove markup before sending readable chapter text for narration.
   function toPlainText(content) {
     let text = String(content || '');
     if (/<\/?(?:p|div|br|h[1-6]|span|em|strong|blockquote|li|ul|ol|a|img|section|table|script|style|iframe)\b/i.test(text)) {
@@ -24,6 +26,7 @@
   }
 
   // Keep every input character; choose sentence/word boundaries without splitting UTF-16 pairs.
+  // Choose a bounded passage, preferring a natural sentence or word boundary.
   function takeChunk(text, size) {
     if (text.length <= size) return text;
     let end = Math.min(size, 1200);
@@ -41,6 +44,7 @@
     return text.slice(0, end);
   }
 
+  // Use a short first passage for quicker startup and larger passages afterward.
   function chunkText(text, firstSize = 350, nextSize = 900) {
     const chunks = [];
     let remaining = String(text);
@@ -63,6 +67,7 @@
     return NC.getExactBook?.(id) || null;
   }
 
+  // Expose a small player snapshot without exposing its internal audio objects.
   function getState() {
     const s = session;
     return {
@@ -73,6 +78,7 @@
     };
   }
 
+  // Update the persistent player controls and announce the current playback state.
   function render() {
     const s = session;
     const player = document.getElementById('global-audio-player');
@@ -99,7 +105,9 @@
     document.dispatchEvent(new CustomEvent('novelcast:audio-state', { detail: getState() }));
   }
 
+  // Ignore completed work belonging to an older playback session or canceled request.
   function alive(s, epoch) { return session === s && s.epoch === epoch; }
+  // Stop an audio object, detach its handlers and release its temporary blob URL.
   function release(track) {
     if (!track) return;
     track.audio.pause();
@@ -108,6 +116,7 @@
     if (track.audio.load) track.audio.load();
     URL.revokeObjectURL(track.url);
   }
+  // Cancel unfinished chapter/audio requests and invalidate their old callbacks.
   function abortRequests(s) {
     s.epoch += 1;
     s.controllers.forEach(controller => controller.abort());
@@ -123,6 +132,7 @@
     render();
   }
 
+  // Fetch chapter JSON or audio with a timeout; reject stale responses and unexpected voice changes.
   async function request(s, epoch, url, options) {
     const controller = new AbortController();
     s.controllers.add(controller);
@@ -174,6 +184,7 @@
     } finally { clearTimeout(timeout); s.controllers.delete(controller); }
   }
 
+  // Load the exact chapter, choose the next passage and ask the backend to synthesize it.
   async function passage(s, epoch) {
     const sourceCursor = s.cursor;
     let cursor = sourceCursor;
@@ -233,6 +244,7 @@
     render();
   }
 
+  // Prepare at most one upcoming passage while the current passage plays.
   function prefetch(s) {
     if (session !== s || !s.wantsPlay || !s.current || s.current.ended || s.next || s.nextPending || s.nextAttempted || s.nextError || s.cursor.chapter === null) return;
     s.nextAttempted = true;
@@ -278,6 +290,7 @@
     }
   }
 
+  // Attach playback events to the current chunk and detach them when that chunk is replaced.
   function installCurrent(s, track) {
     s.current = track;
     s.lastChapter = track.chapter;
@@ -302,6 +315,7 @@
     playCurrent(s);
   }
 
+  // Move to the prepared chunk, or show buffering while the next one is requested.
   async function advance(s) {
     if (session !== s || !s.wantsPlay || s.advancing) return;
     s.advancing = true;
@@ -353,6 +367,7 @@
     if (s.current && !s.current.ended) playCurrent(s);
     else advance(s);
   }
+  // Retry failed preparation from the current passage instead of silently skipping text.
   function retry() {
     const s = session;
     if (!s || s.status !== 'error') return;
@@ -365,6 +380,7 @@
     }
     advance(s);
   }
+  // Start a new book session, or toggle playback when that book is already active.
   function playBook(value, options) {
     const book = findBook(value);
     if (!book) { if (window.NovelCast && window.NovelCast.toast) window.NovelCast.toast('This book is unavailable for listening.'); return false; }
@@ -386,6 +402,7 @@
     if (!session) return;
     if (session.wantsPlay) pause(); else resume();
   }
+  // Attach narration buttons once, including buttons inserted by a later view render.
   function bind(scope) {
     (scope || document).querySelectorAll('[data-audio-stub]').forEach(button => {
       if (button.dataset.audioStubBound) return;

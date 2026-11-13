@@ -1,6 +1,8 @@
+// Build small presentation helpers, including stars, safe cover images and fallback SVG artwork.
 window.NovelCastView = (function () {
   let coverSequence = 0;
 
+  // Return five icon slots reflecting the displayed numeric rating.
   function stars(value) {
     const full = Math.floor(value);
     const half = value - full >= 0.5;
@@ -12,6 +14,7 @@ window.NovelCastView = (function () {
     }
     return html;
   }
+  // Prefer an approved image URL and fall back to generated artwork if loading fails.
   function cover(book, { eager = false } = {}) {
     if (!book) return '';
     const imgUrl = safeCoverUrl(book.coverUrl || book.cover);
@@ -21,6 +24,7 @@ window.NovelCastView = (function () {
     return fallbackCoverSvg(book);
   }
 
+  // Reject unsafe protocols and URLs containing credentials before building image markup.
   function safeCoverUrl(value) {
     if (typeof value !== 'string' || !value.trim()) return '';
     try {
@@ -33,6 +37,7 @@ window.NovelCastView = (function () {
     }
   }
 
+  // Create an escaped book cover with unique gradient IDs so repeated cards do not clash.
   function fallbackCoverSvg(book) {
     const coverId = ++coverSequence;
     const initials = (book.title || 'Novel').replace(/[^A-Z0-9 ]/gi, '').split(' ').filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('') || 'NC';

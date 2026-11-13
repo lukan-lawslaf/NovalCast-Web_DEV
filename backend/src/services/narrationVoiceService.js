@@ -1,5 +1,7 @@
 'use strict';
 
+// Choose a book's narrator once, save it in Atlas, and reuse that exact voice for later chunks.
+
 const mongoose = require('mongoose');
 const Book = require('../models/Book');
 const env = require('../config/env');
@@ -62,6 +64,7 @@ function exactBookQuery(bookId) {
   return /^[a-f0-9]{24}$/.test(bookId) ? { _id: bookId } : { slug: bookId };
 }
 
+// Recognized titles win first; otherwise score themes from title, subjects and synopsis.
 function selectNarrationProfile(book) {
   const title = normalizedText(book.title);
   const knownTitle = TITLE_PROFILES.find((rule) => rule.pattern.test(title));
@@ -88,6 +91,7 @@ function selectNarrationProfile(book) {
   return { profile: 'literary', reason: 'No more specific narration theme matched the book metadata. Selected a calm, measured voice for general English storytelling.' };
 }
 
+// Select a configured reference or an approved English profile; return metadata ready to save.
 function chooseNarrationVoice(book, voices = NARRATION_VOICES, { referenceId = '', now = () => new Date() } = {}) {
   const languages = Array.isArray(book.languages) ? book.languages.filter((value) => typeof value === 'string' && value.trim()) : [];
   if (languages.length && !languages.some((language) => /^(?:en|eng)(?:[-_].*)?$/i.test(language.trim()))) {
@@ -120,6 +124,7 @@ function chooseNarrationVoice(book, voices = NARRATION_VOICES, { referenceId = '
   };
 }
 
+// Refuse incomplete saved assignments rather than silently changing a book's narrator.
 function savedVoice(value) {
   if (!value || typeof value.name !== 'string' || !value.name.trim() ||
       typeof value.reason !== 'string' || !value.reason.trim() ||
@@ -140,6 +145,7 @@ function storageError() {
   return new TtsError(503, 'TTS_VOICE_STORAGE_UNAVAILABLE', 'Book narration settings are temporarily unavailable. Please try again shortly.');
 }
 
+// One listener can cancel its wait without cancelling a shared voice lookup for other listeners.
 function waitWithSignal(promise, signal) {
   if (!signal) return promise;
   if (signal.aborted) return Promise.reject(signal.reason || new Error('Narration cancelled.'));
@@ -189,6 +195,7 @@ function createNarrationVoiceResolver({
     }
   }
 
+  // Conditional update means the first stored choice wins even across concurrent requests.
   async function selectAndPersist(book) {
     const selection = chooseNarrationVoice(book, voices, { referenceId, now });
     let updated;
@@ -208,6 +215,7 @@ function createNarrationVoiceResolver({
     return savedVoice(winner.narrationVoice);
   }
 
+  // Reuse an existing assignment; share first-time selection for aliases of the same book.
   async function lookupVoice(key) {
     let book;
     try {

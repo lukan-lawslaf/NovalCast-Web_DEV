@@ -1,3 +1,4 @@
+// Exercise library sign-in and file selection in a browser; inspect account effects before running.
 const { chromium } = require('playwright');
 const path = require('path');
 

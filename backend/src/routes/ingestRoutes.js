@@ -1,5 +1,7 @@
 'use strict';
 
+// Operator-only import routes validate requests before the ingestion service changes Atlas.
+
 const express = require('express');
 const { createHash, timingSafeEqual } = require('node:crypto');
 const env = require('../config/env');
@@ -29,6 +31,7 @@ function createIngestRouter({
   const expectedDigest = configured ? digest(adminToken) : null;
   let running = false;
 
+  // Compare fixed-size token hashes before parsing a potentially untrusted request body.
   function requireAdmin(req, res, next) {
     res.set('Cache-Control', 'no-store');
     if (!expectedDigest) {
@@ -42,6 +45,7 @@ function createIngestRouter({
     next();
   }
 
+  // One import runs at a time, and the lock is released even when that import fails.
   async function runIngestion(res, run) {
     if (running) return res.status(409).json({ error: 'A catalog import is already running. Try again shortly.' });
     if (!storageReady()) return res.status(503).json({ error: 'Catalog storage is temporarily unavailable.' });

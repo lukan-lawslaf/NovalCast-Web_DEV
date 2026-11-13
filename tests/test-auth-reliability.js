@@ -1,9 +1,11 @@
+// Check sign-in, sign-up and session errors with fake Supabase responses in JSDOM.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const { JSDOM } = require('jsdom');
 const settle = () => new Promise(resolve => setImmediate(resolve));
 
+// Build a fresh browser-like page and replace Supabase calls with test responses.
 function fixture(t, handlers = {}, storedUser) {
   const dom = new JSDOM('<main id="app-view"></main>', { url: 'http://127.0.0.1:3000/#/login', runScripts: 'outside-only' });
   t.after(() => dom.window.close());

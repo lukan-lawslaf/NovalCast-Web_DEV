@@ -1,3 +1,4 @@
+// Map URL hashes to views, replace the main HTML, and clean up the screen being left.
 (function () {
   let activeView = null;
   let pendingBookOpening;
@@ -12,6 +13,7 @@
     'login': window.NovelCastViews.login
   };
 
+  // Read the screen name and query after #; unknown routes fall back to the landing page.
   function parseHash() {
     const raw = location.hash.replace(/^#\/?/, '');
     const defaultRoute = 'landing';
@@ -23,6 +25,7 @@
     return { path, params };
   }
 
+  // Mark the current sidebar link visually and for assistive technology.
   function updateActiveNav(currentRoute) {
     document.querySelectorAll('[data-nav-route]').forEach(link => {
       const route = link.dataset.navRoute;
@@ -33,6 +36,7 @@
     });
   }
 
+  // Guard private routes, destroy the old view, insert new HTML, then bind its controls.
   function renderRoute() {
     const { path, params } = parseHash();
 
@@ -100,6 +104,7 @@
     }
   }
 
+  // Handle hash navigation and optionally animate the selected book cover into its details view.
   function handleRouteChange() {
     if (bookTransition) {
       bookTransition.transition.skipTransition();

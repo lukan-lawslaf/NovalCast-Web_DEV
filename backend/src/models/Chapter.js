@@ -11,6 +11,7 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
+// bookId links each text chapter to its Book document; order controls the reading sequence.
 const ChapterSchema = new Schema(
   {
     bookId: {

@@ -1,6 +1,8 @@
+// Search cached books immediately, then merge backend matches without displaying stale results.
 window.NovelCastViews = window.NovelCastViews || {};
 
 window.NovelCastViews.search = {
+  // Return screen HTML; the router inserts it before init runs.
   render: function () {
     const NC = window.NovelCast;
     const NCPage = window.NCPage;
@@ -194,9 +196,11 @@ window.NovelCastViews.search = {
       </div>
     `;
   },
+  // Find the inserted elements, attach interactions and prepare cleanup for navigation.
   init: function () {
     let searchVersion = 0;
     let disposed = false;
+    // This closure remembers this screen's resources so leaving the route can release them.
     this.destroy = () => { disposed = true; searchVersion++; clearTimeout(searchDebounceTimer); };
     const NC = window.NovelCast;
     const NCPage = window.NCPage;
@@ -211,6 +215,7 @@ window.NovelCastViews.search = {
     let currentFilter = 'all';
     let searchDebounceTimer = null;
 
+    // Update the selected genre chip and its accessible pressed state.
     function selectFilter(filter) {
       currentFilter = filter || 'all';
       chips.forEach(chip => {
@@ -224,6 +229,7 @@ window.NovelCastViews.search = {
       });
     }
 
+    // Render local matches first; a version check prevents older responses replacing newer searches.
     async function performSearch(q, filterType = currentFilter) {
       if (disposed) return;
       clearTimeout(searchDebounceTimer);
@@ -273,6 +279,7 @@ window.NovelCastViews.search = {
       }
     }
 
+    // Insert matching card HTML or an empty state, then bind the new controls.
     function renderResults(list, term) {
       if (!resultsGrid || !resultsCount) return;
       resultsCount.textContent = `${list.length} Book${list.length === 1 ? '' : 's'} Found`;
@@ -292,6 +299,7 @@ window.NovelCastViews.search = {
     }
 
     if (input) {
+      // Debounce typing by 180ms and invalidate results from the previous query.
       input.addEventListener('input', () => {
         searchVersion++;
         clearTimeout(searchDebounceTimer);

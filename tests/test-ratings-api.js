@@ -6,13 +6,20 @@ const mongoose = require('../backend/node_modules/mongoose');
 const Book = require('../backend/src/models/Book');
 const Rating = require('../backend/src/models/Rating');
 const env = require('../backend/src/config/env');
+const errorHandler = require('../backend/src/middleware/errorHandler');
 
 test('ratings enforce verified identity, validate scores, and update one vote per account', async t => {
   const records = new Map();
-  const originals = { book: Book.findOne, own: Rating.findOne, aggregate: Rating.aggregate, upsert: Rating.findOneAndUpdate, init: Rating.init, state: mongoose.connection.readyState };
+  const originals = { book: Book.findOne, own: Rating.findOne, aggregate: Rating.aggregate, upsert: Rating.findOneAndUpdate, init: Rating.init, state: mongoose.connection.readyState, authUrl: env.SUPABASE_URL, authKey: env.SUPABASE_ANON_KEY };
   const auth = express();
+  let authMode = 'normal';
   auth.get('/auth/v1/user', (req, res) => {
     if (req.headers.authorization !== 'Bearer verified-session') return res.status(401).json({ error: 'invalid token' });
+    if (authMode === 'invalid-json') return res.type('json').send('not-json-private-provider-details');
+    if (authMode === 'null') return res.json(null);
+    if (authMode === 'invalid-id') return res.json({ id: 123, email_confirmed_at: '2026-01-01' });
+    if (authMode === 'unconfirmed') return res.json({ id: 'verified-user', email_confirmed_at: null });
+    if (authMode === 'anonymous') return res.json({ id: 'verified-user', email_confirmed_at: '2026-01-01', is_anonymous: true });
     res.json({ id: 'verified-user', email_confirmed_at: '2026-01-01T00:00:00Z' });
   });
   const authServer = await new Promise(resolve => { const server = auth.listen(0, '127.0.0.1', () => resolve(server)); });
@@ -38,11 +45,12 @@ test('ratings enforce verified identity, validate scores, and update one vote pe
   const app = express();
   app.use(express.json());
   app.use('/api', require('../backend/src/routes/ratingRoutes'));
-  app.use((error, req, res, next) => res.status(error.status || 500).json({ error: error.message }));
+  app.use(errorHandler);
   const server = await new Promise(resolve => { const instance = app.listen(0, '127.0.0.1', () => resolve(instance)); });
   t.after(async () => {
     Book.findOne = originals.book; Rating.findOne = originals.own; Rating.aggregate = originals.aggregate;
     Rating.findOneAndUpdate = originals.upsert; Rating.init = originals.init; mongoose.connection.readyState = originals.state;
+    env.SUPABASE_URL = originals.authUrl; env.SUPABASE_ANON_KEY = originals.authKey;
     await Promise.all([new Promise(resolve => server.close(resolve)), new Promise(resolve => authServer.close(resolve))]);
   });
   const base = `http://127.0.0.1:${server.address().port}/api/books/dracula/ratings`;
@@ -61,7 +69,23 @@ test('ratings enforce verified identity, validate scores, and update one vote pe
   assert.equal(publicResult.myRating, null);
   assert.equal(publicResult.average, 2);
   assert.equal((await fetch(base.replace('dracula', 'missing'))).status, 404);
+  for (const mode of ['invalid-json', 'null', 'invalid-id']) {
+    authMode = mode;
+    const failed = await fetch(base, { headers: { Authorization: 'Bearer verified-session' } });
+    assert.equal(failed.status, 503);
+    assert.deepEqual(await failed.json(), { error: 'Account verification is temporarily unavailable. Please try again.' });
+  }
+  for (const mode of ['unconfirmed', 'anonymous']) {
+    authMode = mode;
+    const failed = await put(4, 'verified-session');
+    assert.equal(failed.status, 401);
+    assert.deepEqual(await failed.json(), { error: 'Please sign in with a verified account.' });
+  }
+  authMode = 'normal';
+  assert.equal(records.size, 1);
   mongoose.connection.readyState = 0;
-  assert.equal((await fetch(base)).status, 503);
+  const unavailable = await fetch(base);
+  assert.equal(unavailable.status, 503);
+  assert.deepEqual(await unavailable.json(), { error: 'Ratings are temporarily unavailable. Please try again shortly.' });
   assert.ok(Rating.schema.indexes().some(([keys, options]) => keys.bookSlug === 1 && keys.userId === 1 && options.unique));
 });

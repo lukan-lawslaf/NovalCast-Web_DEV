@@ -4,7 +4,7 @@
 /**
  * Curated seed CLI.
  *
- *   npm run seed                 # ingest the 8 classics listed below
+ *   npm run seed                 # ingest the curated titles
  *   npm run seed -- --only=84,11 # ingest a subset by Gutendex id or slug
  *
  * Re-running is safe: books are upserted by gutendexId and chapters are
@@ -17,6 +17,7 @@ const Book = require('../models/Book');
 const Chapter = require('../models/Chapter');
 const { ingestCurated, CURATED_BOOKS } = require('../services/ingestService');
 
+// --only selects exact source IDs or slugs instead of reimporting the whole shelf.
 function parseArgs(argv) {
   const args = { only: null };
   for (const arg of argv) {
@@ -32,6 +33,7 @@ function formatNumber(value) {
   return new Intl.NumberFormat('en-US').format(value || 0);
 }
 
+// This operator command changes Atlas: import the selected books, summarize, and disconnect.
 async function main() {
   const args = parseArgs(process.argv.slice(2));
 

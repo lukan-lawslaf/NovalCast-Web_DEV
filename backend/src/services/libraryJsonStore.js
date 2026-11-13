@@ -1,5 +1,7 @@
 'use strict';
 
+// Validate private library records and persist them as revisioned JSON files outside the public site.
+
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { createHash, randomUUID } = require('node:crypto');
@@ -10,6 +12,7 @@ const record = value => value !== null && typeof value === 'object' && !Array.is
 const invalid = message => Object.assign(new Error(message), { status: 400 });
 const unavailable = () => Object.assign(new Error('Your library file is unavailable. Your existing data has not been replaced.'), { status: 503 });
 
+// Allowlisted fields keep passwords, tokens and arbitrary extra data out of library records.
 function keys(value, allowed, name) {
   if (!record(value) || Object.keys(value).some(key => !allowed.includes(key))) throw invalid(`Invalid ${name} fields.`);
 }
@@ -44,6 +47,7 @@ function bookmark(value) {
   };
 }
 
+// Normalize the saved/favorite/page information for a single book.
 function libraryEntry(value) {
   keys(value, ['status', 'favorite', 'chapter', 'page', 'bookmarks'], 'library entry');
   const status = value.status ?? null;
@@ -66,6 +70,7 @@ function collection(value) {
 
 const UPLOAD_STRINGS = { slug: 160, title: 300, author: 200, format: 12, size: 40, genre: 80, uploadedAt: 40, lastRead: 80, listens: 40, duration: 80, narrator: 160, description: 6000, shortDescription: 1000, accent: 30, cover: 1500, coverUrl: 1500 };
 
+// Store manuscript metadata only; the original EPUB/PDF/text file is not part of this document.
 function upload(value) {
   keys(value, ['id', ...Object.keys(UPLOAD_STRINGS), 'progress', 'chapters', 'rating', 'reviews', 'chaptersList'], 'upload');
   const result = { id: identifier(value.id), title: text(value.title, 300, 'book title') };
@@ -108,6 +113,7 @@ function settings(value) {
   return result;
 }
 
+// Validate the entire request, fill optional defaults, and bound collections and file size.
 function normalizeDocument(value) {
   keys(value, ['schemaVersion', 'revision', 'state', 'uploads', 'settings', 'readingPlan'], 'library document');
   if (value.schemaVersion !== undefined && value.schemaVersion !== 1) throw invalid('Unsupported library file version.');
@@ -139,14 +145,17 @@ function emptyDocument() {
   return normalizeDocument({ revision: 0 });
 }
 
+// Each store uses one directory; the shared queue coordinates writes within this Node process.
 function createLibraryJsonStore({ directory = path.resolve(__dirname, '../../data/libraries') } = {}) {
   const root = path.resolve(directory);
 
+  // Hash the verified ID so account text cannot become a path or reveal the ID in a filename.
   function filename(userId) {
     if (typeof userId !== 'string' || !userId || userId.length > 256) throw invalid('Invalid account identity.');
     return path.join(root, createHash('sha256').update(userId).digest('hex') + '.json');
   }
 
+  // A first visit gets defaults; a damaged existing file is reported, never silently reset.
   async function read(userId) {
     const target = filename(userId);
     try {
@@ -159,6 +168,7 @@ function createLibraryJsonStore({ directory = path.resolve(__dirname, '../../dat
     }
   }
 
+  // Serialize this account's saves, then compare revisions to stop stale clients overwriting newer data.
   async function save(userId, value) {
     const document = normalizeDocument(value);
     const target = filename(userId);
@@ -180,6 +190,7 @@ function createLibraryJsonStore({ directory = path.resolve(__dirname, '../../dat
         } finally {
           await handle.close();
         }
+        // Replace only after the temporary file is fully written and flushed.
         await fs.rename(temporary, target);
         return next;
       } catch {

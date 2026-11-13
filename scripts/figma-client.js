@@ -1,3 +1,4 @@
+// Design utility: inspect Figma frames/nodes and request image URLs; not part of the running website.
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
@@ -21,6 +22,7 @@ loadEnv();
 const TOKEN = process.env.FIGMA_ACCESS_TOKEN || '';
 const FILE_KEY = process.env.FIGMA_FILE_KEY || '0WW7OwtWFVtYtIXQGuPdk2';
 
+// Request one Figma API resource using the locally configured access token.
 function figmaRequest(endpoint) {
   return new Promise((resolve, reject) => {
     const req = https.request({
@@ -51,6 +53,7 @@ function figmaRequest(endpoint) {
   });
 }
 
+// Find frame nodes to help select which design screens to inspect.
 async function listFrames() {
   const data = await figmaRequest(`/v1/files/${FILE_KEY}?depth=2`);
   const frames = [];
@@ -72,10 +75,12 @@ async function listFrames() {
   return frames;
 }
 
+// Fetch the detailed data for one selected node.
 async function getNode(nodeId) {
   return await figmaRequest(`/v1/files/${FILE_KEY}/nodes?ids=${encodeURIComponent(nodeId)}`);
 }
 
+// Ask Figma for export URLs without downloading the image bytes here.
 async function getImageUrls(nodeIds, format = 'png', scale = 1) {
   const ids = Array.isArray(nodeIds) ? nodeIds.join(',') : nodeIds;
   const res = await figmaRequest(`/v1/images/${FILE_KEY}?ids=${encodeURIComponent(ids)}&format=${format}&scale=${scale}`);

@@ -1,6 +1,8 @@
+// Fetch chapter text, fit it into pages, and connect reader navigation, font controls and scroll mode.
 window.NovelCastViews = window.NovelCastViews || {};
 
 window.NovelCastViews.reader = {
+  // Return screen HTML; the router inserts it before init runs.
   render: function () {
     const NC = window.NovelCast;
     const query = NC.readQuery();
@@ -250,10 +252,12 @@ window.NovelCastViews.reader = {
       </div>
     `;
   },
+  // Find the inserted elements, attach interactions and prepare cleanup for navigation.
   init: function () {
     const controller = new AbortController();
     let resizeTimer;
     let cancelTurn = () => {};
+    // This closure remembers this screen's resources so leaving the route can release them.
     this.destroy = () => { controller.abort(); clearTimeout(resizeTimer); cancelTurn(); if (observer) observer.disconnect(); };
     let observer;
 
@@ -282,6 +286,7 @@ window.NovelCastViews.reader = {
     let currentFontSize = 17;
     let rePaginate = null;
     const sizeLabel = document.getElementById('font-size-label');
+    // Clamp the display size and recalculate pages; this control does not persist font settings.
     const updateFont = (delta) => {
       currentFontSize = Math.min(26, Math.max(13, currentFontSize + delta));
       if (sizeLabel) sizeLabel.textContent = `${currentFontSize}px`;
@@ -305,6 +310,7 @@ window.NovelCastViews.reader = {
     const pageTurnNav = document.getElementById('reader-page-turn-nav');
     const pdfStatusBar = document.getElementById('reader-pdf-status-bar');
 
+    // Switch between paginated HTML and scrolling HTML; the PDF label does not mean a PDF parser.
     function setMode(mode) {
       cancelTurn();
       btnBook.setAttribute('aria-pressed', String(mode !== 'pdf'));
@@ -372,6 +378,7 @@ window.NovelCastViews.reader = {
     }
 
     // Helper to format paragraph text with em markdown tags
+    // Escape chapter text before adding the small supported prose-formatting markup.
     function formatPara(text) {
       if (!text) return '';
       return NC.escapeHtml(text)
@@ -381,6 +388,7 @@ window.NovelCastViews.reader = {
     }
 
     // Dynamic Container Height Pagination Algorithm
+    // Measure text in an invisible box, splitting paragraphs to fit the current dimensions and font.
     function paginateChapter(rawParagraphs, chTitle, targetWidth, targetHeight, fontSize) {
       const sandbox = document.createElement('div');
       sandbox.className = 'reader-content font-serif text-[#2b2620] space-y-4';
@@ -468,6 +476,7 @@ window.NovelCastViews.reader = {
       return pages;
     }
 
+    // Group pages into desktop pairs or a single-page mobile layout.
     function buildSpreads(pages) {
       const spreads = [];
       const step = window.matchMedia('(min-width: 1024px)').matches ? 2 : 1;
@@ -547,6 +556,7 @@ window.NovelCastViews.reader = {
       let spreads = buildSpreads(pages);
       let currentSpread = 0;
 
+      // Navigate to a new chapter while carrying the current display mode in the hash.
       const goTo = (targetCh) => {
         if (!targetCh) return;
         const currentMode = localStorage.getItem('novelcast.reader.mode') || 'book';
@@ -554,6 +564,7 @@ window.NovelCastViews.reader = {
       };
 
       let turning = false;
+      // Update the current pages/navigation and animate a cloned page when appropriate.
       function renderSpread(idx, animate = true) {
         if (controller.signal.aborted || (animate && turning)) return;
         const forward = idx > currentSpread;
@@ -702,6 +713,7 @@ window.NovelCastViews.reader = {
       renderSpread(0, false);
 
       // Re-paginate on font size change or window resize
+      // Re-measure pages after a font/size change while keeping approximately the same place.
       rePaginate = () => {
         const position = currentSpread / spreads.length;
         const currentContainer = document.getElementById('book-left-page-content');

@@ -1,3 +1,4 @@
+// Check per-account browser caching, offline recovery and conflict merging with fake accounts.
 'use strict';
 
 const test = require('node:test');
@@ -10,6 +11,7 @@ const { emptyDocument, normalizeDocument } = require('../backend/src/services/li
 const tick = () => new Promise(resolve => setImmediate(resolve));
 const copy = value => JSON.parse(JSON.stringify(value));
 
+// Keep each fake account's server document separate while exercising the real client code.
 function fixture(t, options = {}) {
   const dom = new JSDOM('<!doctype html><html><body></body></html>', {
     url: 'http://127.0.0.1:3000/', runScripts: 'outside-only', pretendToBeVisual: true,
@@ -30,6 +32,7 @@ function fixture(t, options = {}) {
     getAccessToken: async () => currentUser ? `token-${currentUser.id}` : null,
     onAuthStateChange(callback) { authListeners.push(callback); callback(currentUser); },
   };
+  // This fake API enforces revisions so tests can reproduce and resolve conflicts.
   w.fetch = async (url, init = {}) => {
     const address = String(url);
     if (address.includes('/books?') || address.endsWith('/ratings')) {

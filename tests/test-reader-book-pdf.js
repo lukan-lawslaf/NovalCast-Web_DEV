@@ -1,3 +1,4 @@
+// Check book and scrolling reader modes in a browser; requires the local app servers.
 const { chromium } = require('playwright');
 const path = require('path');
 

@@ -1,3 +1,4 @@
+// Build utility: scan source classes and generate frontend/css/site.css with Tailwind and vendor prefixes.
 const fs = require('fs');
 const path = require('path');
 const postcss = require('postcss');
@@ -8,6 +9,7 @@ const containerQueries = require('@tailwindcss/container-queries');
 
 const root = path.resolve(__dirname, '..');
 
+// Gather source files while excluding dependency, Git, and archive folders.
 function getFilesRecursively(dir, extensions) {
   let files = [];
   if (!fs.existsSync(dir)) return files;
@@ -25,6 +27,7 @@ function getFilesRecursively(dir, extensions) {
   return files;
 }
 
+// Read the shell configuration, compile used utility classes, and write the generated stylesheet.
 function build() {
   const content = [];
   const scannedFiles = [

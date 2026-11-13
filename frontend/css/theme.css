@@ -1,3 +1,5 @@
+/* Theme colors and overrides: shared CSS variables, readable light surfaces, and the ink reveal. */
+/* Default dark palette; components reuse these variables instead of duplicating colors. */
 :root {
   color-scheme: dark;
   --nc-icon-button-size: 2.25rem;
@@ -14,6 +16,7 @@
   --nc-focus: #e1c46e;
 }
 
+/* The theme service changes data-theme; these values recolor the same markup. */
 html[data-theme="light"] {
   color-scheme: light;
   --nc-paper: #ece8e0;
@@ -27,6 +30,52 @@ html[data-theme="light"] {
   --nc-accent-ink: #ffffff;
   --nc-gold: #74510d;
   --nc-focus: #1f3fb0;
+}
+
+/* Keep the old snapshot opaque underneath the incoming contour, with no SVG
+   resource lookups or image filters in the browser's separate snapshot layer. */
+:root[data-theme-transition]::view-transition-group(root) {
+  animation: none;
+  filter: none;
+}
+
+:root[data-theme-transition]::view-transition-image-pair(root) {
+  isolation: isolate;
+}
+
+:root[data-theme-transition]::view-transition-old(root),
+:root[data-theme-transition]::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+  height: 100%;
+  opacity: 1;
+}
+
+:root[data-theme-transition]::view-transition-old(root) {
+  z-index: 1;
+}
+
+:root[data-theme-transition]::view-transition-new(root) {
+  z-index: 2;
+  clip-path: var(--nc-theme-ink-clip, inset(0 0 0 100%));
+  /* Keep the native snapshot alive while the renderer advances its fluid field. */
+  animation: nc-theme-ink-sweep 2.2s linear both;
+}
+
+/* A native snapshot stays present while themeInk.js advances the reveal boundary. */
+@keyframes nc-theme-ink-sweep {
+  from, to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme-transition]::view-transition-group(root) {
+    filter: none;
+  }
+
+  :root[data-theme-transition]::view-transition-new(root) {
+    animation: none;
+    clip-path: none;
+  }
 }
 
 html[data-theme="light"] body {

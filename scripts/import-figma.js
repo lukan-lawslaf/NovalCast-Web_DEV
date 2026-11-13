@@ -1,3 +1,4 @@
+// Design import utility: download Figma reference data/assets into Referance/Figma when run manually.
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
@@ -23,6 +24,7 @@ const outDir = path.resolve(__dirname, '..', 'Referance', 'Figma');
 
 fs.mkdirSync(outDir, { recursive: true });
 
+// Fetch design JSON from Figma; credentials stay in the request headers.
 function figmaGet(endpoint) {
   return new Promise((resolve, reject) => {
     const req = https.request({
@@ -53,6 +55,7 @@ function figmaGet(endpoint) {
   });
 }
 
+// Save a remote binary asset into the local reference folder.
 function downloadBinary(url, dest) {
   return new Promise((resolve, reject) => {
     https.get(url, (res) => {
@@ -69,6 +72,7 @@ function downloadBinary(url, dest) {
   });
 }
 
+// Export selected design nodes, assets, tokens, and a reference preview.
 async function run() {
   console.log(`Importing Figma design from file: ${FILE_KEY} to ${outDir}`);
 

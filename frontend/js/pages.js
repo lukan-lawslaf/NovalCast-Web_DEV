@@ -1,3 +1,4 @@
+// Return reusable HTML sections from book objects; views assemble them and the router displays them.
 (function () {
   const NC = window.NovelCast;
   const { escapeHtml } = NC;
@@ -26,6 +27,7 @@
     'wuthering-heights'
   ];
 
+  // Build linked cover wrappers for the entrance bookshelf.
   function landingShelf() {
     return shelfEditions.map(id => NC.getExactBook(id)).filter(Boolean).map(book => {
       const title = escapeHtml(book.title);
@@ -43,6 +45,7 @@
 
   function bookHref(page, id, chapter) { return NC.bookUrl(page, id, chapter); }
 
+  // Build a large book card; the variant selects its presentation.
   function featuredCard(book, variant) {
     if (variant === 'secondary') {
       return `<div class="relative flex-[1_0_460px] bg-[#161B24] rounded-[22px] border border-appCardBorder/50 p-6 md:p-7 overflow-hidden shadow-xl flex flex-col justify-between opacity-85" data-purpose="secondary-hero-card" style="background: linear-gradient(135deg, #1C2330 0%, #131720 100%); border: 1px solid rgba(241, 214, 158, 0.28); box-shadow: rgba(241, 214, 158, 0.1) 0px 0px 20px -4px, rgba(0, 0, 0, 0.6) 0px 15px 25px -10px;">
@@ -107,6 +110,7 @@
 </div>`;
   }
 
+  // Build the reusable catalog card shown on home and search screens.
   function popularCard(book) {
     return `<div class="flex flex-col group cursor-pointer" data-book-link="${book.id}" data-book-target="details">
   <a href="#/book?book=${book.id}" class="block">
@@ -131,6 +135,7 @@
 </div>`;
   }
 
+  // Retained presentation helper; current views do not call this template.
   function libraryHeroCard(book) {
     const state = NC.loadState().library[book.id] || {};
     const status = state.status || 'saved';
@@ -175,6 +180,7 @@
     </article>`;
   }
 
+  // Retained saved-card template; the active library builds its own cards.
   function savedCard(book) {
     const state = NC.loadState().library[book.id] || {};
     return `<a class="flex flex-col group cursor-pointer" href="${bookHref('book-details.html', book.id)}" data-book-link="${book.id}" data-book-target="details">
@@ -201,6 +207,7 @@
     </a>`;
   }
 
+  // Retained search presentation helper; current views use their own layout.
   function searchHighlight(book) {
     return `<section class="w-full max-w-7xl mx-auto mb-space-2xl">
       <div class="relative w-full rounded-lg bg-surface-container-low shadow-[0_16px_40px_rgba(0,0,0,0.5)] overflow-hidden p-space-lg md:p-space-xl backdrop-blur-xl">
@@ -251,6 +258,7 @@
     </section>`;
   }
 
+  // Retained genre-tile template; it does not register a separate route.
   function genreCard(name, count, icon) {
     return `<a class="relative rounded-DEFAULT bg-surface-container-low p-space-lg overflow-hidden shadow-lg group cursor-pointer hover:bg-surface-container transition-all duration-300" href="search.html?q=${encodeURIComponent(name.toLowerCase().split(' ')[0])}">
       <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-primary-container/10 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-500"></div>
@@ -269,6 +277,7 @@
     </a>`;
   }
 
+  // Build the selected book summary and its reading/listening/save actions.
   function detailHero(book) {
     const bookId = escapeHtml(book.id);
     const readerBookId = encodeURIComponent(book.id);
@@ -319,6 +328,7 @@
     </section>`;
   }
 
+  // Build links and narration actions for the available chapter summaries.
   function chapterList(book) {
     const list = book.chaptersList || [];
     const total = book.chapters || list.length || 1;
@@ -349,10 +359,12 @@
     </div>`;
   }
 
+  // Provide the empty container where ratings.js mounts the interactive rating UI.
   function reviews(book) {
     return '<section id="book-ratings" class="reader-ratings"><h3>Reader ratings</h3><div data-rating-content aria-busy="false"><p class="text-on-surface-variant">Loading reader ratings…</p></div></section>';
   }
 
+  // Show other catalog books as simple recommendations, not personalized analytics.
   function likeRow(book) {
     return `<section class="flex flex-col gap-space-md pt-space-md">
       <div class="flex items-center justify-between"><h3 class="font-headline-xl text-headline-xl text-primary font-bold">You Might Also Like</h3><a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary-container uppercase tracking-wider" href="#/search">View All</a></div>

@@ -1,3 +1,4 @@
+// Legacy browser utility: capture desktop/mobile images of configured page URLs; requires a running site.
 const { chromium } = require('playwright');
 const path = require('path');
 const fs = require('fs');

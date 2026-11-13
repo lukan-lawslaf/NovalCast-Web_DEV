@@ -86,6 +86,7 @@ function normalizeCatalogBook(book) {
   return { ...book, title, author, coverUrl, description };
 }
 
+// Validate URL input before building a database lookup or selecting a bundled book.
 function normalizeBookId(value) {
   return typeof value === 'string' && /^[a-z0-9][a-z0-9_-]{0,199}$/i.test(value) ? value.toLowerCase() : null;
 }
@@ -106,6 +107,7 @@ function boundedFilter(value, max) {
   return typeof value === 'string' && value.length <= max ? value.trim() : null;
 }
 
+// The table of contents sends labels and counts, not full chapter text.
 function toChapterSummary(chapter) {
   return {
     chapterNumber: chapter.chapterNumber,
@@ -142,6 +144,7 @@ function getBundledBook(key, storedBook) {
   return CURATED_BY_KEY.get(storedBook ? String(storedBook.gutendexId) : key);
 }
 
+// Fetch and parse only this book's exact public-domain edition when stored text is unavailable.
 async function loadGutenbergChapters(book) {
   const id = book.gutendexId;
   const urls = [
@@ -163,6 +166,7 @@ async function loadGutenbergChapters(book) {
   return null;
 }
 
+// Reuse successful parses and share an in-progress download; failed downloads have a cooldown.
 function fetchGutenbergChapters(book) {
   const key = book.gutendexId;
   if (gutenbergChaptersCache.has(key)) return Promise.resolve(gutenbergChaptersCache.get(key));

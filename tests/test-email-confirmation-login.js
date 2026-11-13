@@ -1,3 +1,4 @@
+// Exercise signup and email confirmation against the running app; may create an account and send email.
 const { chromium } = require('playwright');
 const path = require('path');
 

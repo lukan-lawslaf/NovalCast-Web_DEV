@@ -1,3 +1,4 @@
+// Design import utility: request Stitch design references and save downloaded outputs when run manually.
 const https = require('https');
 const fs = require('fs');
 // Load environment variables from .env
@@ -22,6 +23,7 @@ const outDir = path.resolve(__dirname, '..', 'Referance', 'Stich');
 
 fs.mkdirSync(outDir, { recursive: true });
 
+// Send a tool request to the design service and return its response.
 function callMcp(toolName, args) {
   return new Promise((resolve, reject) => {
     const req = https.request({
@@ -60,6 +62,7 @@ function callMcp(toolName, args) {
   });
 }
 
+// Download an exported reference file, following redirects where supported.
 function downloadUrl(url, dest) {
   return new Promise((resolve, reject) => {
     https.get(url, (res) => {
@@ -76,6 +79,7 @@ function downloadUrl(url, dest) {
   });
 }
 
+// Collect screen exports and record their local paths in a manifest.
 async function run() {
   console.log('Fetching screen list for Stitch project:', projectId);
   const listRes = await callMcp('list_screens', { projectId: 'projects/' + projectId });

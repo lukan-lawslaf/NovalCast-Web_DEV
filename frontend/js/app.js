@@ -1,8 +1,10 @@
+// Connect shared book links, bookmark buttons and audio controls after a view is rendered.
 document.addEventListener('novelcast:state', () => {
   document.dispatchEvent(new CustomEvent('novelcast:refresh'));
 });
 
 (function () {
+  // Match a bookmark icon and its pressed state to the saved book entry.
   function syncFavorite(button, state) {
     const active = Boolean(state.library[button.dataset.favoriteToggle]?.favorite);
     button.classList.toggle('is-active', active);
@@ -19,11 +21,13 @@ document.addEventListener('novelcast:state', () => {
     document.querySelectorAll('[data-favorite-toggle]').forEach(button => syncFavorite(button, state));
   });
 
+  // Despite the legacy name, these buttons now delegate to the real narration player.
   function installAudioOffLinks(scope) {
     if (window.NovelCastAudio) window.NovelCastAudio.bind(scope);
   }
 
   window.NovelCastUI = Object.assign(window.NovelCastUI || {}, {
+  // Translate book-link data attributes into SPA navigation while preserving modified clicks.
   installBookLinks: function (scope) {
     (scope || document).querySelectorAll('[data-book-link]').forEach((a) => {
       if (a.dataset.bookLinkBound) return;
@@ -47,6 +51,7 @@ document.addEventListener('novelcast:state', () => {
       });
     });
   },
+  // Bind each bookmark once; save the changed flag through the account-state service.
   installFavoriteToggle: function (scope) {
     (scope || document).querySelectorAll('[data-favorite-toggle]').forEach((btn) => {
       if (btn.dataset.favoriteToggleBound) return;
@@ -66,6 +71,7 @@ document.addEventListener('novelcast:state', () => {
       });
     });
   },
+  // Mark a book saved when the add-to-library action is clicked.
   installLibraryToggle: function (scope) {
     (scope || document).querySelectorAll('[data-library-toggle]').forEach((btn) => {
       if (btn.dataset.libraryToggleBound) return;
@@ -88,6 +94,7 @@ window.NovelCastApp = Object.assign(window.NovelCastApp || {}, {
   toggleAudio: function (trackId, options) {
     if (window.NovelCastAudio) return window.NovelCastAudio.playBook(trackId, options);
   },
+  // Call again after replacing view HTML so the new elements receive their handlers.
   bindInteractiveElements: function (scope) {
     if (window.NovelCastUI) {
       window.NovelCastUI.installBookLinks(scope);

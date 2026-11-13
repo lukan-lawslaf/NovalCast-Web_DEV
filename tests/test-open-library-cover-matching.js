@@ -1,9 +1,11 @@
+// Check cover and synopsis matching with fake Open Library responses.
 'use strict';
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { enrich } = require('../backend/src/services/openLibraryService');
 
+// Replace the external catalog with controlled search results for each test.
 function mockLibrary(t, docs) {
   const original = global.fetch;
   const calls = [];

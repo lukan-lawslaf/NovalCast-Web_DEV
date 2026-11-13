@@ -1,5 +1,7 @@
+// Load community ratings and let a signed-in reader submit or edit one score per book.
 (function () {
   const base = ((window.__ENV__ || {}).API_BASE || 'http://127.0.0.1:4000/api').replace(/\/$/, '');
+  // GET the summary or PUT a score, including the session token when one is available.
   async function request(book, score, signal) {
     const token = window.NovelCastAuth && await window.NovelCastAuth.getAccessToken();
     const headers = { 'Content-Type': 'application/json' };
@@ -19,6 +21,7 @@
   }
 
   window.NovelCastRatings = {
+    // Install one rating widget; return cleanup that aborts requests and removes its listeners.
     mount(host, book) {
       if (!host) return () => {};
       const controller = new AbortController();
@@ -27,6 +30,7 @@
       let saving = false;
       const isPrivate = String(book.id).startsWith('upload-');
       const signedIn = () => window.NovelCastAuth && window.NovelCastAuth.isAuthenticated();
+      // Rebuild the summary, distribution and score inputs from the latest confirmed rating data.
       function paint(message) {
         if (controller.signal.aborted) return;
         const count = summary ? summary.count : 0;
@@ -51,6 +55,7 @@
         const heroCount = document.getElementById('book-hero-rating-count');
         if (heroCount && summary) heroCount.textContent = count ? `(${count.toLocaleString()} ${count === 1 ? 'rating' : 'ratings'})` : '(no ratings yet)';
       }
+      // Refresh the summary and keep failures visible without inventing a rating.
       async function load() {
         try { summary = await request(book, undefined, controller.signal); paint(); }
         catch (error) { if (error.name !== 'AbortError') paint(error.message); }

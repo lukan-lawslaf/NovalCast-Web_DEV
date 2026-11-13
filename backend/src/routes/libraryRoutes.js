@@ -1,11 +1,14 @@
 'use strict';
 
+// Save or restore one verified account's private JSON library through GET/PUT requests.
+
 const express = require('express');
 const env = require('../config/env');
 const { createLibraryJsonStore } = require('../services/libraryJsonStore');
 
 function httpError(message, status) { return Object.assign(new Error(message), { status }); }
 
+// Ask Supabase who owns the token; never trust an account ID supplied in the form data.
 async function verifiedUser(req) {
   const match = /^Bearer (\S+)$/i.exec(req.headers.authorization || '');
   if (!match) throw httpError('Please sign in to sync your library.', 401);
@@ -28,8 +31,10 @@ async function verifiedUser(req) {
   return user;
 }
 
+// Injectable storage/auth helpers let isolated tests avoid live accounts and real user files.
 function createLibraryRouter({ store = createLibraryJsonStore(), verifyUser = verifiedUser } = {}) {
   const router = express.Router();
+  // Verify identity before reading/writing data; a 409 also returns the latest library to merge.
   const handle = operation => async (req, res, next) => {
     res.set('Cache-Control', 'no-store');
     try {

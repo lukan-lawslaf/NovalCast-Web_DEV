@@ -1,8 +1,11 @@
+/* Reader appearance: page spread, rotating leaf, navigation, and mobile/reduced-motion rules. */
 .reader-shell { --paper:#faf6ee; }
 .reader-shell>div:first-child>div { min-width:0; max-width:100%; }
 .reader-shell>div:first-child>div:last-child { flex-wrap:wrap; }
+/* Perspective makes the temporary rotating page look three-dimensional. */
 #book-spread { perspective:2200px; isolation:isolate; overflow:visible; }
 #book-spread-content { border-radius:12px; overflow:hidden; }
+/* Front/back faces form the animated leaf; clicks pass through to reader controls. */
 .reader-turn-leaf { position:absolute; top:0; bottom:0; width:50%; z-index:50; transform-style:preserve-3d; pointer-events:none; }
 .turn-forward { left:50%; transform-origin:left center; }
 .turn-backward { left:0; transform-origin:right center; }
@@ -18,7 +21,9 @@
 #reader-next-btn:hover { border-color:#ddc18a66; transform:translateX(2px); }
 #reader-prev-btn:hover { border-color:#ddc18a66; transform:translateX(-2px); }
 .reader-retry { border:1px solid #8f6d48; border-radius:30px; padding:8px 18px; margin-top:16px; color:#6b4123; }
+/* Match readerView.js: narrow screens show one page instead of a two-page spread. */
 @media(max-width:1023px) { #book-right-article { display:none; } .reader-turn-leaf { width:100%; left:0; transform-origin:left center; } #book-spread { perspective:1500px; } #reader-book-container>div>div:first-child { left:auto; right:24px; width:15px; height:65px; } }
+/* Reserve more reading space and wrap controls on phones. */
 @media(max-width:600px) {
   body[data-route="reader"] #app-sidebar { display:none; }
   body[data-route="reader"] #app-content-wrapper { padding:12px; }

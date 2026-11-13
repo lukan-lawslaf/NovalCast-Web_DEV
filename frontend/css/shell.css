@@ -1,3 +1,4 @@
+/* Shared shell controls: sidebar links, header actions, profile image, and keyboard focus. */
 .nc-main-nav {
   display: grid;
   gap: 14px;
@@ -17,6 +18,7 @@
   text-decoration: none;
 }
 
+/* The router sets aria-current; the same visual cue also appears on hover. */
 .nc-nav-link:hover,
 .nc-nav-link[aria-current="page"] {
   color: #f1d69e;
@@ -29,6 +31,7 @@
   height: 18px;
 }
 
+/* Flexbox aligns notification, theme, and account controls in one row. */
 .nc-header-actions {
   display: flex;
   align-items: center;

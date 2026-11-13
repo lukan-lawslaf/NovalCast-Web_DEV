@@ -1,3 +1,4 @@
+// Animate the upload card with browser Canvas; this implementation runs without React.
 /**
  * PixelCard Component - Vanilla JS implementation from React Bits
  * Canvas-based reactive pixel animation wrapper
@@ -78,6 +79,7 @@
     }
   }
 
+  // Scale animation speed, stopping motion when the visitor requests reduced motion.
   function getEffectiveSpeed(value, reducedMotion) {
     const min = 0;
     const max = 100;
@@ -135,6 +137,7 @@
       this.init();
     }
 
+    // Create the canvas and connect hover/focus/resize events for this card instance.
     init() {
       // Create canvas if not present
       let canvas = this.container.querySelector('canvas.pixel-canvas');
@@ -172,6 +175,7 @@
       this.resizeObserver.observe(this.container);
     }
 
+    // Rebuild the pixel grid to match the current card dimensions.
     initPixels() {
       if (!this.container || !this.canvas) return;
 
@@ -204,6 +208,7 @@
       this.pixels = pxs;
     }
 
+    // Draw active pixels at a bounded frame rate and stop once every pixel is idle.
     doAnimate(fnName) {
       this.animationFrame = requestAnimationFrame(() => this.doAnimate(fnName));
       const timeNow = performance.now();
@@ -236,6 +241,7 @@
       this.animationFrame = requestAnimationFrame(() => this.doAnimate(name));
     }
 
+    // Release the animation, observer and handlers when the library view is replaced.
     destroy() {
       cancelAnimationFrame(this.animationFrame);
       if (this.resizeObserver) this.resizeObserver.disconnect();

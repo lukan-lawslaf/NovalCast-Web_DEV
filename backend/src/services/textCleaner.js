@@ -71,6 +71,7 @@ function unwrapBrackets(line) {
     .trim();
 }
 
+// Identify likely headings before reflowing text so titles remain separate from prose.
 function isHeadingLike(line) {
   const text = unwrapBrackets(line);
   if (!text || text.length > 90) return false;
@@ -83,6 +84,7 @@ function isHeadingLike(line) {
   return false;
 }
 
+// A prose-like line helps locate the story after title pages or contents listings.
 function isNarrative(line) {
   const text = String(line).trim();
   if (!text) return false;
@@ -193,11 +195,6 @@ function stripFrontMatter(text) {
 }
 
 /**
- * A heading that unambiguously opens a chapter: an explicit label
- * ("CHAPTER II", "Letter 1") or a numeral heading. Deliberately excludes
- * ALL-CAPS lines, which are just as often printer's colophon as titles.
- */
-/**
  * True when three or more heading-shaped lines run consecutively. Body text
  * never does this — every real heading is followed by prose — so a run at the
  * top of a book is a contents listing even when it has no "Contents" heading
@@ -214,6 +211,11 @@ function startsListingRun(lines, index) {
   return seen >= 3;
 }
 
+/**
+ * A heading that unambiguously opens a chapter: an explicit label
+ * ("CHAPTER II", "Letter 1") or a numeral heading. Deliberately excludes
+ * ALL-CAPS lines, which are just as often printer's colophon as titles.
+ */
 function isStrongHeading(line) {
   const text = unwrapBrackets(line);
   return CHAPTER_HINT.test(text) || ROMAN_ONLY.test(text) || ROMAN_TITLED_LINE.test(text);
@@ -432,6 +434,7 @@ function reflowParagraphs(text) {
   return paragraphs.filter(Boolean).join('\n\n');
 }
 
+// Apply the shared character replacements after structural cleaning.
 function normalizeTypography(text) {
   return TYPOGRAPHY_RULES.reduce(
     (acc, [pattern, replacement]) => acc.replace(pattern, replacement),
@@ -439,6 +442,7 @@ function normalizeTypography(text) {
   );
 }
 
+// Keep paragraph breaks while removing extra spaces and excessive blank lines.
 function normalizeWhitespace(text) {
   return text
     .replace(/[ \t]+/g, ' ')

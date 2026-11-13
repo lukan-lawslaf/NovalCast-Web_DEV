@@ -1,3 +1,4 @@
+// Inspect logos on home and landing screens in a browser; requires the local frontend server.
 const { chromium } = require('playwright');
 
 (async () => {

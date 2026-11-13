@@ -1,10 +1,14 @@
+// Apply the saved light/dark theme and coordinate the optional ink transition between themes.
 (function initializeNovelCastTheme(window, document) {
   'use strict';
 
   const STORAGE_KEY = 'novelcast-theme';
   const THEMES = new Set(['dark', 'light']);
   const root = document.documentElement;
+  const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+  let activeTransition = null;
 
+  // Accept only supported theme names before using browser-stored values.
   function normalizeTheme(theme) {
     return typeof theme === 'string' && THEMES.has(theme) ? theme : null;
   }
@@ -17,6 +21,7 @@
     }
   }
 
+  // Keep all theme buttons, labels and pressed states consistent with the active theme.
   function syncToggles(theme) {
     document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
       const fixedTarget = normalizeTheme(button.dataset.themeToggle);
@@ -38,7 +43,8 @@
     });
   }
 
-  function setTheme(theme, options = {}) {
+  // Change root classes/colors, optionally remember the choice and notify theme listeners.
+  function applyTheme(theme, options = {}) {
     const nextTheme = normalizeTheme(theme);
     if (!nextTheme) return getTheme();
 
@@ -69,8 +75,77 @@
     return normalizeTheme(root.dataset.theme) || 'dark';
   }
 
+  // Release the previous transition mask and optionally finish its pending theme change.
+  function cancelTransition(commitPending = false) {
+    const active = activeTransition;
+    if (!active) return;
+    activeTransition = null;
+    if (commitPending && !active.applied) applyTheme(active.theme);
+    active.transition?.skipTransition();
+    active.ink?.cleanup();
+    root.removeAttribute('data-theme-transition');
+  }
+
+  // Public setters stay immediate, including calls made before the first paint.
+  function setTheme(theme, options = {}) {
+    if (!normalizeTheme(theme)) return getTheme();
+    cancelTransition();
+    return applyTheme(theme, options);
+  }
+
   function toggle() {
     return setTheme(getTheme() === 'light' ? 'dark' : 'light');
+  }
+
+  // Use the ink reveal only when supported and allowed; otherwise apply the theme immediately.
+  function transitionTo(theme) {
+    if (typeof document.startViewTransition !== 'function' || typeof window.NovelCastThemeInk?.prepare !== 'function' || reducedMotion?.matches ||
+        document.visibilityState === 'hidden' || root.hasAttribute('data-book-opening')) {
+      return setTheme(theme);
+    }
+
+    cancelTransition();
+    if (theme === getTheme()) return theme;
+
+    const active = { theme, applied: false, transition: null, ink: null };
+    try {
+      active.ink = window.NovelCastThemeInk?.prepare();
+    } catch {
+      return setTheme(theme);
+    }
+    activeTransition = active;
+    root.setAttribute('data-theme-transition', 'ink');
+    try {
+      active.transition = document.startViewTransition(() => {
+        // A skipped transition can still run its callback after a newer click.
+        if (activeTransition !== active) return;
+        active.applied = true;
+        applyTheme(theme);
+      });
+    } catch {
+      return setTheme(theme);
+    }
+
+    const finish = () => {
+      if (activeTransition === active) {
+        if (!active.applied) applyTheme(theme);
+        activeTransition = null;
+        active.ink?.cleanup();
+        root.removeAttribute('data-theme-transition');
+      }
+    };
+    active.transition.ready.then(() => {
+      if (activeTransition !== active || !active.ink) return;
+      active.ink.start(() => {
+        if (activeTransition === active) active.transition.skipTransition();
+      }, () => {
+        if (activeTransition === active) setTheme(theme);
+      });
+    }).catch(() => {
+      if (activeTransition === active) setTheme(theme);
+    });
+    active.transition.finished.then(finish, finish);
+    return theme;
   }
 
   document.addEventListener('click', (event) => {
@@ -78,9 +153,20 @@
     if (!button || button.disabled) return;
 
     const requestedTheme = normalizeTheme(button.dataset.themeToggle);
-    if (requestedTheme) setTheme(requestedTheme);
-    else toggle();
+    const currentTheme = activeTransition?.theme || getTheme();
+    transitionTo(requestedTheme || (currentTheme === 'light' ? 'dark' : 'light'));
   });
+
+  // Settle before another route's cover animation or a backgrounded page takes over.
+  window.addEventListener('hashchange', () => cancelTransition(true));
+  window.addEventListener('pagehide', () => cancelTransition(true));
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') cancelTransition(true);
+  });
+  reducedMotion?.addEventListener('change', (event) => {
+    if (event.matches) cancelTransition(true);
+  });
+  window.addEventListener('resize', () => cancelTransition(true));
 
   window.NovelCastTheme = Object.freeze({
     getTheme,

@@ -1,3 +1,4 @@
+// Legacy inspection utility: list elements from separate root HTML pages when those files exist.
 const fs = require('fs');
 const path = require('path');
 const { JSDOM } = require('jsdom');

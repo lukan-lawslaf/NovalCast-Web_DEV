@@ -1,3 +1,4 @@
+// Check multiple catalog books in a browser; requires the local app servers and book data.
 const { chromium } = require('playwright');
 
 const TEST_SLUGS = [

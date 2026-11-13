@@ -1,3 +1,4 @@
+/* Library appearance: reading-plan form, sync feedback, JSON download, and saved-book grid. */
 .nc-library-tools {
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
@@ -26,6 +27,7 @@
   line-height: 1.6;
 }
 
+/* Two fields share a row until the phone breakpoint stacks them. */
 .nc-reading-plan-fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -68,6 +70,7 @@
   color: var(--nc-accent);
 }
 
+/* Disabled states show a pending action; focus outlines support keyboard use. */
 .nc-library-button:disabled {
   opacity: .55;
   cursor: wait;
@@ -101,6 +104,7 @@
   margin-bottom: 2.5rem;
 }
 
+/* Auto-fill fits as many readable book columns as the available width allows. */
 .nc-saved-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -145,6 +149,7 @@
   text-underline-offset: 3px;
 }
 
+/* Stack the plan and backup panels on narrower screens. */
 @media (max-width: 900px) {
   .nc-library-tools { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
 }

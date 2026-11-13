@@ -1,9 +1,11 @@
+// Check profile rendering and private library separation using an isolated DOM.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
 const { JSDOM } = require('jsdom');
 
+// Load the actual browser script into an isolated test window.
 function loadScript(window, name) {
   window.eval(readFileSync(join(__dirname, '..', 'frontend', 'js', name), 'utf8'));
 }

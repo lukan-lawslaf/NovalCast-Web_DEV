@@ -1,6 +1,8 @@
+// Build sign-in/sign-up screens and handle validation feedback, confirmation and account submission.
 window.NovelCastViews = window.NovelCastViews || {};
 
 window.NovelCastViews.login = {
+  // Return screen HTML; the router inserts it before init runs.
   render: function () {
     const auth = window.NovelCastAuth;
     const user = auth && auth.isAuthenticated() ? auth.getUser() : null;
@@ -237,9 +239,11 @@ window.NovelCastViews.login = {
     `;
   },
 
+  // Find the inserted elements, attach interactions and prepare cleanup for navigation.
   init: function () {
     let disposed = false;
     let submitting = false;
+    // This closure remembers this screen's resources so leaving the route can release them.
     this.destroy = () => { disposed = true; };
     const auth = window.NovelCastAuth;
     const user = auth && auth.isAuthenticated() ? auth.getUser() : null;
@@ -278,6 +282,7 @@ window.NovelCastViews.login = {
       if (verifiedBanner) verifiedBanner.classList.remove('hidden');
     }
 
+    // Select the sign-in tab and hide fields that are only needed for registration.
     function activateSignIn() {
       isSignUp = false;
       tabSignIn.classList.add('gold-pill-active');
@@ -297,6 +302,7 @@ window.NovelCastViews.login = {
       hideAlert();
     }
 
+    // Select registration and reveal the optional name field.
     function activateSignUp() {
       isSignUp = true;
       tabSignUp.classList.add('gold-pill-active');
@@ -378,6 +384,7 @@ window.NovelCastViews.login = {
       });
     }
 
+    // Display plain text or a deliberately constructed DOM message, not arbitrary error HTML.
     function showAlert(content) {
       if (!alertBox || disposed) return;
       if (typeof content === 'string') {
@@ -394,6 +401,7 @@ window.NovelCastViews.login = {
     }
 
     if (form) {
+      // Read validated fields, block duplicate requests, call auth and restore controls in finally.
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (submitting || disposed) return;

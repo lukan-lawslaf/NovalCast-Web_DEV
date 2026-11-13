@@ -27,6 +27,7 @@ const SEARCH_FIELDS = [
   'edition_count',
 ].join(',');
 
+// Accept either description shape and flatten markdown/whitespace into readable text.
 function readableDescription(raw) {
   if (!raw) return '';
   const text = typeof raw === 'string' ? raw : raw.value || '';
@@ -45,12 +46,14 @@ function normalizeWords(value) {
     : '';
 }
 
+// Compare full and subtitle-free titles so a cover must belong to the requested work.
 function titleKeys(title) {
   if (typeof title !== 'string') return [];
   const mainTitle = title.split(/;|:\s|\s+[–—-]\s+|\s+\/\s+/u)[0];
   return [...new Set([normalizeWords(title), normalizeWords(mainTitle)].filter(Boolean))];
 }
 
+// Normalize name order and dates before matching; an unknown author is not a reliable match.
 function authorKeys(author) {
   if (typeof author !== 'string') return [];
   const name = author.replace(/\([^()]*\)/g, ' ').replace(/[,\s]+\d{3,4}(?:\s*[-–]\s*\d{0,4})?\s*$/u, '').trim();
@@ -74,6 +77,7 @@ async function fetchWorkDescription(workKey) {
   }
 }
 
+// Only recognized cover IDs/edition IDs are converted into provider image URLs.
 function buildCoverUrl(doc) {
   if (Number.isSafeInteger(doc.cover_i) && doc.cover_i > 0) return `${COVERS_BASE}/id/${doc.cover_i}-L.jpg?default=false`;
   if (typeof doc.cover_edition_key === 'string' && /^OL[1-9]\d*M$/.test(doc.cover_edition_key)) {

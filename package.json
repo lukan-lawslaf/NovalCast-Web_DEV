@@ -16,7 +16,7 @@
     "screenshots": "node scripts/screenshots.js",
     "test": "node tests/test-reader-book-pdf.js",
     "test:auth": "node tests/test-email-confirmation-login.js",
-    "test:ratings": "node --test tests/test-ratings-api.js tests/test-ratings-ui.js",
+    "test:ratings": "node --test tests/test-ratings-api.js tests/test-ratings-ui.js tests/test-backend-errors.js",
     "test:audio": "node --test tests/test-tts-api.js tests/test-audio-player.js tests/test-narration-voice.js",
     "test:auth:reliability": "node --test tests/test-auth-reliability.js",
     "test:library": "node --test tests/test-library-api.js tests/test-library-sync.js",

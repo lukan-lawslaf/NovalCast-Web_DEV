@@ -1,5 +1,7 @@
 'use strict';
 
+// Stream one narration passage using the book's saved voice and the fixed free Fish Audio model.
+
 const express = require('express');
 const { Readable } = require('node:stream');
 const { pipeline } = require('node:stream/promises');
@@ -53,6 +55,7 @@ function createTtsRouter({
     let timedOut = false;
     let disconnected = false;
     let audio;
+    // Stop provider work if the reader leaves or closes its audio request.
     const abortClient = () => {
       if (res.writableFinished) return;
       disconnected = true;
@@ -85,6 +88,7 @@ function createTtsRouter({
         throw new TtsError(502, 'TTS_AUDIO_TOO_LARGE', 'Fish Audio returned a narration response that was too large.');
       }
 
+      // Enforce the byte limit while streaming, without buffering a whole narration response.
       const limitedAudio = Readable.from((async function* () {
         let totalBytes = first.value.length;
         yield first.value;

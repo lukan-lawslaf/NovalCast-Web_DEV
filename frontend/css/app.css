@@ -1,3 +1,4 @@
+/* Shared page resets: remove default spacing, avoid overscroll, and hide scrollbars. */
 html,
 body {
   margin: 0;
@@ -8,6 +9,7 @@ body {
   overscroll-behavior: none;
 }
 
+/* Avoid extra gaps around the view inserted by the SPA router. */
 main > :first-child {
   margin-top: 0 !important;
 }
@@ -16,6 +18,7 @@ main > :last-child {
   margin-bottom: 0 !important;
 }
 
+/* Hide the scrollbar track; the page can still scroll normally. */
 ::-webkit-scrollbar {
   display: none;
 }

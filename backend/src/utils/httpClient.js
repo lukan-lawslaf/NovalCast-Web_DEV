@@ -17,6 +17,7 @@ const DEFAULT_RETRIES = 2;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Timeouts, throttling and server failures may be temporary.
 function isRetryableStatus(status) {
   return status === 408 || status === 429 || (status >= 500 && status <= 599);
 }
@@ -104,11 +105,13 @@ async function readText(response) {
   }
 }
 
+// Return decoded text after the shared request/timeout handling succeeds.
 async function fetchText(url, options) {
   const response = await request(url, options);
   return readText(response);
 }
 
+// Parse provider JSON and make an invalid response an explicit request failure.
 async function fetchJson(url, options) {
   const response = await request(url, options);
   const text = await readText(response);

@@ -1,3 +1,4 @@
+/* Catalog appearance: page background, book shadows/spines, and decorative dot patterns. */
 body {
   background: linear-gradient(135deg, #222B3A 0%, #151A24 50%, #0B0E14 100%);
   background-attachment: fixed;
@@ -20,6 +21,7 @@ body {
   border-radius: 9999px;
 }
 
+/* Decorative glow dots do not intercept pointer clicks. */
 .bokeh-dot {
   position: absolute;
   border-radius: 50%;
@@ -27,6 +29,7 @@ body {
   pointer-events: none;
 }
 
+/* Shadows and the narrow spine give flat covers a book-like appearance. */
 .book-shadow {
   box-shadow: -4px 6px 16px rgba(0, 0, 0, 0.6), 0 10px 24px -5px rgba(0, 0, 0, 0.8);
 }

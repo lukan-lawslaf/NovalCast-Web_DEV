@@ -1,3 +1,4 @@
+// Expose account helpers to views; Supabase owns credentials, while the backend verifies protected requests.
 /**
  * NovelCast Supabase Auth Service
  * Manages user authentication, session persistence, and auth guards
@@ -15,6 +16,7 @@
   let client = null;
   const LOCAL_USER_KEY = 'novelcast.auth.user.v1';
 
+  // Turn provider/network failures into messages the login screen can safely show.
   function authError(error) {
     const message = error && error.message || '';
     if (error && (error.status === 0 || error.status >= 500) ||
@@ -25,6 +27,7 @@
     return error instanceof Error ? error : Object.assign(new Error(message || 'Unable to complete authentication.'), { code: error && error.code });
   }
 
+  // Abort the actual network request after the timeout and remove temporary signal listeners.
   async function authFetch(url, options = {}) {
     const controller = new AbortController();
     const originalSignal = options.signal;
@@ -42,6 +45,7 @@
     }
   }
 
+  // Call one Supabase account method and normalize its success/error result.
   async function authRequest(method, payload) {
     try {
       const sb = getClient();
@@ -89,6 +93,7 @@
     return client;
   }
 
+  // Cache account metadata and notify views; never store the submitted password here.
   function setStoredUser(user) {
     if (signingOut && user) return;
     currentUser = user;
@@ -101,6 +106,7 @@
   }
 
   const listeners = [];
+  // Notify service callbacks first, then send the account-change event to the app.
   function dispatchAuthChange(user) {
     listeners.forEach(cb => {
       try { cb(user); } catch (err) { console.error(err); }
@@ -110,11 +116,13 @@
   }
 
   const NovelCastAuth = {
+    // Reuse the initial restore promise so repeated startup calls do not duplicate subscriptions.
     init: function () {
       if (!initPromise) initPromise = this.restoreSession();
       return initPromise;
     },
 
+    // Restore the session and keep a newer sign-out from being undone by an older response.
     restoreSession: async function () {
       currentUser = getStoredUser();
 
@@ -150,6 +158,7 @@
       return currentUser;
     },
 
+    // Obtain the active token and update account identity before a protected request is sent.
     getAccessToken: async function () {
       if (signingOut) return null;
       const sb = getClient();
@@ -184,6 +193,7 @@
       }
     },
 
+    // Send registration to Supabase; a returned user without a session is not signed in.
     signUp: async function (email, password, options = {}) {
       const data = await authRequest('signUp', {
         email: email.trim(),
@@ -239,6 +249,7 @@
       return data;
     },
 
+    // Hide private state immediately, even when remote sign-out is slow or fails.
     signOut: async function () {
       const sb = getClient();
       signingOut = true;

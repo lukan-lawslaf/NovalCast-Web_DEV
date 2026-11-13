@@ -12,6 +12,7 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
+// Store the chosen voice inside its book so every audio passage uses the same narrator.
 const NarrationVoiceSchema = new Schema(
   {
     referenceId: { type: String, required: true, trim: true, maxlength: 160 },

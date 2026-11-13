@@ -1,6 +1,8 @@
+// Build the catalog home screen from featured/popular books and refresh when catalog data arrives.
 window.NovelCastViews = window.NovelCastViews || {};
 
 window.NovelCastViews.home = {
+  // Return screen HTML; the router inserts it before init runs.
   render: function () {
     const NC = window.NovelCast;
     const NCPage = window.NCPage;
@@ -102,8 +104,10 @@ window.NovelCastViews.home = {
       </section>
     `;
   },
+  // Find the inserted elements, attach interactions and prepare cleanup for navigation.
   init: function () {
     const controller = new AbortController();
+    // This closure remembers this screen's resources so leaving the route can release them.
     this.destroy = () => controller.abort();
     if (window.NovelCastApp && window.NovelCastApp.bindInteractiveElements) {
       window.NovelCastApp.bindInteractiveElements();

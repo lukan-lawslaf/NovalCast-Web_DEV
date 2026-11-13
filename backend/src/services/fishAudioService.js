@@ -1,5 +1,7 @@
 'use strict';
 
+// Server-only Fish Audio client: validate small passages and return a bounded MP3 response.
+
 // Never accept a model from an environment variable or a browser request.
 // Fish Audio may select a paid model when this header is absent or unrecognised.
 const FISH_AUDIO_MODEL = 's2.1-pro-free';
@@ -18,6 +20,7 @@ class TtsError extends Error {
   }
 }
 
+// Reject empty/oversized input before sending any text to the provider.
 function validateTtsText(text) {
   if (typeof text !== 'string' || !text.trim()) {
     throw new TtsError(400, 'TTS_INVALID_TEXT', 'Provide a nonempty text passage for narration.');
@@ -28,6 +31,7 @@ function validateTtsText(text) {
   return text.trim();
 }
 
+// Every chunk needs an explicit saved voice; there is no unspecified-speaker fallback.
 function validateReferenceId(referenceId) {
   if (typeof referenceId !== 'string' || !/^[a-zA-Z0-9_-]{1,160}$/.test(referenceId.trim())) {
     throw new TtsError(503, 'TTS_VOICE_UNAVAILABLE', 'A saved narration voice is unavailable for this book.');
@@ -35,6 +39,7 @@ function validateReferenceId(referenceId) {
   return referenceId.trim();
 }
 
+// Translate provider failures into safe user messages without retrying with a paid model.
 function upstreamError(status) {
   if (status === 401 || status === 403) {
     return new TtsError(503, 'TTS_AUTH_FAILED', 'Narration is unavailable because Fish Audio rejected the server API key.');

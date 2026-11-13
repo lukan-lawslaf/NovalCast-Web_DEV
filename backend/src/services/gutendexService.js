@@ -45,6 +45,7 @@ function naturalName(name) {
   return parts[0] || '';
 }
 
+// Build a compact readable author label from the provider's author records.
 function normalizeAuthor(authors = []) {
   if (!authors.length) return 'Unknown Author';
   const names = authors.map((author) => naturalName(author.name || '').trim()).filter(Boolean);
@@ -76,6 +77,7 @@ const decodeEntities = (text) =>
     .replace(/&gt;/g, '>')
     .replace(/&nbsp;/g, ' ');
 
+// Read fallback metadata from Gutenberg's HTML without executing that page.
 function metaContent(html, property) {
   const pattern = new RegExp(`<meta[^>]+(?:property|name)=["']${property}["'][^>]+content=["']([^"']*)["']`, 'i');
   const match = pattern.exec(html);

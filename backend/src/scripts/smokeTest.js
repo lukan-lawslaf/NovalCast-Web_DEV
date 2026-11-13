@@ -20,11 +20,13 @@ const app = require('../../index');
 
 const checks = [];
 
+// Keep each result so the process exits unsuccessfully if any live API check fails.
 function record(name, passed, detail) {
   checks.push({ name, passed, detail });
   console.log(`${passed ? '  PASS' : '  FAIL'}  ${name}${detail ? ` — ${detail}` : ''}`);
 }
 
+// Start a temporary server against the configured live database; checks are read-only.
 async function main() {
   if (!env.MONGODB_URI) {
     console.error('[smoke] MONGODB_URI not found.');
