@@ -109,25 +109,18 @@ const corsOrigin = lookup(KEY_ALIASES.CORS_ORIGIN);
 const dbName = lookup(KEY_ALIASES.MONGODB_DB_NAME);
 const dnsServers = lookup(KEY_ALIASES.MONGODB_DNS_SERVERS);
 
-/** Pull the database name out of a MongoDB connection string path segment. */
-function databaseNameFromUri(uri) {
-  if (!uri) return null;
-  const match = /mongodb(?:\+srv)?:\/\/[^/]+\/([^?]+)/i.exec(uri);
-  const name = match && match[1] ? decodeURIComponent(match[1]).trim() : '';
-  return name || null;
-}
-
 module.exports = {
   PROJECT_ROOT,
   BACKEND_ROOT,
   MONGODB_URI: mongoUri.value || null,
   MONGODB_SOURCE: mongoUri.source,
-  MONGODB_DB_NAME: dbName.value || databaseNameFromUri(mongoUri.value) || 'novelcast',
+  MONGODB_DB_NAME: dbName.value,
   PORT: Number(port.value) || 4000,
   CORS_ORIGIN: corsOrigin.value || '*',
   INGEST_ADMIN_TOKEN: lookup(['INGEST_ADMIN_TOKEN']).value || '',
   SUPABASE_URL: lookup(['SUPABASE_URL', 'Supabase_url', 'supabase_url']).value || '',
   SUPABASE_ANON_KEY: lookup(['SUPABASE_ANON_KEY', 'Supabase_anon_key', 'SUPABASE_KEY', 'Supabase_key', 'supabase_anon_key', 'Supabase_api']).value || '',
+  LIBRARY_STORE: lookup(['LIBRARY_STORE']).value || (process.env.NODE_ENV === 'production' ? 'atlas' : 'json'),
   // These values stay on the server. The narration model is fixed in code.
   FISH_AUDIO_API_KEY: lookup(['FISH_AUDIO_API_KEY', 'FISH_API_KEY', 'Fish_Audio']).value || '',
   FISH_AUDIO_REFERENCE_ID: lookup(['FISH_AUDIO_REFERENCE_ID']).value || '',

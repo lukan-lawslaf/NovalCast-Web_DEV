@@ -12,8 +12,15 @@ const MAX_BYTES = 1024 * 1024;
 const record = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 // Tag validation failures for the route’s 400 response.
 const invalid = message => Object.assign(new Error(message), { status: 400 });
-// Report unreadable storage without replacing an existing library.
-const unavailable = () => Object.assign(new Error('Your library file is unavailable. Your existing data has not been replaced.'), { status: 503 });
+// Report unreadable storage without revealing provider or account details.
+const libraryUnavailable = () => Object.assign(new Error('Your library is temporarily unavailable. Please try again.'), { status: 503 });
+const libraryConflict = document => Object.assign(new Error('Your library changed elsewhere. Refresh and merge before saving.'), { status: 409, document });
+
+// Hash verified account IDs for both the local filename and the Atlas document key.
+function libraryAccountKey(userId) {
+  if (typeof userId !== 'string' || !userId || userId.length > 256) throw invalid('Invalid account identity.');
+  return createHash('sha256').update(userId).digest('hex');
+}
 
 // Allowlisted fields keep passwords, tokens and arbitrary extra data out of library records.
 function keys(value, allowed, name) {
@@ -166,8 +173,7 @@ function createLibraryJsonStore({ directory = path.resolve(__dirname, '../../dat
 
   // Hash the verified ID so account text cannot become a path or reveal the ID in a filename.
   function filename(userId) {
-    if (typeof userId !== 'string' || !userId || userId.length > 256) throw invalid('Invalid account identity.');
-    return path.join(root, createHash('sha256').update(userId).digest('hex') + '.json');
+    return path.join(root, libraryAccountKey(userId) + '.json');
   }
 
   // A first visit gets defaults; a damaged existing file is reported, never silently reset.
@@ -175,11 +181,11 @@ function createLibraryJsonStore({ directory = path.resolve(__dirname, '../../dat
     const target = filename(userId);
     try {
       const raw = await fs.readFile(target, 'utf8');
-      if (Buffer.byteLength(raw) > MAX_BYTES) throw unavailable();
+      if (Buffer.byteLength(raw) > MAX_BYTES) throw libraryUnavailable();
       return normalizeDocument(JSON.parse(raw));
     } catch (error) {
       if (error.code === 'ENOENT') return emptyDocument();
-      throw unavailable();
+      throw libraryUnavailable();
     }
   }
 
@@ -193,10 +199,10 @@ function createLibraryJsonStore({ directory = path.resolve(__dirname, '../../dat
       // Compare the submitted revision with the latest file to detect another client’s changes.
       const current = await read(userId);
       if (current.revision !== document.revision) {
-        throw Object.assign(new Error('Your library changed elsewhere. Refresh and merge before saving.'), { status: 409, document: current });
+        throw libraryConflict(current);
       }
-      if (current.revision === Number.MAX_SAFE_INTEGER) throw unavailable();
-      const next = { ...document, revision: current.revision + 1 };
+      if (current.revision === Number.MAX_SAFE_INTEGER) throw libraryUnavailable();
+      const next = normalizeDocument({ ...document, revision: current.revision + 1 });
       // Write a private temporary file first so a failed write cannot partially replace the library.
       const temporary = target + '.' + randomUUID() + '.tmp';
       try {
@@ -213,7 +219,7 @@ function createLibraryJsonStore({ directory = path.resolve(__dirname, '../../dat
         await fs.rename(temporary, target);
         return next;
       } catch {
-        throw unavailable();
+        throw libraryUnavailable();
       // Remove any leftover temporary file whether writing or replacement succeeds or fails.
       } finally {
         await fs.unlink(temporary).catch(() => {});
@@ -228,4 +234,4 @@ function createLibraryJsonStore({ directory = path.resolve(__dirname, '../../dat
   return { read, save };
 }
 
-module.exports = { createLibraryJsonStore, normalizeDocument, emptyDocument };
+module.exports = { createLibraryJsonStore, normalizeDocument, emptyDocument, libraryAccountKey, libraryConflict, libraryUnavailable };

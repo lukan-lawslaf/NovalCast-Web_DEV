@@ -1,10 +1,11 @@
 'use strict';
 
-// Save or restore one verified account's private JSON library through GET/PUT requests.
+// Save or restore one verified account's private library through GET/PUT requests.
 
 const express = require('express');
 const env = require('../config/env');
 const { createLibraryJsonStore } = require('../services/libraryJsonStore');
+const { createLibraryAtlasStore } = require('../services/libraryAtlasStore');
 
 // Attach an HTTP status so the route can return expected authentication errors.
 function httpError(message, status) { return Object.assign(new Error(message), { status }); }
@@ -35,8 +36,14 @@ async function verifiedUser(req) {
   return user;
 }
 
+function configuredStore() {
+  if (env.LIBRARY_STORE === 'atlas') return createLibraryAtlasStore();
+  if (env.LIBRARY_STORE === 'json') return createLibraryJsonStore();
+  throw new Error('LIBRARY_STORE must be atlas or json.');
+}
+
 // Injectable storage/auth helpers let isolated tests avoid live accounts and real user files.
-function createLibraryRouter({ store = createLibraryJsonStore(), verifyUser = verifiedUser } = {}) {
+function createLibraryRouter({ store = configuredStore(), verifyUser = verifiedUser } = {}) {
   const router = express.Router();
   // Verify identity before reading/writing data; a 409 also returns the latest library to merge.
   const handle = operation => async (req, res, next) => {

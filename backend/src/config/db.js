@@ -96,11 +96,12 @@ async function connectDB(uri, { retries = DEFAULT_RETRIES } = {}) {
     try {
       const startedAt = Date.now();
       await mongoose.connect(uri, {
+        dbName: env.MONGODB_DB_NAME,
         serverSelectionTimeoutMS: 10000,
         socketTimeoutMS: 45000,
         maxPoolSize: 10,
       });
-      console.log(`[db] Handshake complete in ${Date.now() - startedAt}ms.`);
+      console.log(`[db] Connected to database ${mongoose.connection.name} in ${Date.now() - startedAt}ms.`);
       return mongoose;
     } catch (error) {
       // Keep the latest failure so callers receive a useful error after retries.

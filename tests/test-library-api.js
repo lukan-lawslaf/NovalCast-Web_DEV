@@ -8,6 +8,7 @@ const path = require('node:path');
 const express = require('../backend/node_modules/express');
 const env = require('../backend/src/config/env');
 const { createLibraryJsonStore, emptyDocument } = require('../backend/src/services/libraryJsonStore');
+const { createLibraryAtlasStore } = require('../backend/src/services/libraryAtlasStore');
 const { createLibraryRouter } = require('../backend/src/routes/libraryRoutes');
 
 // Create an isolated temporary directory and remove only that test directory during cleanup.
@@ -44,6 +45,64 @@ function changedDocument() {
     readingPlan: { dailyMinutes: 35, favoriteGenre: 'Mystery' },
   };
 }
+
+test('Atlas library survives a new store instance and rejects concurrent stale revisions', async () => {
+  const rows = new Map();
+  const collection = {
+    async findOne({ _id }) { return rows.get(_id) || null; },
+    async insertOne(row) {
+      if (rows.has(row._id)) throw Object.assign(new Error('duplicate'), { code: 11000 });
+      rows.set(row._id, row);
+    },
+    async replaceOne({ _id, revision }, row) {
+      if (rows.get(_id)?.revision !== revision) return { matchedCount: 0 };
+      rows.set(_id, row);
+      return { matchedCount: 1 };
+    },
+  };
+  const connection = {
+    readyState: 1,
+    db: { collection(name) {
+      assert.equal(name, 'account_libraries');
+      return collection;
+    } },
+  };
+  const reader = 'verified-atlas-reader';
+  const store = createLibraryAtlasStore({ connection });
+  const nextInstance = createLibraryAtlasStore({ connection });
+  assert.deepEqual(await store.read(reader), emptyDocument());
+
+  let document = changedDocument();
+  for (const revision of [1, 2]) {
+    const results = await Promise.allSettled([
+      store.save(reader, document),
+      nextInstance.save(reader, { ...document, readingPlan: { dailyMinutes: 45 } }),
+    ]);
+    const winner = results.find(result => result.status === 'fulfilled')?.value;
+    const loser = results.find(result => result.status === 'rejected')?.reason;
+    assert.equal(winner?.revision, revision);
+    assert.equal(loser?.status, 409);
+    assert.deepEqual(loser.document, winner);
+    assert.deepEqual(await nextInstance.read(reader), winner);
+    document = winner;
+  }
+  assert.deepEqual(await store.read('another-atlas-reader'), emptyDocument());
+  assert.equal(rows.size, 1);
+  const row = [...rows.values()][0];
+  assert.match(row._id, /^[a-f0-9]{64}$/);
+  assert.equal(JSON.stringify(row).includes(reader), false);
+  assert.deepEqual(JSON.parse(row.payload), document);
+
+  connection.readyState = 0;
+  await assert.rejects(store.read(reader), { status: 503 });
+  await assert.rejects(store.save(reader, document), { status: 503 });
+  connection.readyState = 1;
+  assert.deepEqual(await store.read(reader), document);
+  row.payload = 'unreadable document';
+  await assert.rejects(store.read(reader), { status: 503 });
+  await assert.rejects(store.save(reader, document), { status: 503 });
+  assert.equal(rows.get(row._id).payload, 'unreadable document');
+});
 
 // Scenario: library API verifies Supabase identity, isolates accounts and saves actual JSON. The checks below exercise this behavior as one independent case.
 test('library API verifies Supabase identity, isolates accounts and saves actual JSON', async t => {

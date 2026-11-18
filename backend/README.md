@@ -44,7 +44,8 @@ curl http://localhost:4000/api/books/frankenstein/chapters/1
 | `PORT` | `4000` | HTTP port. |
 | `CORS_ORIGIN` | `*` | Comma-separated allow-list, or `*`. |
 | `INGEST_ADMIN_TOKEN` | unset | Optional server-only secret for both HTTP ingestion routes. Use a random token of 32–512 characters with no whitespace. Without it, HTTP ingestion is disabled; the operator CLI is unchanged. |
-| `MONGODB_DB_NAME` | URI path, else `novelcast` | Database name. |
+| `MONGODB_DB_NAME` | URI path, else MongoDB's driver default | Explicit database override. Select the existing catalog's database when deploying. |
+| `LIBRARY_STORE` | `atlas` in production, otherwise `json` | Stores private account libraries in Atlas for durable hosting or as local JSON files during development. |
 | `MONGODB_DNS_SERVERS` | `8.8.8.8,1.1.1.1` | Resolvers used **only** when the machine's own DNS refuses the SRV lookup that `mongodb+srv://` needs (VPN clients and local DNS stubs commonly do). Set to an empty string to disable. |
 | `FISH_AUDIO_API_KEY` | — | Server-only Fish Audio narration key. `FISH_API_KEY` and the existing `Fish_Audio` name are also accepted, using the same source precedence as above. |
 | `FISH_AUDIO_REFERENCE_ID` | unset | Optional voice override for books with no saved narrator. It is saved as the book's choice on first listen; existing choices stay unchanged. |

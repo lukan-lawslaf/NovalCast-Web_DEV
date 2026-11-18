@@ -57,7 +57,6 @@ async function main() {
 
   console.log(`[seed] Connecting to MongoDB Atlas (source: ${env.MONGODB_SOURCE})...`);
   await connectDB(env.MONGODB_URI);
-  console.log(`[seed] Database: ${env.MONGODB_DB_NAME}`);
   console.log(`[seed] Ingesting ${shelf.length} curated titles.\n`);
 
   const startedAt = Date.now();

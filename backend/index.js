@@ -55,7 +55,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Each router owns one feature; the library router uses JSON files, not Atlas.
+// Each router owns one feature.
 app.use('/api', catalogRoutes);
 app.use('/api', require('./src/routes/ratingRoutes'));
 app.use('/api', require('./src/routes/libraryRoutes'));
@@ -78,9 +78,8 @@ async function start() {
 
   console.log(`[startup] MONGODB_URI source: ${env.MONGODB_SOURCE || 'none'}`);
 
-  const server = app.listen(env.PORT, () => {
-    console.log(`[startup] NovelCast API listening on http://localhost:${env.PORT}`);
-    console.log(`[startup] Database: ${env.MONGODB_DB_NAME}`);
+  const server = app.listen(env.PORT, '0.0.0.0', () => {
+    console.log(`[startup] NovelCast API listening on port ${env.PORT}`);
   });
 
   // Connection failure leaves the HTTP server running with its catalog fallback.
