@@ -715,18 +715,58 @@ window.NovelCast = (function () {
   // --- Live Backend API Client ---
   let isLoaded = false;
 
+  function waitForCatalogRetry(delay, signal) {
+    signal.throwIfAborted();
+    return new Promise((resolve, reject) => {
+      const onAbort = () => {
+        clearTimeout(timer);
+        reject(signal.reason);
+      };
+      const timer = setTimeout(() => {
+        signal.removeEventListener('abort', onAbort);
+        resolve();
+      }, delay);
+      signal.addEventListener('abort', onAbort, { once: true });
+    });
+  }
+
+  // Render can return a transient gateway error or an HTML loading page during a cold start.
+  // Retry catalog reads within one deadline. Writes and narration requests use their own paths.
+  async function fetchCatalogResponse(url, signal) {
+    const headers = { Accept: 'application/json' };
+    if (API_BASE !== '/api') return fetch(url, { headers, signal });
+
+    const deadline = AbortSignal.timeout(90000);
+    const requestSignal = signal ? AbortSignal.any([signal, deadline]) : deadline;
+    let failure;
+    for (const delay of [0, 1000, 3000, 7000, 15000, 20000, 25000]) {
+      if (delay) await waitForCatalogRetry(delay, requestSignal);
+      try {
+        const response = await fetch(url, { headers, signal: requestSignal });
+        const loadingPage = response.ok && response.headers.get('content-type')?.startsWith('text/html');
+        if (!loadingPage && ![502, 503, 504].includes(response.status)) return response;
+        response.body?.cancel().catch(() => {});
+        failure = new Error(loadingPage ? 'Catalog is starting up.' : `HTTP ${response.status}`);
+      } catch (error) {
+        requestSignal.throwIfAborted();
+        if (!(error instanceof TypeError)) throw error;
+        failure = error;
+      }
+    }
+    throw failure;
+  }
+
   // Refresh catalog/ratings from the API while keeping cached metadata usable on failure.
   // Fetch and normalize remote books, keeping the local catalog usable if the request fails.
   async function fetchCatalog(options = {}) {
     const limit = options.limit || 50;
     const sort = options.sort || 'popular';
     try {
-      const ratingsRequest = fetch(`${API_BASE}/ratings`, { signal: AbortSignal.timeout(3000) })
-        .then(response => response.ok ? response.json() : null).catch(() => null);
-      const res = await fetch(`${API_BASE}/books?limit=${limit}&sort=${sort}`);
+      const res = await fetchCatalogResponse(`${API_BASE}/books?limit=${limit}&sort=${sort}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      const payload = await ratingsRequest;
+      const payload = await fetch(`${API_BASE}/ratings`, { signal: AbortSignal.timeout(3000) })
+        .then(response => response.ok ? response.json() : null).catch(() => null);
       if (Array.isArray(payload?.ratings)) {
         communityRatings = Object.fromEntries(payload.ratings.filter(row => typeof row?.slug === 'string').map(row => [row.slug, row]));
       }
@@ -762,11 +802,11 @@ window.NovelCast = (function () {
 
   // Refresh only the requested book and convert its chapter summaries for the UI.
   // Load fuller metadata for one book and update the shared catalog cache.
-  async function fetchBookDetails(slugOrId) {
+  async function fetchBookDetails(slugOrId, { signal } = {}) {
     const target = resolveId(slugOrId);
     if (String(target).startsWith('upload-')) return getExactBook(target);
     try {
-      const res = await fetch(`${API_BASE}/books/${encodeURIComponent(target)}`);
+      const res = await fetchCatalogResponse(`${API_BASE}/books/${encodeURIComponent(target)}`, signal);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (data && data.book) {
@@ -792,7 +832,7 @@ window.NovelCast = (function () {
         return updatedBook;
       }
     } catch (err) {
-      console.warn(`[NovelCastAPI] Error fetching book details for ${target}:`, err.message);
+      if (!signal?.aborted) console.warn(`[NovelCastAPI] Error fetching book details for ${target}:`, err.message);
     }
     return getExactBook(target);
   }
@@ -804,7 +844,7 @@ window.NovelCast = (function () {
     const num = Math.max(1, parseInt(chapterNumber || 1, 10));
     if (String(target).startsWith('upload-')) return null;
     try {
-      const res = await fetch(`${API_BASE}/books/${encodeURIComponent(target)}/chapters/${num}`, { signal });
+      const res = await fetchCatalogResponse(`${API_BASE}/books/${encodeURIComponent(target)}/chapters/${num}`, signal);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       const expected = getExactBook(target);
@@ -819,21 +859,21 @@ window.NovelCast = (function () {
 
   // Return backend matches, or null so the search view keeps its local results.
   // Ask the backend for catalog matches while leaving display and fallback behavior to the caller.
-  async function searchCatalog(query = '', genre = '') {
+  async function searchCatalog(query = '', genre = '', { signal } = {}) {
     try {
-      const url = new URL(`${API_BASE}/books`);
+      const url = new URL(`${API_BASE}/books`, window.location.origin);
       if (query && query.trim()) url.searchParams.set('search', query.trim());
       if (genre && genre !== 'all') url.searchParams.set('genre', genre.trim());
       url.searchParams.set('limit', '50');
 
-      const res = await fetch(url.toString());
+      const res = await fetchCatalogResponse(url.toString(), signal);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (Array.isArray(data.books)) {
         return data.books.map(transformBackendBook);
       }
     } catch (err) {
-      console.warn('[NovelCastAPI] Search fallback to the local shelf:', err.message);
+      if (!signal?.aborted) console.warn('[NovelCastAPI] Search fallback to the local shelf:', err.message);
     }
     return null;
   }

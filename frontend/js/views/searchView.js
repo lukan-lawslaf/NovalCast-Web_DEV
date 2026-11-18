@@ -200,9 +200,12 @@ window.NovelCastViews.search = {
   init: function () {
     let searchVersion = 0;
     let disposed = false;
-    // This closure remembers this screen's resources so leaving the route can release them.
-    // Invalidate pending search responses and cancel the typing timer when leaving the view.
-    this.destroy = () => { disposed = true; searchVersion++; clearTimeout(searchDebounceTimer); };
+    let searchRequest;
+    this.destroy = () => {
+      disposed = true;
+      searchRequest?.abort();
+      clearTimeout(searchDebounceTimer);
+    };
     const NC = window.NovelCast;
     const NCPage = window.NCPage;
     const input = document.getElementById('search-input');
@@ -236,6 +239,7 @@ window.NovelCastViews.search = {
       clearTimeout(searchDebounceTimer);
       // Each search gets a newer version; late responses from older searches cannot replace its results.
       const version = ++searchVersion;
+      searchRequest?.abort();
       const term = (q || '').trim();
       selectFilter(filterType);
 
@@ -266,25 +270,33 @@ window.NovelCastViews.search = {
         );
       }
 
-      renderResults(matched, term);
+      renderResults(matched, term, 'Searching the catalog…');
 
       // 2. Asynchronously query backend search for full-text MongoDB match
-      try {
-        const backendResults = await NC.searchCatalog(term, filterType === 'all' ? '' : filterType);
-        if (!disposed && version === searchVersion && backendResults) {
-          // Curated genres can be broader than the provider's raw subject labels.
-          // Combine local and server matches by book ID to prevent duplicate cards.
-          const results = new Map([...matched, ...backendResults].map(book => [book.id, book]));
-          renderResults([...results.values()], term);
-        }
-      } catch (e) {
-        // Fallback already rendered
+      searchRequest = new AbortController();
+      const backendResults = await NC.searchCatalog(term, filterType === 'all' ? '' : filterType, {
+        signal: searchRequest.signal,
+      }).catch(() => null);
+      if (disposed || version !== searchVersion) return;
+      if (!backendResults) {
+        if (!matched.length) renderResults([], term, 'Catalog unavailable. Try again shortly.');
+        return;
       }
+
+      // Curated genres can be broader than the provider's raw subject labels.
+      // Combine local and server matches by book ID to prevent duplicate cards.
+      const results = new Map([...matched, ...backendResults].map(book => [book.id, book]));
+      renderResults([...results.values()], term);
     }
 
     // Insert matching card HTML or an empty state, then bind the new controls.
-    function renderResults(list, term) {
+    function renderResults(list, term, emptyStatus = '') {
       if (!resultsGrid || !resultsCount) return;
+      if (!list.length && emptyStatus) {
+        resultsCount.textContent = emptyStatus;
+        resultsGrid.replaceChildren();
+        return;
+      }
       resultsCount.textContent = `${list.length} Book${list.length === 1 ? '' : 's'} Found`;
       resultsGrid.innerHTML = list.length
         ? list.map(b => NCPage.popularCard(b)).join('')
@@ -305,6 +317,7 @@ window.NovelCastViews.search = {
       // Debounce typing by 180ms and invalidate results from the previous query.
       input.addEventListener('input', () => {
         searchVersion++;
+        searchRequest?.abort();
         clearTimeout(searchDebounceTimer);
         searchDebounceTimer = setTimeout(() => {
           performSearch(input.value);

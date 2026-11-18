@@ -1,59 +1,70 @@
-// Startup utility: copy only public Supabase/API configuration into generated browser files.
-const fs = require('fs');
-const path = require('path');
+// Generate the public browser configuration for local development or Vercel.
+const fs = require('node:fs');
+const path = require('node:path');
 
-// Generate client environment config from .env
-function generateEnv() {
-  // Resolve paths relative to this script so the command works from any working directory.
+function readLocalEnv() {
   const envPath = path.join(__dirname, '../.env');
-  const outJsPath = path.join(__dirname, '../frontend/js/env.js');
-  const outJsonPath = path.join(__dirname, '../frontend/env.json');
-
-  // Start with an empty allowlist: arbitrary server secrets must never reach browser files.
-  const envConfig = {};
-
-  // Missing local configuration is allowed; the default API address is applied below.
+  const values = {};
   if (fs.existsSync(envPath)) {
-    const raw = fs.readFileSync(envPath, 'utf8');
-    const lines = raw.split(/\r?\n/);
-
-    // Process one assignment per line, ignoring blank lines and environment-file comments.
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith('#')) continue;
-      // Split at the first equals sign so any later equals signs remain part of the value.
-      const idx = trimmed.indexOf('=');
-      if (idx > -1) {
-        const key = trimmed.slice(0, idx).trim();
-        const val = trimmed.slice(idx + 1).trim();
-
-        // Safely extract client-needed Supabase keys and API_BASE
-        // Normalize accepted key aliases into the three public names the browser expects.
-        if (key.toLowerCase() === 'supabase_url') {
-          envConfig.SUPABASE_URL = val;
-        } else if (key.toLowerCase() === 'supabase_api' || key.toLowerCase() === 'supabase_anon_key') {
-          envConfig.SUPABASE_ANON_KEY = val;
-        } else if (key.toLowerCase() === 'api_base' || key.toLowerCase() === 'backend_url') {
-          envConfig.API_BASE = val;
-        }
-      }
+    for (const line of fs.readFileSync(envPath, 'utf8').split(/\r?\n/)) {
+      const match = /^\s*([a-z_][a-z\d_]*)\s*=\s*(.*)$/i.exec(line);
+      if (match) values[match[1]] = match[2];
     }
   }
-
-  // A local frontend should still know the backend address when it is not configured.
-  if (!envConfig.API_BASE) {
-    envConfig.API_BASE = 'http://localhost:4000/api';
-  }
-
-  // Write JS loader
-  const jsContent = `// Auto-generated from .env by scripts/generate-env.js. DO NOT EDIT OR COMMIT.\nwindow.__ENV__ = ${JSON.stringify(envConfig, null, 2)};\n`;
-  fs.writeFileSync(outJsPath, jsContent, 'utf8');
-
-  // Write JSON fallback
-  fs.writeFileSync(outJsonPath, JSON.stringify(envConfig, null, 2), 'utf8');
-
-  console.log('[generate-env] Successfully generated frontend/js/env.js and frontend/env.json from .env');
+  return values;
 }
 
-// Execute the generator when npm runs the prestart/predev hook.
+function publicOptions(source) {
+  const values = Object.fromEntries(Object.entries(source).map(([key, value]) => [key.toUpperCase(), value.trim()]));
+  return Object.fromEntries(Object.entries({
+    SUPABASE_URL: values.SUPABASE_URL,
+    SUPABASE_ANON_KEY: values.SUPABASE_PUBLISHABLE_KEY || values.SUPABASE_ANON_KEY || values.SUPABASE_API,
+    API_BASE: values.API_BASE || values.BACKEND_URL,
+  }).filter(([, value]) => value));
+}
+
+function isPublicSupabaseKey(key) {
+  if (/^sb_publishable_[\w-]+$/.test(key)) return true;
+  if (!/^[\w-]+\.[\w-]+\.[\w-]+$/.test(key)) return false;
+  try {
+    const payload = JSON.parse(Buffer.from(key.split('.')[1], 'base64url').toString('utf8'));
+    // Legacy API keys are long-lived JWTs. Only the anon role belongs in a browser build.
+    return payload?.role === 'anon';
+  } catch {
+    return false;
+  }
+}
+
+function isPublicSupabaseUrl(value, production) {
+  try {
+    const url = new URL(value);
+    return (url.protocol === 'https:' || (!production && url.protocol === 'http:')) &&
+      !url.username && !url.password && !url.search && !url.hash && (!production || url.pathname === '/');
+  } catch {
+    return false;
+  }
+}
+
+function generateEnv() {
+  const production = process.argv.includes('--production');
+  const config = {
+    ...(production ? {} : publicOptions(readLocalEnv())),
+    ...publicOptions(process.env),
+  };
+  config.API_BASE = production ? '/api' : config.API_BASE || 'http://localhost:4000/api';
+
+  if ((production || config.SUPABASE_URL) && !isPublicSupabaseUrl(config.SUPABASE_URL, production)) {
+    throw new Error('SUPABASE_URL must be a valid Supabase project URL using HTTPS in production.');
+  }
+  if ((production || config.SUPABASE_ANON_KEY) && !isPublicSupabaseKey(config.SUPABASE_ANON_KEY)) {
+    throw new Error('Set SUPABASE_PUBLISHABLE_KEY or SUPABASE_ANON_KEY to a public Supabase API key.');
+  }
+
+  const json = JSON.stringify(config, null, 2);
+  const script = `// Generated by scripts/generate-env.js. DO NOT EDIT OR COMMIT.\nwindow.__ENV__ = ${json};\n`;
+  fs.writeFileSync(path.join(__dirname, '../frontend/js/env.js'), script, 'utf8');
+  fs.writeFileSync(path.join(__dirname, '../frontend/env.json'), json, 'utf8');
+  console.log('[generate-env] Generated public browser configuration.');
+}
+
 generateEnv();

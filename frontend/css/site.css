@@ -1333,6 +1333,9 @@ input:where([type='file']):focus {
     .flex-grow {
   flex-grow: 1;
 }
+    .grow {
+  flex-grow: 1;
+}
     .-translate-x-1\/2 {
   --tw-translate-x: -50%;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
@@ -1661,16 +1664,31 @@ input:where([type='file']):focus {
   border-color: rgb(234 224 204 / var(--tw-border-opacity, 1));
 }
     .border-appCardBorder {
-  border-color: rgba(217, 180, 126, 0.22);
+  border-color: rgba(241, 214, 158, 0.32);
 }
     .border-appCardBorder\/50 {
-  border-color: rgba(217, 180, 126, 0.5);
+  border-color: rgba(241, 214, 158, 0.5);
 }
     .border-emerald-500\/40 {
   border-color: rgb(16 185 129 / 0.4);
 }
+    .border-gold-400\/10 {
+  border-color: rgb(229 191 91 / 0.1);
+}
+    .border-gold-400\/15 {
+  border-color: rgb(229 191 91 / 0.15);
+}
+    .border-gold-400\/20 {
+  border-color: rgb(229 191 91 / 0.2);
+}
+    .border-gold-400\/25 {
+  border-color: rgb(229 191 91 / 0.25);
+}
+    .border-gold-400\/30 {
+  border-color: rgb(229 191 91 / 0.3);
+}
     .border-goldAccent\/30 {
-  border-color: rgb(243 209 130 / 0.3);
+  border-color: rgb(241 214 158 / 0.3);
 }
     .border-outline-variant\/30 {
   border-color: rgb(76 70 56 / 0.3);
@@ -1815,18 +1833,34 @@ input:where([type='file']):focus {
     .bg-emerald-950\/60 {
   background-color: rgb(2 44 34 / 0.6);
 }
+    .bg-gold-400\/15 {
+  background-color: rgb(229 191 91 / 0.15);
+}
     .bg-goldAccent {
   --tw-bg-opacity: 1;
-  background-color: rgb(243 209 130 / var(--tw-bg-opacity, 1));
+  background-color: rgb(241 214 158 / var(--tw-bg-opacity, 1));
 }
     .bg-goldAccent\/10 {
-  background-color: rgb(243 209 130 / 0.1);
+  background-color: rgb(241 214 158 / 0.1);
 }
     .bg-goldAccent\/15 {
-  background-color: rgb(243 209 130 / 0.15);
+  background-color: rgb(241 214 158 / 0.15);
 }
     .bg-goldAccent\/20 {
-  background-color: rgb(243 209 130 / 0.2);
+  background-color: rgb(241 214 158 / 0.2);
+}
+    .bg-obsidian-950 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(6 8 11 / var(--tw-bg-opacity, 1));
+}
+    .bg-obsidian-950\/25 {
+  background-color: rgb(6 8 11 / 0.25);
+}
+    .bg-obsidian-950\/30 {
+  background-color: rgb(6 8 11 / 0.3);
+}
+    .bg-obsidian-950\/70 {
+  background-color: rgb(6 8 11 / 0.7);
 }
     .bg-primary-container {
   --tw-bg-opacity: 1;
@@ -1954,6 +1988,11 @@ input:where([type='file']):focus {
   --tw-gradient-to: rgb(0 0 0 / 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
+    .from-obsidian-950\/80 {
+  --tw-gradient-from: rgb(6 8 11 / 0.8) var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(6 8 11 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
     .from-primary-container {
   --tw-gradient-from: #f5d77f var(--tw-gradient-from-position);
   --tw-gradient-to: rgb(245 215 127 / 0) var(--tw-gradient-to-position);
@@ -1985,6 +2024,10 @@ input:where([type='file']):focus {
   --tw-gradient-to: rgb(0 0 0 / 0)  var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), rgb(0 0 0 / 0.2) var(--tw-gradient-via-position), var(--tw-gradient-to);
 }
+    .via-obsidian-950\/25 {
+  --tw-gradient-to: rgb(6 8 11 / 0)  var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), rgb(6 8 11 / 0.25) var(--tw-gradient-via-position), var(--tw-gradient-to);
+}
     .via-primary-container\/10 {
   --tw-gradient-to: rgb(245 215 127 / 0)  var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), rgb(245 215 127 / 0.1) var(--tw-gradient-via-position), var(--tw-gradient-to);
@@ -2014,6 +2057,9 @@ input:where([type='file']):focus {
     .to-black\/30 {
   --tw-gradient-to: rgb(0 0 0 / 0.3) var(--tw-gradient-to-position);
 }
+    .to-obsidian-950\/50 {
+  --tw-gradient-to: rgb(6 8 11 / 0.5) var(--tw-gradient-to-position);
+}
     .to-surface-tint {
   --tw-gradient-to: #e1c46e var(--tw-gradient-to-position);
 }
@@ -2024,7 +2070,7 @@ input:where([type='file']):focus {
   background-attachment: fixed;
 }
     .fill-goldAccent {
-  fill: #F3D182;
+  fill: #F1D69E;
 }
     .object-contain {
   -o-object-fit: contain;
@@ -2255,34 +2301,34 @@ input:where([type='file']):focus {
   text-align: justify;
 }
     .font-body-md {
-  font-family: "Plus Jakarta Sans";
+  font-family: Plus Jakarta Sans;
 }
     .font-body-sm {
-  font-family: "Plus Jakarta Sans";
+  font-family: Plus Jakarta Sans;
 }
     .font-display-lg {
-  font-family: "Plus Jakarta Sans";
+  font-family: Plus Jakarta Sans;
 }
     .font-headline-lg {
-  font-family: "Plus Jakarta Sans";
+  font-family: Plus Jakarta Sans;
 }
     .font-headline-md {
-  font-family: "Plus Jakarta Sans";
+  font-family: Plus Jakarta Sans;
 }
     .font-headline-sm {
-  font-family: "Plus Jakarta Sans";
+  font-family: Plus Jakarta Sans;
 }
     .font-headline-xl {
-  font-family: "Plus Jakarta Sans";
+  font-family: Plus Jakarta Sans;
 }
     .font-label-badge {
-  font-family: "Plus Jakarta Sans";
+  font-family: Plus Jakarta Sans;
 }
     .font-label-caps {
-  font-family: "Space Grotesk";
+  font-family: Space Grotesk;
 }
     .font-label-numeric {
-  font-family: "Space Grotesk";
+  font-family: Space Grotesk;
 }
     .font-mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -2727,15 +2773,64 @@ input:where([type='file']):focus {
   --tw-text-opacity: 1;
   color: rgb(110 231 183 / var(--tw-text-opacity, 1));
 }
+    .text-gold-300 {
+  --tw-text-opacity: 1;
+  color: rgb(242 212 121 / var(--tw-text-opacity, 1));
+}
+    .text-gold-300\/75 {
+  color: rgb(242 212 121 / 0.75);
+}
+    .text-gold-300\/80 {
+  color: rgb(242 212 121 / 0.8);
+}
+    .text-gold-400 {
+  --tw-text-opacity: 1;
+  color: rgb(229 191 91 / var(--tw-text-opacity, 1));
+}
+    .text-gold-400\/30 {
+  color: rgb(229 191 91 / 0.3);
+}
+    .text-gold-400\/80 {
+  color: rgb(229 191 91 / 0.8);
+}
+    .text-gold-500 {
+  --tw-text-opacity: 1;
+  color: rgb(215 171 61 / var(--tw-text-opacity, 1));
+}
     .text-goldAccent {
   --tw-text-opacity: 1;
-  color: rgb(243 209 130 / var(--tw-text-opacity, 1));
+  color: rgb(241 214 158 / var(--tw-text-opacity, 1));
 }
     .text-goldAccent\/60 {
-  color: rgb(243 209 130 / 0.6);
+  color: rgb(241 214 158 / 0.6);
 }
     .text-goldAccent\/90 {
-  color: rgb(243 209 130 / 0.9);
+  color: rgb(241 214 158 / 0.9);
+}
+    .text-ivory-100 {
+  --tw-text-opacity: 1;
+  color: rgb(247 245 239 / var(--tw-text-opacity, 1));
+}
+    .text-ivory-300 {
+  --tw-text-opacity: 1;
+  color: rgb(210 204 191 / var(--tw-text-opacity, 1));
+}
+    .text-ivory-300\/80 {
+  color: rgb(210 204 191 / 0.8);
+}
+    .text-ivory-400 {
+  --tw-text-opacity: 1;
+  color: rgb(155 150 138 / var(--tw-text-opacity, 1));
+}
+    .text-ivory-400\/70 {
+  color: rgb(155 150 138 / 0.7);
+}
+    .text-ivory-400\/80 {
+  color: rgb(155 150 138 / 0.8);
+}
+    .text-ivory-50 {
+  --tw-text-opacity: 1;
+  color: rgb(253 252 249 / var(--tw-text-opacity, 1));
 }
     .text-neutral-300 {
   --tw-text-opacity: 1;
@@ -2752,6 +2847,10 @@ input:where([type='file']):focus {
     .text-neutral-600 {
   --tw-text-opacity: 1;
   color: rgb(82 82 82 / var(--tw-text-opacity, 1));
+}
+    .text-obsidian-950 {
+  --tw-text-opacity: 1;
+  color: rgb(6 8 11 / var(--tw-text-opacity, 1));
 }
     .text-on-primary-container {
   --tw-text-opacity: 1;
@@ -2818,9 +2917,18 @@ input:where([type='file']):focus {
     .underline {
   text-decoration-line: underline;
 }
+    .decoration-gold-400\/30 {
+  text-decoration-color: rgb(229 191 91 / 0.3);
+}
     .antialiased {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+    .placeholder-ivory-500\/40::-moz-placeholder {
+  color: rgb(109 114 127 / 0.4);
+}
+    .placeholder-ivory-500\/40::placeholder {
+  color: rgb(109 114 127 / 0.4);
 }
     .opacity-0 {
   opacity: 0;
@@ -2976,9 +3084,6 @@ input:where([type='file']):focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
 }
-    .outline {
-  outline-style: solid;
-}
     .blur {
   --tw-blur: blur(8px);
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
@@ -3101,11 +3206,17 @@ input:where([type='file']):focus {
       text-decoration: none !important;
       color: inherit;
     }
+    .selection\:bg-gold-500\/30 *::-moz-selection {
+  background-color: rgb(215 171 61 / 0.3);
+}
+    .selection\:bg-gold-500\/30 *::selection {
+  background-color: rgb(215 171 61 / 0.3);
+}
     .selection\:bg-goldAccent\/30 *::-moz-selection {
-  background-color: rgb(243 209 130 / 0.3);
+  background-color: rgb(241 214 158 / 0.3);
 }
     .selection\:bg-goldAccent\/30 *::selection {
-  background-color: rgb(243 209 130 / 0.3);
+  background-color: rgb(241 214 158 / 0.3);
 }
     .selection\:bg-primary-container *::-moz-selection {
   --tw-bg-opacity: 1;
@@ -3114,6 +3225,14 @@ input:where([type='file']):focus {
     .selection\:bg-primary-container *::selection {
   --tw-bg-opacity: 1;
   background-color: rgb(245 215 127 / var(--tw-bg-opacity, 1));
+}
+    .selection\:text-gold-200 *::-moz-selection {
+  --tw-text-opacity: 1;
+  color: rgb(248 236 197 / var(--tw-text-opacity, 1));
+}
+    .selection\:text-gold-200 *::selection {
+  --tw-text-opacity: 1;
+  color: rgb(248 236 197 / var(--tw-text-opacity, 1));
 }
     .selection\:text-on-primary-container *::-moz-selection {
   --tw-text-opacity: 1;
@@ -3131,11 +3250,17 @@ input:where([type='file']):focus {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
 }
+    .selection\:bg-gold-500\/30::-moz-selection {
+  background-color: rgb(215 171 61 / 0.3);
+}
+    .selection\:bg-gold-500\/30::selection {
+  background-color: rgb(215 171 61 / 0.3);
+}
     .selection\:bg-goldAccent\/30::-moz-selection {
-  background-color: rgb(243 209 130 / 0.3);
+  background-color: rgb(241 214 158 / 0.3);
 }
     .selection\:bg-goldAccent\/30::selection {
-  background-color: rgb(243 209 130 / 0.3);
+  background-color: rgb(241 214 158 / 0.3);
 }
     .selection\:bg-primary-container::-moz-selection {
   --tw-bg-opacity: 1;
@@ -3144,6 +3269,14 @@ input:where([type='file']):focus {
     .selection\:bg-primary-container::selection {
   --tw-bg-opacity: 1;
   background-color: rgb(245 215 127 / var(--tw-bg-opacity, 1));
+}
+    .selection\:text-gold-200::-moz-selection {
+  --tw-text-opacity: 1;
+  color: rgb(248 236 197 / var(--tw-text-opacity, 1));
+}
+    .selection\:text-gold-200::selection {
+  --tw-text-opacity: 1;
+  color: rgb(248 236 197 / var(--tw-text-opacity, 1));
 }
     .selection\:text-on-primary-container::-moz-selection {
   --tw-text-opacity: 1;
@@ -3199,10 +3332,10 @@ input:where([type='file']):focus {
   border-color: rgb(103 117 143 / var(--tw-border-opacity, 1));
 }
     .hover\:border-goldAccent\/50:hover {
-  border-color: rgb(243 209 130 / 0.5);
+  border-color: rgb(241 214 158 / 0.5);
 }
     .hover\:border-goldAccent\/60:hover {
-  border-color: rgb(243 209 130 / 0.6);
+  border-color: rgb(241 214 158 / 0.6);
 }
     .hover\:border-primary-container\/50:hover {
   border-color: rgb(245 215 127 / 0.5);
@@ -3250,9 +3383,21 @@ input:where([type='file']):focus {
   --tw-bg-opacity: 1;
   background-color: rgb(38 42 49 / var(--tw-bg-opacity, 1));
 }
+    .hover\:text-gold-200:hover {
+  --tw-text-opacity: 1;
+  color: rgb(248 236 197 / var(--tw-text-opacity, 1));
+}
+    .hover\:text-gold-300:hover {
+  --tw-text-opacity: 1;
+  color: rgb(242 212 121 / var(--tw-text-opacity, 1));
+}
     .hover\:text-goldAccent:hover {
   --tw-text-opacity: 1;
-  color: rgb(243 209 130 / var(--tw-text-opacity, 1));
+  color: rgb(241 214 158 / var(--tw-text-opacity, 1));
+}
+    .hover\:text-ivory-200:hover {
+  --tw-text-opacity: 1;
+  color: rgb(236 231 219 / var(--tw-text-opacity, 1));
 }
     .hover\:text-primary:hover {
   --tw-text-opacity: 1;
@@ -3298,6 +3443,9 @@ input:where([type='file']):focus {
   --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
   --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color);
   box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+}
+    .focus\:ring-gold-400\/40:focus {
+  --tw-ring-color: rgb(229 191 91 / 0.4);
 }
     .focus\:ring-offset-0:focus {
   --tw-ring-offset-width: 0px;
@@ -3349,7 +3497,7 @@ input:where([type='file']):focus {
 }
     .group:hover .group-hover\:text-goldAccent {
   --tw-text-opacity: 1;
-  color: rgb(243 209 130 / var(--tw-text-opacity, 1));
+  color: rgb(241 214 158 / var(--tw-text-opacity, 1));
 }
     .group:hover .group-hover\:text-neutral-200 {
   --tw-text-opacity: 1;

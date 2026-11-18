@@ -270,7 +270,7 @@ window.NovelCastViews.reader = {
     const book = NC.getExactBook(bookId);
     if (!book) {
       const status = document.getElementById('reader-route-status');
-      NC.fetchBookDetails(bookId).then(() => {
+      NC.fetchBookDetails(bookId, { signal: controller.signal }).then(() => {
         if (controller.signal.aborted || !status?.isConnected) return;
         if (!NC.getExactBook(bookId)) {
           status.textContent = 'This book is unavailable. Browse the catalog to choose another.';

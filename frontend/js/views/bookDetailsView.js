@@ -46,7 +46,7 @@ window.NovelCastViews.bookDetails = {
     const book = NC.getExactBook(bookId);
     if (!book) {
       const status = document.getElementById('book-route-status');
-      NC.fetchBookDetails(bookId).then(() => {
+      NC.fetchBookDetails(bookId, { signal: controller.signal }).then(() => {
         if (controller.signal.aborted || !status?.isConnected) return;
         if (!NC.getExactBook(bookId)) {
           status.textContent = 'This book is unavailable. Browse the catalog to choose another.';
@@ -68,7 +68,7 @@ window.NovelCastViews.bookDetails = {
     const targetSlug = book.slug || book.id;
     if (NC.fetchBookDetails) {
       // Refresh the displayed details when fuller catalog metadata arrives.
-      NC.fetchBookDetails(targetSlug).then(updatedBook => {
+      NC.fetchBookDetails(targetSlug, { signal: controller.signal }).then(updatedBook => {
         if (controller.signal.aborted) return;
         if (!updatedBook || !updatedBook.chaptersList) return;
         const chaptersWrapper = document.getElementById('book-chapters-wrapper');
