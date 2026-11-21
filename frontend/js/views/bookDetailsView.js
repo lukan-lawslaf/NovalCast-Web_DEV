@@ -38,7 +38,7 @@ window.NovelCastViews.bookDetails = {
     const controller = new AbortController();
     // This closure remembers this screen's resources so leaving the route can release them.
     // Abort work and unmount the rating widget when navigating away from this book.
-    this.destroy = () => { controller.abort(); if (this.unmountRatings) this.unmountRatings(); };
+    this.destroy = () => { controller.abort(); if (this.unmountRatings) this.unmountRatings(); this.unmountFilm?.(); };
     const NC = window.NovelCast;
     const NCPage = window.NCPage;
     const query = NC.readQuery();
@@ -58,6 +58,8 @@ window.NovelCastViews.bookDetails = {
       });
       return;
     }
+    const actions = document.querySelector('[data-audio-stub^="detail-"]')?.parentElement;
+    if (actions) this.unmountFilm = window.NovelCastFilms?.mountPublished(actions, book);
     this.unmountRatings = window.NovelCastRatings.mount(document.getElementById('book-ratings'), book);
 
     if (window.NovelCastApp && window.NovelCastApp.bindInteractiveElements) {

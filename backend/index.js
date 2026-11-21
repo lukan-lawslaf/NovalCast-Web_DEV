@@ -17,6 +17,7 @@ const { connectDB, disconnectDB, connectionState } = require('./src/config/db');
 const catalogRoutes = require('./src/routes/catalogRoutes');
 const ingestRoutes = require('./src/routes/ingestRoutes');
 const ttsRoutes = require('./src/routes/ttsRoutes');
+const { createFilmRouter } = require('./src/routes/filmRoutes');
 const errorHandler = require('./src/middleware/errorHandler');
 
 const app = express();
@@ -60,6 +61,7 @@ app.use('/api', catalogRoutes);
 app.use('/api', require('./src/routes/ratingRoutes'));
 app.use('/api', require('./src/routes/libraryRoutes'));
 app.use('/api', ttsRoutes);
+app.use('/api/films', createFilmRouter({ filmsOnly: true }));
 
 // Requests not matched by a feature router receive a consistent JSON 404.
 app.use((req, res) => {
