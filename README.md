@@ -1,8 +1,8 @@
-# 🎧 NovalCast — Audiobook & E-Book Platform
+# 🎧 NovelCast — Audiobook & E-Book Platform
 
-**NovalCast** is a web development project — a modern platform for discovering, streaming, and reading audiobooks and e-books. Built as a fully static front-end prototype using HTML, Tailwind CSS, and custom CSS 3D transforms, it explores an editorial, book-luxury visual style across the full product journey: landing → catalog → book details → library → immersive reading.
+**NovelCast** is a web app for discovering public-domain books, reading them online, listening to chapter narration, and watching film adaptations where available. The browser app uses a Node.js and Express API backed by MongoDB Atlas.
 
-> 🚀 **Status:** Live Catalog Integration — The SPA is connected to the backend API (`http://localhost:4000/api`) backed by MongoDB Atlas, serving 20 public-domain literary classics across 8 genres with 634 chapters and 1.78M words.
+[Open NovelCast](https://novelcast.vercel.app/) · [Browse Experience](https://novelcast.vercel.app/#/experience) · [Deployment guide](docs/deployment.md)
 
 ---
 
@@ -15,6 +15,7 @@
 - **Bespoke Reader (`#/reader`)** — dual modes: Classic Book double-page spread and distraction-free Continuous Scroll PDF layout with real-time reading pace (WPM)
 - **Sanctuary Access (`#/login`)** — luxury editorial authentication modal with Supabase email verification
 - **Listen Now** — Fish Audio narration of the original chapter text, using only `s2.1-pro-free`. A library voice matched to the book's title, synopsis, and subjects is saved in Atlas and reused for every passage and future session. Plays one short passage while preparing only the next; pause, close, and book switching cancel pending work.
+- **Experience (`#/experience`)** — browse illustrated book covers in a cinematic shelf with a moving filmstrip and genre filters. Where a film or preview is available, open it in the player. Films with chapter markers also support chapter navigation. [Experience architecture](docs/experience-architecture.md)
 
 ## 🛠️ Tech Stack
 
@@ -23,7 +24,10 @@
 | Architecture | Single Page Application (SPA Hash Router) |
 | Structure | HTML5 / JavaScript (Vanilla ES6+) |
 | Styling | Tailwind CSS (CDN & compiled utility tokens) |
-| Auth & State | Supabase Authentication |
+| API & storage | Node.js, Express, MongoDB Atlas |
+| Authentication | Supabase Auth |
+| Narration | Fish Audio |
+| Hosting | Vercel frontend, Render backend |
 | Fonts | Google Fonts — Cormorant Garamond, Bodoni Moda, Playfair Display, Plus Jakarta Sans, Cinzel |
 | Icons | Material Symbols |
 | 3D & Visuals | CSS 3D transforms (`perspective`, `preserve-3d`), React Bits Canvas PixelCard, ASCII stream |
@@ -38,15 +42,16 @@ NovalCast-Web_DEV/
 │   ├── assets/          # Static media & official vector branding
 │   ├── css/             # Custom styles (site.css, landing.css, pixel-card.css, reader.css)
 │   └── js/              # Modular application logic
-│       ├── views/       # View controllers (landing, home, book, reader, library, login, search)
+│       ├── views/       # View controllers, including the Experience shelf
 │       ├── components/  # Canvas PixelCard component
 │       ├── auth.js      # Supabase authentication service
 │       ├── data.js      # Catalog dataset & book normalizer
 │       └── router.js    # Client-side hash router
-├── backend/             # Node/Express catalog API — Gutendex ingestion into MongoDB Atlas
+├── backend/             # Catalog, library, ratings, narration, and film APIs
+├── docs/                # Deployment and feature documentation
 ├── Referance/           # High-fidelity Figma ASTs & Google Stitch reference screens
 ├── scripts/             # Build and asset extraction tooling
-├── tests/               # Playwright automated test suite
+├── tests/               # Node.js and Playwright tests
 └── package.json         # NPM scripts and dev dependencies
 ```
 
@@ -70,14 +75,14 @@ NovalCast-Web_DEV/
    # Terminal 1: frontend
    npm run dev
 
-   # Terminal 2: API and narration proxy
+   # Terminal 2: backend API
    npm --prefix backend run dev
    ```
    Then visit `http://127.0.0.1:3000`. The API defaults to port 4000.
    Run `npm run test:audio` for isolated narration API and playback tests;
    these tests use fake provider responses and do not generate real speech.
 
-> **Note:** The application uses client-side hash routing (`#/landing`, `#/home`, `#/book`, `#/reader`, `#/library`, `#/login`, `#/search`).
+> **Note:** The application uses client-side hash routing (`#/landing`, `#/home`, `#/book`, `#/reader`, `#/library`, `#/login`, `#/search`, `#/experience`).
 
 ## 🗺️ Roadmap
 
@@ -90,6 +95,7 @@ NovalCast-Web_DEV/
 - [x] Backend catalog API — 20 public-domain classics across 8 genres ingested from Gutendex/Gutenberg into MongoDB Atlas, served over REST
 - [x] Wiring the SPA to the catalog API (Home, Search, Book Details, Dual-Mode Reader, 3D Landing Parade)
 - [x] On-demand audio playback with Fish Audio's free model and one-passage lookahead
+- [x] Experience shelf with genre filters and film playback for available titles
 - [ ] Reader state persistence for user notes & highlights
 - [ ] Responsive polish for mobile readers
 
@@ -118,4 +124,4 @@ For educational purposes. All book content shown (titles, excerpts, cover concep
 
 ---
 
-<p align="center"><em>Built with 📚 + ❤️ by Team NovalCast</em></p>
+<p align="center"><em>Built with 📚 + ❤️ by Team NovelCast</em></p>
