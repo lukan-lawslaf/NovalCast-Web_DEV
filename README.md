@@ -86,18 +86,21 @@ NovalCast-Web_DEV/
 
 ## 🗺️ Roadmap
 
-- [x] Semantic routing / friendly page names
-- [x] Search & filtering across the catalog
-- [x] User accounts and cloud-synced library (Supabase Auth & user manuscript uploads)
-- [x] Reader dual modes (Classic Book double-page & Continuous Scroll PDF layout)
-- [x] Reading progress tracking (% complete, reading pace & time left)
-- [x] Interactive 3D hardcover book parade & ambient visual effects
-- [x] Backend catalog API — 20 public-domain classics across 8 genres ingested from Gutendex/Gutenberg into MongoDB Atlas, served over REST
-- [x] Wiring the SPA to the catalog API (Home, Search, Book Details, Dual-Mode Reader, 3D Landing Parade)
-- [x] On-demand audio playback with Fish Audio's free model and one-passage lookahead
-- [x] Experience shelf with genre filters and film playback for available titles
-- [ ] Reader state persistence for user notes & highlights
-- [ ] Responsive polish for mobile readers
+### Available today
+
+- [x] Browse and search the public-domain catalog from MongoDB Atlas, with book details and an interactive 3D landing shelf.
+- [x] Read in Classic Book or Continuous Scroll mode with chapter navigation, reading progress, and pace estimates.
+- [x] Sign in with Supabase to sync saved books, reading plans, and manuscript metadata. Export a library snapshot as JSON.
+- [x] Rate books with a verified account and see community scores.
+- [x] Listen to on-demand chapter narration with Fish Audio and a saved narrator voice for each book.
+- [x] Browse the illustrated Experience shelf by genre and play films or previews for available titles. Jump between chapters when a film provides chapter markers.
+
+### Upcoming work
+
+- [ ] Save reader notes and highlights so they can be reopened in later sessions.
+- [ ] Refine the reader layout and controls on mobile screens.
+- [ ] Extract and index text from private manuscript uploads so they can be opened in the reader.
+- [ ] Prototype on-demand Experience scenes using public-domain passages. Measure scene preparation time and provider quotas before expanding playback. [Experience proposal](docs/experience-architecture.md)
 
 ## 👥 Team
 
