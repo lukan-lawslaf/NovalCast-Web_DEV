@@ -7,6 +7,7 @@
     'home': window.NovelCastViews.home,
     'search': window.NovelCastViews.search,
     'library': window.NovelCastViews.library,
+    'experience': window.NovelCastViews.experienceShelf,
     'book': window.NovelCastViews.bookDetails,
     'reader': window.NovelCastViews.reader,
     'landing': window.NovelCastViews.landing,
@@ -23,6 +24,18 @@
     const path = Object.hasOwn(routes, route) ? route : defaultRoute;
     const params = new URLSearchParams(queryPart || '');
     return { path, params };
+  }
+
+  function finishLogin() {
+    const { path, params } = parseHash();
+    if (path !== 'login') return;
+    const [screen, query] = (params.get('redirect') || 'library').split('?');
+    if (!Object.hasOwn(routes, screen) || screen === 'login') {
+      location.hash = '#/library';
+      return;
+    }
+    const destination = new URLSearchParams(query);
+    location.hash = `#/${screen}${destination.size ? '?' + destination : ''}`;
   }
 
   // Mark the current sidebar link visually and for assistive technology.
@@ -197,6 +210,7 @@
   }
 
   window.NovelCastRouter = {
+    finishLogin,
     // Remember the cover for the next route transition and navigate to its destination.
     openBook: function (hash, cover) {
       pendingBookOpening = { hash, cover };
@@ -216,8 +230,7 @@
         if (nextId === accountId) return;
         accountId = nextId;
         if (nextId && parseHash().path === 'login') {
-          const redirect = parseHash().params.get('redirect') || 'library';
-          location.hash = `#/${Object.hasOwn(routes, redirect) ? redirect : 'library'}`;
+          finishLogin();
           return;
         }
         // Release private view listeners immediately, including sign-out from another tab.

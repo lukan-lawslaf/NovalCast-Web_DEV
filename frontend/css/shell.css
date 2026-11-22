@@ -33,6 +33,57 @@
   height: 18px;
 }
 
+.nc-cinema-link svg { width: 21px; height: 21px; }
+
+/* Let the illustrated marquee meet the edges of the screen on the Experience route. */
+body[data-route="experience"] #app-content-wrapper {
+  padding: 0;
+  background: #150b10;
+}
+body[data-route="experience"] :is(#app-content-wrapper, #app-header, #app-sidebar) {
+  transition: none;
+}
+body[data-route="experience"] #app-header {
+  margin: 0;
+  padding: .72rem clamp(1.25rem, 4vw, 4.5rem);
+  background: #1b0e14;
+  border-color: #d7a87c36;
+}
+html[data-theme="light"] body[data-route="experience"] #app-header {
+  background: #f5e7cf;
+}
+body[data-route="experience"] #app-sidebar {
+  background: #140c11;
+  border-color: #d7a87c36;
+}
+body[data-route="experience"] .nc-cinema-link.nav-active {
+  background: #48202b !important;
+  color: #ffdaac !important;
+  border-color: #cf86665c;
+  box-shadow: none;
+}
+
+@media (max-width: 700px) {
+  body[data-route="experience"] #app-sidebar {
+    position: fixed;
+    inset: auto 0 0;
+    width: 100%;
+    height: auto;
+    padding: .26rem 1rem max(.26rem, env(safe-area-inset-bottom));
+    border-width: 1px 0 0;
+  }
+  body[data-route="experience"] #app-sidebar > a { display: none; }
+  body[data-route="experience"] #main-nav {
+    display: flex;
+    width: min(100%, 24rem);
+    justify-content: space-between;
+    margin: 0;
+  }
+  body[data-route="experience"] #app-content-wrapper {
+    padding-bottom: calc(3.5rem + env(safe-area-inset-bottom));
+  }
+}
+
 /* Flexbox aligns notification, theme, and account controls in one row. */
 .nc-header-actions {
   display: flex;

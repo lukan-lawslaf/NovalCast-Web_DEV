@@ -446,18 +446,14 @@ window.NovelCastViews.login = {
 
             // Auto-confirmed fallback (if project has email confirmations disabled)
             window.NovelCast.toast('Welcome to the Sanctuary');
-            const params = new URLSearchParams(location.hash.split('?')[1] || '');
-            const redirect = params.get('redirect') || 'library';
-            window.NovelCastRouter.navigate(redirect);
+            window.NovelCastRouter.finishLogin();
           } else {
             // Sign in via Supabase
             await auth.signIn(email, password);
             if (disposed) return;
             window.NovelCast.toast('Welcome back to the Sanctuary');
 
-            const params = new URLSearchParams(location.hash.split('?')[1] || '');
-            const redirect = params.get('redirect') || 'library';
-            window.NovelCastRouter.navigate(redirect);
+            window.NovelCastRouter.finishLogin();
           }
         } catch (err) {
           if (disposed) return;
