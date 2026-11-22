@@ -93,40 +93,36 @@
 
 .exs-hero-curtain > span {
   position: relative;
+  clip-path: inset(0);
+  will-change: transform, clip-path;
+}
+
+.exs-curtain-velvet {
+  position: absolute;
+  inset: -1px -16%;
   background-color: #4b101e;
   background-image:
     linear-gradient(180deg, #f4a35c14, transparent 35%, #15070b87 100%),
     url('../assets/experience/curtain-velvet.webp');
   background-size: 100% 100%, 200% 100%;
   background-repeat: no-repeat;
+  transform-origin: center;
   will-change: transform;
 }
 
 .exs-hero-curtain > span:first-child {
-  background-position: center, left center;
   transform-origin: left center;
-  box-shadow: 8px 0 18px #18060959;
 }
 
 .exs-hero-curtain > span:last-child {
-  background-position: center, right center;
   transform-origin: right center;
-  box-shadow: -8px 0 18px #18060959;
 }
 
-.exs-hero-curtain > span::after {
-  position: absolute;
-  inset-block: 0;
-  width: 4px;
-  background: linear-gradient(90deg, #22081075, #d3966673 62%, #310d15aa);
-  content: '';
-}
-
-.exs-hero-curtain > span:first-child::after { right: 0; }
-.exs-hero-curtain > span:last-child::after { left: 0; }
+.exs-hero-curtain > span:first-child .exs-curtain-velvet { background-position: center, left center; }
+.exs-hero-curtain > span:last-child .exs-curtain-velvet { background-position: center, right center; }
 
 .exs-hero-inner,
-.exs-collection {
+.exs-collection-inner {
   width: min(100%, 99rem);
   margin-inline: auto;
   padding-inline: var(--exs-pad);
@@ -240,8 +236,6 @@
   justify-content: space-between;
   gap: .4rem 1rem;
   padding-bottom: .95rem;
-  border-bottom: 1px solid transparent;
-  border-image: linear-gradient(90deg, #eab28070, var(--exs-rule) 38%, #d7a87c26) 1;
 }
 
 .exs-collection-heading h2 {
@@ -261,37 +255,96 @@
   font-variant-numeric: tabular-nums;
 }
 
-.exs-filters {
+.exs-filmstrip {
+  --strip-frame: max(8.75rem, calc(100vw / 6));
+  --strip-gap: .35rem;
+  overflow: hidden;
+  margin-block-start: .65rem;
+  border-block: 1px solid var(--exs-rule);
+  background: #201116;
+}
+
+.exs-filmstrip-track,
+.exs-filmstrip-track > div {
   display: flex;
-  flex-wrap: wrap;
-  gap: .44rem;
-  margin-block: 1.05rem clamp(1.55rem, 3.25vw, 3rem);
+  width: max-content;
+}
+
+.exs-filmstrip-track {
+  animation: exs-filmstrip-feed 48s linear infinite paused;
+}
+
+.exs-filmstrip.is-visible .exs-filmstrip-track { animation-play-state: running; }
+
+.exs-filmstrip-track > div {
+  gap: var(--strip-gap);
+  padding: .6rem var(--strip-gap) .6rem 0;
+  background: repeating-linear-gradient(90deg, #b68f6d85 0 .19rem, transparent .19rem .45rem) 0 .2rem / 100% .15rem no-repeat,
+    repeating-linear-gradient(90deg, #b68f6d85 0 .19rem, transparent .19rem .45rem) 0 calc(100% - .2rem) / 100% .15rem no-repeat;
+}
+
+.exs-filmstrip-track img {
+  display: block;
+  width: var(--strip-frame);
+  height: clamp(2.7rem, 5vw, 4.4rem);
+  object-fit: cover;
+  object-position: center 37%;
+  border: 1px solid #ba88674a;
+  border-radius: .16rem;
+  opacity: .82;
+}
+
+@keyframes exs-filmstrip-feed {
+  to { transform: translateX(-50%); }
+}
+
+.exs-filters {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 1px;
+  margin-block: clamp(1.2rem, 2vw, 2rem) clamp(1.55rem, 3.25vw, 3rem);
+  padding: 1px;
+  border-radius: .55rem;
+  background: #503138;
 }
 
 .exs-filters button {
-  min-height: 44px;
-  padding: .36rem .85rem;
-  border: 1px solid var(--exs-rule);
-  border-radius: 99px;
+  position: relative;
+  min-height: 48px;
+  padding: .65rem .4rem;
+  border-radius: .32rem;
   color: var(--exs-muted);
   background: #241118;
-  font-size: .74rem;
+  font-size: clamp(.7rem, 1vw, .85rem);
   font-weight: 700;
   line-height: 1.2;
-  text-align: start;
-  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+  text-align: center;
+  transition: background-color 180ms ease, color 180ms ease;
 }
 
 .exs-filters button[aria-pressed='true'] {
-  border-color: var(--exs-amber);
-  color: #381921;
+  color: #ffdb9f;
+  background: linear-gradient(0deg, #553021, #3a1e21);
+}
+
+.exs-filters button[aria-pressed='true']::after {
+  position: absolute;
+  inset: auto 27% .24rem;
+  height: 2px;
+  border-radius: 2px;
   background: var(--exs-amber);
+  content: '';
 }
 
 .exs-filters button:hover:not([aria-pressed='true']) {
-  border-color: #b9856b;
   color: var(--exs-cream);
   background: #382029;
+}
+
+.exs-filters button:focus-visible { z-index: 1; }
+
+@media (max-width: 650px) {
+  .exs-filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 .exs-empty {

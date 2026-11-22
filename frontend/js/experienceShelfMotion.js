@@ -17,6 +17,40 @@ window.NovelCastShelfMotion = (function () {
     return gsapRequest;
   }
 
+  const curtainDuration = 1600;
+
+  function easePull(value) {
+    const t = Math.max(0, Math.min(1, value));
+    return t * t * (3 - 2 * t);
+  }
+
+  function curtainTracks(side) {
+    const direction = side === 0 ? -1 : 1;
+    const delay = side * 0.035;
+    const panel = [];
+    const velvet = [];
+    for (let frame = 0; frame <= 30; frame++) {
+      const offset = frame / 30;
+      const rail = easePull((offset - delay) / 0.89);
+      const hem = easePull((offset - delay - 0.19) / 0.76);
+      const tension = rail - hem;
+      const edge = Array.from({ length: 17 }, (_, point) => {
+        const height = point / 16;
+        const draw = tension * (88 * (1 - height) ** 1.6 + 44 * Math.sin(Math.PI * height));
+        const x = side === 0 ? 100 - draw : draw;
+        return `${x.toFixed(2)}% ${height * 100}%`;
+      });
+      const outside = side === 0 ? '0%' : '100%';
+      panel.push({
+        offset,
+        transform: `translateX(${direction * 104 * hem}%) scaleX(${1 - 0.22 * rail})`,
+        clipPath: `polygon(${outside} 0%, ${edge.join(', ')}, ${outside} 100%)`
+      });
+      velvet.push({ offset, transform: `skewX(${-direction * tension * 14}deg)` });
+    }
+    return { panel, velvet };
+  }
+
   function playCurtain(curtain, onStart, onOpen) {
     if (typeof curtain.animate !== 'function') return null;
     // Keep the fabric on the compositor while the browser lays out the shelf underneath.
@@ -32,10 +66,11 @@ window.NovelCastShelfMotion = (function () {
         frame = requestAnimationFrame(open);
         return;
       }
-      panels = Array.from(curtain.children, (panel, index) => panel.animate([
-        { transform: 'translateX(0) scaleX(1)' },
-        { transform: `translateX(${index === 0 ? -100 : 100}%) scaleX(0.84)` }
-      ], { duration: 720, easing: 'cubic-bezier(.37, 0, .63, 1)', fill: 'both' }));
+      const timing = { duration: curtainDuration, fill: 'both' };
+      panels = Array.from(curtain.children).flatMap((panel, side) => {
+        const track = curtainTracks(side);
+        return [panel.animate(track.panel, timing), panel.firstElementChild.animate(track.velvet, timing)];
+      });
       panels[0].addEventListener('finish', finish, { once: true });
       onStart();
     }
@@ -63,9 +98,9 @@ window.NovelCastShelfMotion = (function () {
     const shelfHeading = root.querySelector('.exs-collection-heading');
     const reveal = { ease: 'power3.out', clearProps: 'transform,opacity' };
     const timeline = gsap.timeline();
-    timeline.from(title, { ...reveal, y: 14, opacity: 0.56, duration: 0.49 }, 0.13);
-    timeline.from(captions, { ...reveal, y: 8, opacity: 0.62, duration: 0.4, stagger: 0.05 }, 0.29);
-    timeline.from(shelfHeading, { ...reveal, y: 6, opacity: 0.72, duration: 0.32 }, 0.37);
+    timeline.from(title, { ...reveal, y: 14, opacity: 0.56, duration: 0.62 }, 0.55);
+    timeline.from(captions, { ...reveal, y: 8, opacity: 0.62, duration: 0.46, stagger: 0.08 }, 0.78);
+    timeline.from(shelfHeading, { ...reveal, y: 6, opacity: 0.72, duration: 0.4 }, 1.05);
     return timeline.time(elapsed);
   }
 

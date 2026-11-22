@@ -113,6 +113,17 @@ window.NovelCastViews.experienceShelf = (function () {
     return books.map(bookCard).join('');
   }
 
+  function filmstrip() {
+    const frames = leadBooks.map(id => `
+      <img src="${illustrationUrl({ id })}" alt="" loading="lazy" decoding="async">`).join('');
+    return `
+      <div class="exs-filmstrip" data-exs-filmstrip aria-hidden="true">
+        <div class="exs-filmstrip-track">
+          <div>${frames}</div><div>${frames}</div>
+        </div>
+      </div>`;
+  }
+
   function render() {
     const { featured, books } = catalog();
     return `
@@ -128,19 +139,25 @@ window.NovelCastViews.experienceShelf = (function () {
             </div>
             <div class="exs-hero-feature" data-exs-feature>${featuredAction(featured)}</div>
           </div>
-          <div class="exs-hero-curtain" aria-hidden="true" hidden><span></span><span></span></div>
+          <div class="exs-hero-curtain" aria-hidden="true" hidden>
+            <span><span class="exs-curtain-velvet"></span></span>
+            <span><span class="exs-curtain-velvet"></span></span>
+          </div>
         </section>
         <section class="exs-collection" aria-labelledby="exs-collection-title">
-          <div class="exs-collection-heading">
+          <div class="exs-collection-inner exs-collection-heading">
             <h2 id="exs-collection-title">The collection</h2>
             <p role="status" data-exs-count>${books.length} ${books.length === 1 ? 'story' : 'stories'}</p>
           </div>
-          <div class="exs-filters" role="group" aria-label="Filter by genre">
-            <button type="button" data-exs-filter="all" aria-pressed="true" aria-controls="exs-books">All stories</button>
-            ${genres.map(genre => `<button type="button" data-exs-filter="${genre.id}" aria-pressed="false" aria-controls="exs-books">${genre.name}</button>`).join('')}
+          ${filmstrip()}
+          <div class="exs-collection-inner">
+            <div class="exs-filters" role="group" aria-label="Filter by genre">
+              <button type="button" data-exs-filter="all" aria-pressed="true" aria-controls="exs-books">All stories</button>
+              ${genres.map(genre => `<button type="button" data-exs-filter="${genre.id}" aria-pressed="false" aria-controls="exs-books">${genre.name}</button>`).join('')}
+            </div>
+            <p class="exs-empty" data-exs-empty ${books.length ? 'hidden' : ''}>There are no stories in this collection yet.</p>
+            <ul class="exs-grid" id="exs-books" role="list">${listMarkup(books)}</ul>
           </div>
-          <p class="exs-empty" data-exs-empty ${books.length ? 'hidden' : ''}>There are no stories in this collection yet.</p>
-          <ul class="exs-grid" id="exs-books" role="list">${listMarkup(books)}</ul>
         </section>
       </div>
     `;
@@ -159,6 +176,12 @@ window.NovelCastViews.experienceShelf = (function () {
       const count = root.querySelector('[data-exs-count]');
       const empty = root.querySelector('[data-exs-empty]');
       const filters = Array.from(root.querySelectorAll('[data-exs-filter]'));
+      const strip = root.querySelector('[data-exs-filmstrip]');
+      const stripObserver = typeof IntersectionObserver === 'function'
+        ? new IntersectionObserver(([entry]) => strip.classList.toggle('is-visible', entry.isIntersecting))
+        : null;
+      if (stripObserver) stripObserver.observe(strip);
+      else strip.classList.add('is-visible');
       const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
       const supportsTilt = matchMedia('(hover: hover) and (pointer: fine)');
       const requested = new URLSearchParams(location.hash.split('?')[1] || '').get('book');
@@ -198,6 +221,7 @@ window.NovelCastViews.experienceShelf = (function () {
       const motion = window.NovelCastShelfMotion.mount(root, list, { reducedMotion, supportsTilt });
 
       this.destroy = () => {
+        stripObserver?.disconnect();
         motion.destroy();
         stopPoster();
         closeExperience?.();

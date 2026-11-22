@@ -44,11 +44,19 @@
   border: 0;
 }
 
-.nc-film-player [data-film-drive] a {
-  display: inline-block;
-  padding: 0.75rem 1rem;
-  color: #f8e4b4;
-  text-decoration: underline;
+.nc-film-brand {
+  display: flex;
+  justify-content: center;
+  padding: .85rem 1rem;
+  border-top: 1px solid #b97f593d;
+  background: linear-gradient(90deg, #171012, #291b19, #171012);
+}
+
+.nc-film-brand img {
+  display: block;
+  width: clamp(7.5rem, 18vw, 10rem);
+  height: auto;
+  filter: brightness(0) invert(.9) sepia(.25);
 }
 
 .nc-film-player [data-film-status] {

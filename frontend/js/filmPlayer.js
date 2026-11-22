@@ -49,12 +49,16 @@ window.NovelCastFilms = (function () {
       <label class="nc-film-chapter" hidden>
         <span>Chapter</span>
         <select aria-label="Jump to chapter"></select>
-      </label>`;
+      </label>
+      <footer class="nc-film-brand" hidden>
+        <img src="assets/experience/wordmark.webp" width="520" height="80" alt="NovelCast">
+      </footer>`;
     const heading = dialog.querySelector('h2');
     const status = dialog.querySelector('[data-film-status]');
     const retry = dialog.querySelector('[data-film-retry]');
     const video = dialog.querySelector('video');
     const drive = dialog.querySelector('[data-film-drive]');
+    const brand = dialog.querySelector('.nc-film-brand');
     const chapter = dialog.querySelector('select');
     const chapterControl = chapter.closest('label');
     const controller = new AbortController();
@@ -69,6 +73,7 @@ window.NovelCastFilms = (function () {
     function clearMedia() {
       drive.replaceChildren();
       drive.hidden = true;
+      brand.hidden = true;
       video.pause();
       video.removeAttribute('src');
       video.removeAttribute('poster');
@@ -118,13 +123,10 @@ window.NovelCastFilms = (function () {
           frame.src = preview.href;
           frame.title = heading.textContent;
           frame.allowFullscreen = true;
-          const link = document.createElement('a');
-          link.href = view.href;
-          link.target = '_blank';
-          link.rel = 'noopener noreferrer';
-          link.textContent = 'Open in Google Drive';
-          drive.append(frame, link);
+          frame.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+          drive.append(frame);
           drive.hidden = false;
+          brand.hidden = false;
           status.hidden = true;
           return;
         }
@@ -149,6 +151,7 @@ window.NovelCastFilms = (function () {
         chapterControl.hidden = chapters.length < 2;
         chapter.disabled = true;
         video.hidden = false;
+        brand.hidden = false;
         status.hidden = true;
         video.src = src;
         if (autoplay) video.play().catch(() => {});
